@@ -55,12 +55,18 @@ class LLMService:
         except httpx.TimeoutException as exc:
             raise AppError(504, "provider_timeout", "The inference provider timed out.") from exc
         except httpx.RequestError as exc:
-            raise AppError(502, "provider_unavailable", "The inference provider is unavailable.") from exc
+            raise AppError(
+                502, "provider_unavailable", "The inference provider is unavailable."
+            ) from exc
 
         if response.status_code == 401 or response.status_code == 403:
-            raise AppError(502, "provider_auth_error", "The inference provider rejected its credentials.")
+            raise AppError(
+                502, "provider_auth_error", "The inference provider rejected its credentials."
+            )
         if response.status_code == 429:
-            raise AppError(503, "provider_rate_limited", "The inference provider is rate limiting requests.")
+            raise AppError(
+                503, "provider_rate_limited", "The inference provider is rate limiting requests."
+            )
         if response.is_error:
             raise AppError(502, "provider_error", "The inference provider returned an error.")
         try:
@@ -70,5 +76,7 @@ class LLMService:
                 raise ValueError("Missing completion content")
         except (ValueError, KeyError, IndexError, TypeError) as exc:
             logger.warning("Inference provider returned a malformed response.")
-            raise AppError(502, "provider_invalid_response", "The inference provider response was invalid.") from exc
+            raise AppError(
+                502, "provider_invalid_response", "The inference provider response was invalid."
+            ) from exc
         return content

@@ -42,7 +42,9 @@ def chunk_document(path: Path, root: Path, chunk_size: int = 1_200) -> list[dict
     title = resolved_path.stem.replace("_", " ").replace("-", " ").strip()
     output = []
     for chunk_number, text in enumerate(chunks):
-        chunk_hash = hashlib.sha256(f"{relative_path}:{chunk_number}:{text}".encode()).hexdigest()[:16]
+        chunk_hash = hashlib.sha256(f"{relative_path}:{chunk_number}:{text}".encode()).hexdigest()[
+            :16
+        ]
         output.append(
             {
                 "chunk_id": chunk_hash,

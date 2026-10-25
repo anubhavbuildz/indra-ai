@@ -58,9 +58,7 @@ def test_create_list_get_and_patch_project(project_client):
     assert fetched.status_code == 200
     assert fetched.json()["id"] == project["id"]
 
-    updated = project_client.patch(
-        f"/api/v1/projects/{project['id']}", json={"status": "archived"}
-    )
+    updated = project_client.patch(f"/api/v1/projects/{project['id']}", json={"status": "archived"})
     assert updated.status_code == 200
     assert updated.json()["status"] == "archived"
 

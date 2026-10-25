@@ -24,11 +24,14 @@ COMMANDS: dict[str, tuple[str, ...]] = {
 UNSAFE_TERRAFORM = re.compile(
     r'^\s*(?:module|provisioner)\s+"|'
     r'^\s*backend\s+"|'
-    r'^\s*(?:resource|data)\s+"(?!aws_)[^"]+"\s*\{|'
+    r'^\s*(?:resource|data)\s+"(?!aws_)[^"]+"\s+"[^"]+"\s*\{|'
     r'^\s*provider\s+"(?!aws")[^"]+"\s*\{|'
     r'^\s*data\s+"external"\s+|'
-    r'\b(?:local-exec|remote-exec)\b|'
-    r'^\s*source\s*=\s*["\'](?!hashicorp/aws["\'])[^"\']+["\']',
+    r"\bendpoints\s*\{|"
+    r"\b(?:local-exec|remote-exec)\b|"
+    r"\b(?:access_key|secret_key|secret_access_key|session_token|token|password|"
+    r"client_secret|api_key|private_key)\s*=|"
+    r'\bsource\s*=\s*["\'](?!hashicorp/aws["\'])[^"\']+["\']',
     re.IGNORECASE | re.MULTILINE,
 )
 
@@ -59,7 +62,9 @@ class TerraformService:
     @staticmethod
     def validate_code(code: str) -> None:
         if len(code.encode("utf-8")) > MAX_TERRAFORM_CODE_BYTES:
-            raise AppError(413, "terraform_code_too_large", "Terraform code exceeds the size limit.")
+            raise AppError(
+                413, "terraform_code_too_large", "Terraform code exceeds the size limit."
+            )
         if UNSAFE_TERRAFORM.search(code):
             raise AppError(
                 422,
@@ -70,7 +75,9 @@ class TerraformService:
     def _run(self, operation: str, workspace: Path) -> tuple[int, str, bool]:
         command = COMMANDS.get(operation)
         if command is None:
-            raise AppError(400, "terraform_command_not_allowed", "Terraform command is not allowed.")
+            raise AppError(
+                400, "terraform_command_not_allowed", "Terraform command is not allowed."
+            )
         root = self.settings.terraform_workspace_root.resolve()
         working_directory = workspace.resolve()
         if not working_directory.is_relative_to(root) or not working_directory.is_dir():
@@ -173,7 +180,9 @@ class TerraformService:
             f"Requirements:\n{requirements}",
             [],
         )
-        code_match = re.search(r"```(?:terraform|hcl)?\s*(.*?)```", answer, re.IGNORECASE | re.DOTALL)
+        code_match = re.search(
+            r"```(?:terraform|hcl)?\s*(.*?)```", answer, re.IGNORECASE | re.DOTALL
+        )
         code = code_match.group(1).strip() if code_match else answer.strip()
         self.validate_code(code)
         return {"status": "proposed", "code": code, "executed": False, "project_id": project_id}

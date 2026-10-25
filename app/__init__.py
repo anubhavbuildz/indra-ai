@@ -1,2 +1,1 @@
 """Indra backend application."""
-

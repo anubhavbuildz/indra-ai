@@ -17,4 +17,3 @@ def test_credentials_are_not_in_settings_repr():
     settings = Settings(_env_file=None, NVIDIA_API_KEY="unit-test-secret")
 
     assert "unit-test-secret" not in repr(settings)
-

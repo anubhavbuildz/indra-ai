@@ -1,18 +1,20 @@
 """Database engine and session dependency."""
 
+from collections.abc import Generator
 from functools import lru_cache
 from pathlib import Path
-from collections.abc import Generator
 from typing import Annotated
 
-from fastapi import Depends
 from alembic import command
 from alembic.config import Config
+from fastapi import Depends
 from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker
 
 from app.core.config import Settings, get_settings
+
+
 @lru_cache
 def _engine_for(database_url: str) -> Engine:
     """Create and cache an engine for a configured database URL."""
@@ -44,7 +46,13 @@ def get_db(settings: Annotated[Settings, Depends(get_settings)]) -> Generator[Se
 def initialize_database(settings: Settings | None = None) -> None:
     """Apply the checked-in Alembic migrations for local startup."""
     project_root = Path(__file__).resolve().parents[2]
+    configured_settings = settings or get_settings()
+    if configured_settings.database_url.startswith("sqlite:///"):
+        database_path = configured_settings.database_url.removeprefix("sqlite:///")
+        if database_path != ":memory:":
+            Path(database_path).parent.mkdir(parents=True, exist_ok=True)
     migration_config = Config(str(project_root / "alembic.ini"))
-    database_url = (settings or get_settings()).database_url.replace("%", "%%")
+    migration_config.set_main_option("script_location", str(project_root / "migrations"))
+    database_url = configured_settings.database_url.replace("%", "%%")
     migration_config.set_main_option("sqlalchemy.url", database_url)
     command.upgrade(migration_config, "head")

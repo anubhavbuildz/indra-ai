@@ -1,7 +1,7 @@
 """AWS identity lookup through the standard credential chain."""
 
 import boto3
-from botocore.exceptions import ClientError, NoCredentialsError, ProfileNotFound
+from botocore.exceptions import BotoCoreError, ClientError, NoCredentialsError, ProfileNotFound
 
 from app.core.config import Settings
 from app.core.errors import AppError
@@ -35,6 +35,8 @@ class AWSService:
                     "user_id": None,
                     "region": self.settings.aws_region,
                 }
+            raise AppError(502, "aws_identity_error", "AWS identity verification failed.") from exc
+        except BotoCoreError as exc:
             raise AppError(502, "aws_identity_error", "AWS identity verification failed.") from exc
 
         return {

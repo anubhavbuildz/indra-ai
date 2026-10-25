@@ -73,7 +73,9 @@ The API starts without NVIDIA or AWS credentials. Health is available at
 For schema-managed deployments, run `alembic upgrade head` before starting the
 app. A fresh local development launch creates its SQLite schema automatically.
 SQLite uses `data/indra.db`; a PostgreSQL-compatible `DATABASE_URL` can be
-configured for other environments.
+configured for other environments. Install the PostgreSQL driver with
+`python -m pip install -e '.[postgres]'` and use a SQLAlchemy URL such as
+`postgresql+psycopg://...`.
 
 ## Configuration
 
@@ -126,7 +128,9 @@ baseline, not semantic model embeddings.
 Terraform operates only through a fixed command allowlist, argument arrays,
 `shell=False`, server-generated per-operation workspaces, execution timeouts,
 and output limits. Generated code is a proposal, never an execution command.
-V1 allows format check, backend-disabled init, validate, and plan. It does not
+The V1 HCL policy permits AWS resources/provider only and rejects modules,
+provider endpoint overrides, inline credentials, provisioners, and backend
+blocks. V1 allows format check, backend-disabled init, validate, and plan. It does not
 run `apply` or `destroy`; both endpoints return 501. Do not treat these
 controls as production isolation or authorization.
 

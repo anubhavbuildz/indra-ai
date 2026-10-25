@@ -35,9 +35,7 @@ def register_error_handlers(app: FastAPI) -> None:
         )
 
     @app.exception_handler(RequestValidationError)
-    async def handle_validation_error(
-        _: Request, exc: RequestValidationError
-    ) -> JSONResponse:
+    async def handle_validation_error(_: Request, exc: RequestValidationError) -> JSONResponse:
         fields = [
             {"field": ".".join(str(part) for part in error["loc"]), "code": error["type"]}
             for error in exc.errors()
@@ -69,4 +67,3 @@ def register_error_handlers(app: FastAPI) -> None:
                 }
             },
         )
-

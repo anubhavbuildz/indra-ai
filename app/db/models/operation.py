@@ -24,4 +24,3 @@ class Operation(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
     finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     safe_summary: Mapped[str | None] = mapped_column(Text, nullable=True)
-

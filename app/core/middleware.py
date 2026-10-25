@@ -4,6 +4,7 @@ import logging
 from uuid import uuid4
 
 from starlette.responses import JSONResponse
+from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 logger = logging.getLogger(__name__)
 
@@ -11,11 +12,11 @@ logger = logging.getLogger(__name__)
 class RequestContextMiddleware:
     """Buffer bounded request bodies and attach a safe request identifier."""
 
-    def __init__(self, app, max_body_bytes: int) -> None:
+    def __init__(self, app: ASGIApp, max_body_bytes: int) -> None:
         self.app = app
         self.max_body_bytes = max_body_bytes
 
-    async def __call__(self, scope, receive, send) -> None:
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
         if scope["type"] != "http":
             await self.app(scope, receive, send)
             return
@@ -57,7 +58,7 @@ class RequestContextMiddleware:
 
         body_sent = False
 
-        async def replay_receive():
+        async def replay_receive() -> Message:
             nonlocal body_sent
             if body_sent:
                 return {"type": "http.request", "body": b"", "more_body": False}
@@ -66,7 +67,7 @@ class RequestContextMiddleware:
 
         status_code = 500
 
-        async def send_with_status(message):
+        async def send_with_status(message: Message) -> None:
             nonlocal status_code
             if message["type"] == "http.response.start":
                 status_code = message["status"]
@@ -84,8 +85,8 @@ class RequestContextMiddleware:
             )
 
     @staticmethod
-    def _send_with_id(send, request_id: str):
-        async def send_response(message):
+    def _send_with_id(send: Send, request_id: str):
+        async def send_response(message: Message) -> None:
             if message["type"] == "http.response.start":
                 response_headers = list(message.get("headers", []))
                 response_headers.append((b"x-request-id", request_id.encode("ascii")))

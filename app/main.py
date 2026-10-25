@@ -1,6 +1,5 @@
 """FastAPI application entry point."""
 
-import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -15,7 +14,6 @@ from app.core.middleware import RequestContextMiddleware
 
 settings = get_settings()
 configure_logging(settings.debug)
-logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
@@ -56,4 +54,7 @@ if settings.cors_origin_list:
 @app.get("/")
 def root() -> dict[str, str]:
     """Provide a minimal service greeting."""
-    return {"service": settings.app_name, "docs": "/docs" if settings.app_env == "development" else ""}
+    return {
+        "service": settings.app_name,
+        "docs": "/docs" if settings.app_env == "development" else "",
+    }

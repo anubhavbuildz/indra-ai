@@ -2,8 +2,8 @@
 
 from fastapi import APIRouter
 
-from app.api.routes.chat import router as chat_router
 from app.api.routes.aws import router as aws_router
+from app.api.routes.chat import router as chat_router
 from app.api.routes.projects import router as projects_router
 from app.api.routes.rag import router as rag_router
 from app.api.routes.terraform import router as terraform_router

@@ -1,5 +1,6 @@
 """FAISS index construction, validation, persistence, and retrieval."""
 
+import hashlib
 import os
 import pickle
 import tempfile
@@ -10,7 +11,6 @@ from app.core.config import Settings
 from app.core.errors import AppError
 from app.services.embedding_service import (
     EMBEDDING_DIMENSION,
-    EMBEDDING_MODEL_ID,
     EmbeddingService,
 )
 
@@ -45,11 +45,19 @@ class RagService:
             with metadata_path.open("rb") as metadata_file:
                 metadata = pickle.load(metadata_file)
             index = faiss.read_index(str(index_path))
+            try:
+                index_ids = faiss.vector_to_array(index.id_map).tolist()
+            except (AttributeError, TypeError):
+                index_ids = []
         except (OSError, EOFError, pickle.UnpicklingError, RuntimeError, ValueError) as exc:
-            raise AppError(503, "rag_index_unavailable", "The local retrieval index is unavailable.") from exc
+            raise AppError(
+                503, "rag_index_unavailable", "The local retrieval index is unavailable."
+            ) from exc
 
         if not isinstance(metadata, dict):
-            raise AppError(503, "rag_index_mismatch", "The retrieval index metadata is incompatible.")
+            raise AppError(
+                503, "rag_index_mismatch", "The retrieval index metadata is incompatible."
+            )
         documents = metadata.get("documents")
         if (
             metadata.get("schema_version") != SCHEMA_VERSION
@@ -58,6 +66,9 @@ class RagService:
             or not isinstance(documents, list)
             or index.d != EMBEDDING_DIMENSION
             or index.ntotal != len(documents)
+            or not isinstance(metadata.get("index_ids"), list)
+            or metadata["index_ids"] != index_ids
+            or len(index_ids) != len(documents)
             or any(
                 not isinstance(item, dict)
                 or not METADATA_FIELDS.issubset(item)
@@ -67,9 +78,12 @@ class RagService:
                 or not item["source_title"]
                 for item in documents
             )
-            or len({item["chunk_id"] for item in documents if isinstance(item, dict)}) != len(documents)
+            or len({item["chunk_id"] for item in documents if isinstance(item, dict)})
+            != len(documents)
         ):
-            raise AppError(503, "rag_index_mismatch", "The retrieval index metadata is incompatible.")
+            raise AppError(
+                503, "rag_index_mismatch", "The retrieval index metadata is incompatible."
+            )
         return index, metadata
 
     def status(self) -> dict[str, Any]:
@@ -112,11 +126,17 @@ class RagService:
         index, metadata = loaded
         vector = np.asarray([self.embeddings.embed(text)], dtype="float32")
         scores, indices = index.search(vector, min(limit, index.ntotal))
+        documents_by_id = {
+            document_id: document
+            for document_id, document in zip(
+                metadata["index_ids"], metadata["documents"], strict=True
+            )
+        }
         results = []
-        for score, document_index in zip(scores[0], indices[0], strict=True):
-            if document_index < 0:
+        for score, document_id in zip(scores[0], indices[0], strict=True):
+            if document_id < 0:
                 continue
-            results.append({"score": float(score), **metadata["documents"][int(document_index)]})
+            results.append({"score": float(score), **documents_by_id[int(document_id)]})
         return {"status": "ready", "results": results}
 
 
@@ -143,8 +163,17 @@ def build_index(settings: Settings, documents: list[dict[str, str]]) -> int:
 
     embeddings = EmbeddingService(settings.embedding_model)
     vectors = np.asarray([embeddings.embed(item["text"]) for item in documents], dtype="float32")
-    index = faiss.IndexFlatIP(EMBEDDING_DIMENSION)
-    index.add(vectors)
+    index_ids = [
+        int.from_bytes(
+            hashlib.sha256(f"{item['chunk_id']}\0{item['text']}".encode()).digest()[:8], "big"
+        )
+        & ((1 << 63) - 1)
+        for item in documents
+    ]
+    if len(set(index_ids)) != len(index_ids):
+        raise ValueError("Chunk identifiers produced a duplicate FAISS index ID.")
+    index = faiss.IndexIDMap2(faiss.IndexFlatIP(EMBEDDING_DIMENSION))
+    index.add_with_ids(vectors, np.asarray(index_ids, dtype="int64"))
     index_path = settings.faiss_index_path
     metadata_path = settings.faiss_metadata_path
     index_path.parent.mkdir(parents=True, exist_ok=True)
@@ -153,10 +182,13 @@ def build_index(settings: Settings, documents: list[dict[str, str]]) -> int:
         "schema_version": SCHEMA_VERSION,
         "dimension": EMBEDDING_DIMENSION,
         "embedding_model": embeddings.model_id,
+        "index_ids": index_ids,
         "documents": documents,
     }
     index_fd, index_temp_name = tempfile.mkstemp(dir=index_path.parent, prefix=".index-")
-    metadata_fd, metadata_temp_name = tempfile.mkstemp(dir=metadata_path.parent, prefix=".metadata-")
+    metadata_fd, metadata_temp_name = tempfile.mkstemp(
+        dir=metadata_path.parent, prefix=".metadata-"
+    )
     os.close(index_fd)
     os.close(metadata_fd)
     try:

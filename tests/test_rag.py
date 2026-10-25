@@ -3,8 +3,6 @@
 import pickle
 from pathlib import Path
 
-import pytest
-
 from app.core.config import Settings
 from app.services.rag_service import RagService, build_index
 
@@ -58,7 +56,7 @@ def test_metadata_mismatch_is_not_used(tmp_path):
     build_index(settings, [make_document("chunk-1", "Firewall policy.", "Policy")])
     with settings.faiss_metadata_path.open("rb") as metadata_file:
         metadata = pickle.load(metadata_file)
-    metadata["documents"].clear()
+    metadata["index_ids"] = [metadata["index_ids"][0] + 1]
     with settings.faiss_metadata_path.open("wb") as metadata_file:
         pickle.dump(metadata, metadata_file)
 

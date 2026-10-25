@@ -10,4 +10,3 @@ def configure_logging(debug: bool = False) -> None:
         format="%(asctime)s %(levelname)s %(name)s %(message)s",
         force=True,
     )
-

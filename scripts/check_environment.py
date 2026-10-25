@@ -18,7 +18,11 @@ def main() -> None:
     print(f"Terraform executable: {'available' if terraform_available else 'not found'}")
     print(f"NVIDIA inference: {'configured' if nvidia_configured else 'not configured'}")
     print("AWS credentials: checked only when /api/v1/aws/identity is called")
-    print("FAISS index: configured" if settings.faiss_index_path.exists() else "FAISS index: not built")
+    print(
+        "FAISS index: configured"
+        if settings.faiss_index_path.exists()
+        else "FAISS index: not built"
+    )
 
 
 if __name__ == "__main__":
