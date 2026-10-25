@@ -11,6 +11,8 @@ def test_defaults_allow_startup_without_provider_credentials():
     assert not settings.nvidia_api_key
     assert not settings.nvidia_base_url
     assert not settings.nvidia_model
+    assert settings.prowler_bin == "prowler"
+    assert settings.prowler_timeout_seconds == 900
 
 
 def test_credentials_are_not_in_settings_repr():

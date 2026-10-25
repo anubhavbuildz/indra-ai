@@ -7,34 +7,36 @@ The versioned API is mounted at `/api/v1`. FastAPI docs are available at
 | --- | --- | --- |
 | GET | `/health` | Process health; no external provider calls |
 | GET | `/ready` | Local database/index configuration state |
-| POST | `/api/v1/chat` | Senior review, repaired Terraform proposal, and compliance assessment in separate fields; never runs proposed actions |
+| POST | `/api/v1/chat` | Run a fresh Prowler scan for the request's optional region/services and summarize findings with the user's question/history |
 | POST / GET | `/api/v1/projects` | Create and paginate projects |
 | GET / PATCH | `/api/v1/projects/{project_id}` | Read or update safe project metadata |
 | GET | `/api/v1/rag/status` | Index availability and counts |
 | POST | `/api/v1/rag/query` | Return attributed passages or an empty not-indexed response |
-| POST | `/api/v1/terraform/generate` | Propose HCL; does not execute it |
-| POST | `/api/v1/terraform/repair` | Revise safe HCL from caller-supplied diagnostics; does not run Terraform |
-| POST | `/api/v1/terraform/validate` | Fixed init/format/validate operations |
-| POST | `/api/v1/terraform/plan` | Fixed init/validate/plan operations; never applies |
-| POST | `/api/v1/terraform/apply` | Always returns 501 |
-| POST | `/api/v1/terraform/destroy` | Always returns 501 |
+| POST | `/api/v1/prowler/scan` | Run Prowler CLI, parse JSON-OCSF findings, and return findings with an AI summary |
 | GET | `/api/v1/aws/identity` | Optional STS identity from the standard credential chain |
+
+Both scan routes accept optional `region`, `services`, and `prowler_args`
+fields. Additional Prowler arguments are passed as argv tokens (not through a
+shell); arguments that override region, credentials, or report-output settings
+are rejected. If `region` and `services` are omitted, the scanner uses
+`AWS_REGION` and Prowler's default service scope. Both routes use `PROWLER_BIN` and
+the process's standard AWS credential chain. No AWS credentials are accepted
+in request bodies. Both routes require a configured Prowler executable, AWS
+credentials, and NVIDIA inference. Scan responses include `operation_id`, `status`,
+`region`, `findings_count`, `prowler_summary`, `compliance`,
+`assistant_response` (the senior agent's cross-check), source references, and
+the parsed `findings`. The compliance agent assesses the Prowler summary
+against retrieved knowledge-base passages; the senior agent reviews both
+assessments and their evidence.
 
 Expected errors use `{ "error": { "code": "...", "message": "...",
 "details": {} } }`. Validation errors include field paths and error types,
-not submitted values. Operational response summaries avoid raw Terraform and
-provider output.
+not submitted values. CLI output and report contents are not included in
+operational error messages.
 
-The chat response includes `assistant_response` (the senior agent's final
-assessment of both outputs), `terraform` (the proposed Terraform after
-senior-agent repair based on that assessment), and `compliance` as separate
-fields. These values are not concatenated. The repaired proposal is not
-Terraform-validated, planned, or deployed by the chat workflow. System prompts
-are maintained in the packaged Markdown files under
-`app/services/llm/roles/`; the senior role separates review and repair prompts.
-
-Terraform repair accepts `project_id`, `code`, and a non-empty `errors` list.
-The source and result are checked against the Terraform execution policy. The
-repair endpoint calls the configured OpenAI-compatible provider using
-`nvidia/nemotron-3-super-120b-a12b`; it does not run `fmt`, `validate`, `plan`,
-`apply`, or `destroy`.
+Prowler's output is read from a server-created temporary directory and is not
+persisted. JSON reports above 5 MB or 5,000 findings are rejected. Summarizing
+findings uses bounded batches and consolidation so every finding is analyzed
+without exceeding the per-prompt input limit. A single finding or conversation
+that cannot fit that limit is rejected explicitly; no partial summary is
+presented as complete. Large scans may require multiple inference calls.

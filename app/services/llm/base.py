@@ -12,7 +12,7 @@ from openai import (
     RateLimitError,
 )
 from openai.types.chat import ChatCompletionMessageParam
-
+from app.tools.prowler.schema import prowler_scan_tool
 from app.core.config import Settings
 from app.core.errors import AppError
 
@@ -20,6 +20,7 @@ if TYPE_CHECKING:
     from openai.types.chat import ChatCompletion
 
 logger = logging.getLogger(__name__)
+
 
 
 class BaseLLM:
@@ -99,6 +100,7 @@ class BaseLLM:
                 messages=messages,
                 temperature=0.6,
                 max_completion_tokens=8192,
+                tools=prowler_scan_tool
             )
         except APITimeoutError as exc:
             raise AppError(504, "provider_timeout", "The inference provider timed out.") from exc

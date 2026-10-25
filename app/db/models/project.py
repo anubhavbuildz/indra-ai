@@ -15,7 +15,7 @@ def utc_now() -> datetime:
 
 
 class Project(Base):
-    """User-owned infrastructure planning project."""
+    """User-owned cloud security assessment project."""
 
     __tablename__ = "projects"
 

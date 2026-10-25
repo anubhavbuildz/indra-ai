@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "indra-backend"
 version = "0.1.0"
-description = "Backend scaffold for the Indra cloud infrastructure assistant"
+description = "Backend for the Indra AWS security assessment assistant"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [

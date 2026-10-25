@@ -38,10 +38,9 @@ class Settings(BaseSettings):
     knowledge_base_path: Path = Field(
         default=Path("./knowledge_base"), validation_alias="KNOWLEDGE_BASE_PATH"
     )
-    terraform_bin: str = Field(default="terraform", validation_alias="TERRAFORM_BIN")
-    terraform_workspace_root: Path = Field(
-        default=Path("./data/terraform_workspaces"),
-        validation_alias="TERRAFORM_WORKSPACE_ROOT",
+    prowler_bin: str = Field(default="prowler", validation_alias="PROWLER_BIN")
+    prowler_timeout_seconds: int = Field(
+        default=900, ge=1, le=3_600, validation_alias="PROWLER_TIMEOUT_SECONDS"
     )
     aws_region: str = Field(default="us-east-1", validation_alias="AWS_REGION")
     cors_origins: str = Field(default="", validation_alias="CORS_ORIGINS")
@@ -63,7 +62,7 @@ class Settings(BaseSettings):
                 and self.nvidia_api_format
             ),
             "aws": True,
-            "terraform": bool(self.terraform_bin),
+            "prowler": bool(self.prowler_bin),
         }
 
 
