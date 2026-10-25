@@ -76,10 +76,14 @@ async def scan_workflow(
         prowler_agent = await stack.enter_async_context(ProwlerAgent(settings))
         compliance_agent = await stack.enter_async_context(ComplianceAgent(settings))
         senior_agent = await stack.enter_async_context(SeniorAgent(settings))
-        scan = await prowler_agent.run_scan(
+        scan_arguments = await prowler_agent.choose_scan_arguments(
+            prompt_question,
             region=region,
             services=services,
             prowler_args=prowler_args,
+        )
+        scan = await prowler_agent.run_scan(
+            **scan_arguments,
         )
 
         retrieval = RagService(settings).query(prompt_question)

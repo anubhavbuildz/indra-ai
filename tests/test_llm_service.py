@@ -1,6 +1,7 @@
 """Shared OpenAI client behavior tests."""
 
 import asyncio
+import json
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, Mock, patch
 
@@ -9,6 +10,7 @@ from openai import APIConnectionError, AuthenticationError, RateLimitError
 
 from app.core.config import Settings
 from app.core.errors import AppError
+from app.services.llm import orchestrator
 from app.services.llm.base import BaseLLM
 from app.services.llm.compliance_agent import ComplianceAgent
 from app.services.llm.orchestrator import review_scan
@@ -217,6 +219,49 @@ def test_prowler_agent_runs_scanner_tool(monkeypatch):
     }
 
 
+def test_prowler_agent_uses_llm_selected_scan_arguments():
+    function_call = SimpleNamespace(
+        type="function",
+        function=SimpleNamespace(
+            name="select_scan_arguments",
+            arguments=json.dumps(
+                {
+                    "region": "eu-west-1",
+                    "services": ["iam"],
+                    "prowler_args": ["--checks", "check-b"],
+                }
+            ),
+        ),
+    )
+    client = mock_client()
+    client.chat.completions.create = AsyncMock(
+        return_value=SimpleNamespace(
+            choices=[SimpleNamespace(message=SimpleNamespace(tool_calls=[function_call]))]
+        )
+    )
+    agent = ProwlerAgent(configured_settings(), client=client)
+
+    arguments = asyncio.run(
+        agent.choose_scan_arguments(
+            "Check S3 encryption.",
+            region="us-west-2",
+            services=["s3"],
+        )
+    )
+
+    assert arguments == {
+        "region": "us-west-2",
+        "services": ["s3"],
+        "prowler_args": ["--checks", "check-b"],
+    }
+    call = client.chat.completions.create.call_args.kwargs
+    assert call["tool_choice"] == {
+        "type": "function",
+        "function": {"name": "select_scan_arguments"},
+    }
+    assert call["tools"][0]["function"]["name"] == "select_scan_arguments"
+
+
 def test_compliance_agent_includes_sources_and_non_certification_prompt():
     client = mock_client("Evidence-limited assessment")
     agent = ComplianceAgent(configured_settings(), client=client)
@@ -315,3 +360,51 @@ def test_review_scan_runs_prowler_and_compliance_in_parallel_then_senior_review(
     assert events == {"prowler", "compliance"}
     prowler_agent.review.assert_awaited_once()
     compliance_agent.review.assert_awaited_once()
+
+
+def test_scan_workflow_scans_with_arguments_selected_by_llm(monkeypatch):
+    class AgentContext:
+        def __init__(self, agent):
+            self.agent = agent
+
+        async def __aenter__(self):
+            return self.agent
+
+        async def __aexit__(self, exc_type, exc_value, traceback):
+            return None
+
+    scan = {
+        "operation_id": "operation-1",
+        "region": "us-west-2",
+        "findings": [],
+        "findings_count": 0,
+    }
+    selected_args = {
+        "region": "us-west-2",
+        "services": ["s3"],
+        "prowler_args": ["--checks", "check-a"],
+    }
+    prowler_agent = Mock()
+    prowler_agent.choose_scan_arguments = AsyncMock(return_value=selected_args)
+    prowler_agent.run_scan = AsyncMock(return_value=scan)
+    prowler_agent.review = AsyncMock(return_value="Prowler summary.")
+    compliance_agent = Mock()
+    compliance_agent.review = AsyncMock(return_value="Compliance assessment.")
+    senior_agent = Mock()
+    senior_agent.review_prowler = AsyncMock(return_value="Senior review.")
+    monkeypatch.setattr(orchestrator, "ProwlerAgent", lambda _: AgentContext(prowler_agent))
+    monkeypatch.setattr(orchestrator, "ComplianceAgent", lambda _: AgentContext(compliance_agent))
+    monkeypatch.setattr(orchestrator, "SeniorAgent", lambda _: AgentContext(senior_agent))
+    monkeypatch.setattr(
+        orchestrator,
+        "RagService",
+        lambda _: Mock(query=Mock(return_value={"results": []})),
+    )
+
+    result = asyncio.run(
+        orchestrator.scan_workflow(configured_settings(), question="Check S3 encryption.")
+    )
+
+    prowler_agent.choose_scan_arguments.assert_awaited_once()
+    prowler_agent.run_scan.assert_awaited_once_with(**selected_args)
+    assert result["findings"] == []

@@ -1,5 +1,6 @@
 """Shared settings-backed OpenAI-compatible asynchronous client."""
 
+import json
 import logging
 from typing import TYPE_CHECKING, Self, cast
 
@@ -11,8 +12,8 @@ from openai import (
     AuthenticationError,
     RateLimitError,
 )
-from openai.types.chat import ChatCompletionMessageParam
-from app.tools.prowler.schema import prowler_scan_tool
+from openai.types.chat import ChatCompletionMessageParam, ChatCompletionToolUnionParam
+
 from app.core.config import Settings
 from app.core.errors import AppError
 
@@ -20,7 +21,6 @@ if TYPE_CHECKING:
     from openai.types.chat import ChatCompletion
 
 logger = logging.getLogger(__name__)
-
 
 
 class BaseLLM:
@@ -100,7 +100,6 @@ class BaseLLM:
                 messages=messages,
                 temperature=0.6,
                 max_completion_tokens=8192,
-                tools=prowler_scan_tool
             )
         except APITimeoutError as exc:
             raise AppError(504, "provider_timeout", "The inference provider timed out.") from exc
@@ -137,6 +136,69 @@ class BaseLLM:
                 502, "provider_invalid_response", "The inference provider response was invalid."
             )
         return content
+
+    async def request_tool_arguments(
+        self,
+        message: str,
+        tool: ChatCompletionToolUnionParam,
+        tool_name: str,
+    ) -> dict[str, object]:
+        """Ask the provider for one structured function call and return its arguments."""
+        try:
+            response = await self.client.chat.completions.create(
+                model=self.settings.nvidia_model,
+                messages=[{"role": "user", "content": message}],
+                temperature=0,
+                max_completion_tokens=512,
+                tools=[tool],
+                tool_choice={"type": "function", "function": {"name": tool_name}},
+            )
+        except APITimeoutError as exc:
+            raise AppError(504, "provider_timeout", "The inference provider timed out.") from exc
+        except AuthenticationError as exc:
+            raise AppError(
+                502, "provider_auth_error", "The inference provider rejected its credentials."
+            ) from exc
+        except RateLimitError as exc:
+            raise AppError(
+                503, "provider_rate_limited", "The inference provider is rate limiting requests."
+            ) from exc
+        except APIConnectionError as exc:
+            raise AppError(
+                502, "provider_unavailable", "The inference provider is unavailable."
+            ) from exc
+        except APIStatusError as exc:
+            logger.warning("Inference provider returned status=%s.", exc.status_code)
+            raise AppError(
+                502, "provider_error", "The inference provider returned an error."
+            ) from exc
+
+        try:
+            tool_calls = response.choices[0].message.tool_calls
+        except (AttributeError, IndexError, TypeError) as exc:
+            raise AppError(
+                502, "provider_invalid_response", "The inference provider response was invalid."
+            ) from exc
+        if not tool_calls or len(tool_calls) != 1 or tool_calls[0].type != "function":
+            raise AppError(
+                502, "provider_invalid_response", "The inference provider response was invalid."
+            )
+        function = tool_calls[0].function
+        if function.name != tool_name:
+            raise AppError(
+                502, "provider_invalid_response", "The inference provider response was invalid."
+            )
+        try:
+            arguments = json.loads(function.arguments)
+        except json.JSONDecodeError as exc:
+            raise AppError(
+                502, "provider_invalid_response", "The inference provider response was invalid."
+            ) from exc
+        if not isinstance(arguments, dict):
+            raise AppError(
+                502, "provider_invalid_response", "The inference provider response was invalid."
+            )
+        return arguments
 
     async def close(self) -> None:
         """Close the shared async client if it was initialized."""

@@ -82,6 +82,10 @@ FAISS, httpx, Boto3, pytest, pytest-cov, Ruff, and the Prowler CLI.
 - Configure AWS credentials using the standard AWS credential chain (for
   example, an AWS profile or workload role). The API does not accept AWS
   access keys in requests.
+- Use a dedicated non-root IAM user or role for scans; do not run Prowler with
+  AWS root-account credentials. Grant only the read permissions required for
+  the services you intend to assess, following Prowler's current AWS setup
+  guidance.
 - Configure NVIDIA inference only if summaries are required. Health, local
   project operations, and RAG can run without NVIDIA or AWS credentials.
 
@@ -156,8 +160,9 @@ metadata: never load a user-supplied pickle.
 - Prompts treat report contents as untrusted data. The agent only summarizes
   findings; it cannot apply remediations or change AWS resources.
 - Ensure the AWS identity used by Prowler is appropriate for read-only
-  assessment. Scan results and summaries may contain sensitive resource
-  identifiers; protect API access and logs accordingly.
+  assessment and is not the AWS root identity. Scan results and summaries may
+  contain sensitive resource identifiers; protect API access and logs
+  accordingly.
 
 ## Tests, lint, and formatting
 
