@@ -218,3 +218,31 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Indra local configuration and runtime data
+.env
+.env.*
+!.env.example
+data/*
+!data/.gitkeep
+faiss_store/*
+!faiss_store/.gitkeep
+*.db
+*.sqlite
+*.sqlite3
+terraform.tfstate
+terraform.tfstate.*
+*.tfstate
+*.tfstate.*
+*.tfplan
+*.plan
+.terraform/
+*.tfvars
+*.tfvars.json
+crash.log
+crash.*.log
+*.pem
+*.key
+*.p12
+*.pfx
+.DS_Store
