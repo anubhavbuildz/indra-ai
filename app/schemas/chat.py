@@ -16,6 +16,8 @@ class ChatRequest(BaseModel):
 
 class ChatResponse(BaseModel):
     assistant_response: str
+    terraform: str
+    compliance: str
     proposed_actions: list[dict[str, str]]
     sources: list[dict[str, str]]
     status: str

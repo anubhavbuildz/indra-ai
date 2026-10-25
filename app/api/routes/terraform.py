@@ -11,6 +11,7 @@ from app.schemas.terraform import (
     TerraformCodeRequest,
     TerraformGenerateRequest,
     TerraformOperationResult,
+    TerraformRepairRequest,
 )
 from app.services.terraform_service import TerraformService
 
@@ -22,7 +23,17 @@ async def generate(
     body: TerraformGenerateRequest,
     settings: Annotated[Settings, Depends(get_settings)],
 ) -> TerraformArtifact:
-    return await TerraformService(settings).generate(body.project_id, body.requirements)
+    result = await TerraformService(settings).generate(body.project_id, body.requirements)
+    return TerraformArtifact.model_validate(result)
+
+
+@router.post("/repair")
+async def repair(
+    body: TerraformRepairRequest,
+    settings: Annotated[Settings, Depends(get_settings)],
+) -> TerraformArtifact:
+    result = await TerraformService(settings).repair(body.project_id, body.code, body.errors)
+    return TerraformArtifact.model_validate(result)
 
 
 @router.post("/validate", response_model=TerraformOperationResult)
@@ -30,7 +41,8 @@ def validate(
     body: TerraformCodeRequest,
     settings: Annotated[Settings, Depends(get_settings)],
 ) -> TerraformOperationResult:
-    return TerraformService(settings).validate(body.project_id, body.code)
+    result = TerraformService(settings).validate(body.project_id, body.code)
+    return TerraformOperationResult.model_validate(result)
 
 
 @router.post("/plan", response_model=TerraformOperationResult)
@@ -38,7 +50,8 @@ def plan(
     body: TerraformCodeRequest,
     settings: Annotated[Settings, Depends(get_settings)],
 ) -> TerraformOperationResult:
-    return TerraformService(settings).plan(body.project_id, body.code)
+    result = TerraformService(settings).plan(body.project_id, body.code)
+    return TerraformOperationResult.model_validate(result)
 
 
 @router.post("/apply")

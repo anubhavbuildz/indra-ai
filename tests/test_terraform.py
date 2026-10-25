@@ -1,5 +1,6 @@
 """Terraform execution boundary tests."""
 
+import asyncio
 import os
 import subprocess
 from io import BytesIO
@@ -9,6 +10,7 @@ from uuid import uuid4
 
 import pytest
 
+from app.api.routes import terraform as terraform_route
 from app.core.config import Settings
 from app.core.errors import AppError
 from app.services.terraform_service import TerraformService
@@ -111,3 +113,73 @@ def test_policy_rejects_provider_endpoint_overrides_and_inline_credentials(tmp_p
             service_at(tmp_path).validate_code(code)
 
         assert error.value.code == "terraform_policy_rejected"
+
+
+def test_repair_returns_proposal_without_running_terraform(tmp_path, monkeypatch):
+    service = service_at(tmp_path)
+    repaired = 'resource "aws_s3_bucket" "assets" {}'
+    seen: dict[str, object] = {}
+
+    class FakeSeniorAgent:
+        def __init__(self, settings):
+            seen["settings"] = settings
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, exc_type, exc_value, traceback):
+            return None
+
+        async def repair(self, code, errors):
+            seen["code"] = code
+            seen["errors"] = errors
+            return repaired
+
+    monkeypatch.setattr("app.services.terraform_service.SeniorAgent", FakeSeniorAgent)
+    monkeypatch.setattr(
+        service, "_run", Mock(side_effect=AssertionError("repair must not run Terraform"))
+    )
+    code = 'resource "aws_s3_bucket" "assets" { acl = "private" }'
+    errors = ["The acl argument is deprecated."]
+
+    result = asyncio.run(service.repair(str(uuid4()), code, errors))
+
+    assert result["status"] == "proposed"
+    assert result["code"] == repaired
+    assert result["executed"] is False
+    assert seen["code"] == code
+    assert seen["errors"] == errors
+
+
+def test_repair_endpoint_passes_code_and_diagnostics(client, monkeypatch):
+    seen: dict[str, object] = {}
+
+    class FakeTerraformService:
+        def __init__(self, settings):
+            pass
+
+        async def repair(self, project_id, code, errors):
+            seen["project_id"] = project_id
+            seen["code"] = code
+            seen["errors"] = errors
+            return {
+                "status": "proposed",
+                "code": code,
+                "executed": False,
+                "project_id": project_id,
+            }
+
+    monkeypatch.setattr(terraform_route, "TerraformService", FakeTerraformService)
+    project_id = str(uuid4())
+    code = 'resource "aws_s3_bucket" "assets" {}'
+    errors = ["Correct an invalid argument."]
+
+    response = client.post(
+        "/api/v1/terraform/repair",
+        json={"project_id": project_id, "code": code, "errors": errors},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["code"] == code
+    assert response.json()["executed"] is False
+    assert seen == {"project_id": project_id, "code": code, "errors": errors}

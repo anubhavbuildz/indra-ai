@@ -10,7 +10,8 @@ from uuid import UUID, uuid4
 
 from app.core.config import Settings
 from app.core.errors import AppError
-from app.services.llm_service import LLMService
+from app.services.llm.senior_agent import SeniorAgent
+from app.services.llm.terraform_agent import TerraformAgent
 
 MAX_OUTPUT_BYTES = 16_384
 MAX_TERRAFORM_CODE_BYTES = 100_000
@@ -173,19 +174,27 @@ class TerraformService:
         return {key: value for key, value in os.environ.items() if key in allowed}
 
     async def generate(self, project_id: str, requirements: str) -> dict[str, object]:
-        answer = await LLMService(self.settings).complete(
-            "Produce a minimal proposed Terraform configuration for the following requirements. "
-            "Return only HCL in a single terraform code block. Do not include deployment commands, "
-            "credentials, modules, provisioners, backend blocks, or remote sources.\n\n"
-            f"Requirements:\n{requirements}",
-            [],
-        )
+        async with TerraformAgent(self.settings) as agent:
+            answer = await agent.generate(requirements)
         code_match = re.search(
             r"```(?:terraform|hcl)?\s*(.*?)```", answer, re.IGNORECASE | re.DOTALL
         )
         code = code_match.group(1).strip() if code_match else answer.strip()
         self.validate_code(code)
         return {"status": "proposed", "code": code, "executed": False, "project_id": project_id}
+
+    async def repair(self, project_id: str, code: str, errors: list[str]) -> dict[str, object]:
+        """Repair caller-supplied Terraform diagnostics; never run Terraform commands."""
+        self.validate_code(code)
+        async with SeniorAgent(self.settings) as agent:
+            repaired_code = await agent.repair(code, errors)
+        self.validate_code(repaired_code)
+        return {
+            "status": "proposed",
+            "code": repaired_code,
+            "executed": False,
+            "project_id": project_id,
+        }
 
     def validate(self, project_id: str, code: str) -> dict[str, object]:
         self.validate_code(code)

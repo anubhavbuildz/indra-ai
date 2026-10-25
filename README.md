@@ -14,11 +14,20 @@ frontend.
 - SQLAlchemy project/operation persistence, SQLite by default, and Alembic.
 - Optional NVIDIA inference, enabled only when a verified full endpoint,
   exact model ID, API key, and explicitly supported API format are configured.
+- Shared OpenAI-compatible async client base for chat, Terraform, and
+  compliance agents; the LLM workflow runs Terraform proposal and compliance
+  review concurrently, then asks the senior agent to assess both outputs and
+  revise the Terraform proposal. The senior assessment, revised Terraform,
+  and compliance assessment are returned as separate fields.
+- Editable agent system prompts in `app/services/llm/roles/`; these Markdown
+  files are included in package builds and loaded when each agent runs.
 - Local 384-dimensional feature-hash retrieval with FAISS and attributed,
   trusted metadata. The baseline is lexical, not semantic.
 - Optional AWS caller identity using the standard credential chain; credentials
   are not accepted through chat or persisted.
-- Terraform proposal, formatting, validation, and plan-only boundaries.
+- Terraform proposal, caller-diagnostic repair, formatting, validation, and
+  plan-only boundaries. Repair uses the senior Nemotron agent and does not run
+  Terraform commands.
 
 This scaffold has no authentication, authorization, tenant isolation, complete
 audit system, or frontend. Apply and destroy are disabled. Do not use it as a
@@ -39,6 +48,69 @@ flowchart LR
 
 See [architecture](docs/architecture.md), [API overview](docs/api.md), and
 [security notes](docs/security.md).
+
+## Agent workflow
+
+For each chat request, the API retrieves any matching local source passages and
+passes the requirements, retrieved evidence, and conversation history into the
+LLM workflow:
+
+```mermaid
+flowchart TD
+    Client[Chat request] --> API[FastAPI chat endpoint]
+    API --> Retrieve[Retrieve local source passages]
+    API --> Inputs[Requirements + conversation history]
+    Retrieve --> Context[Workflow inputs]
+    Inputs --> Context
+
+    Context --> Terraform[Terraform agent]
+    Context --> Compliance[Compliance agent]
+    Terraform --> Proposal[Terraform proposal]
+    Compliance --> Assessment[Evidence-bound compliance assessment]
+
+    Proposal --> Review[Senior agent review]
+    Assessment --> Review
+    Context --> Review
+
+    Proposal --> Repair[Senior agent repair]
+    Review --> Repair
+
+    Review --> Response[assistant_response]
+    Repair --> TerraformOut[terraform]
+    Assessment --> ComplianceOut[compliance]
+    Response --> Result[Chat response: separate fields]
+    TerraformOut --> Result
+    ComplianceOut --> Result
+
+    Result -. "No Terraform execution or validation" .-> Safety[Proposal only]
+```
+
+Terraform generation and compliance review run concurrently; the diagram
+shows both branches feeding the subsequent senior review.
+
+1. **Terraform and compliance run concurrently.** The Terraform agent generates
+   an infrastructure proposal from the requirements. At the same time, the
+   compliance agent reviews the requirements against only the retrieved source
+   passages; with no passages, its result should report insufficient evidence.
+2. **Senior review assesses both results.** After both agents finish, the senior
+   agent receives the requirements, Terraform proposal, compliance assessment,
+   source metadata, and conversation history. It returns a user-facing
+   assessment without merging the Terraform or compliance content into that
+   assessment.
+3. **Senior repair revises the proposal.** The senior agent receives the
+   original Terraform and its own review as repair diagnostics and returns the
+   revised Terraform proposal. The compliance result remains the original
+   evidence-bound assessment.
+4. **The API returns three separate values:** `assistant_response` (senior
+   assessment), `terraform` (revised proposal), and `compliance` (compliance
+   assessment). The workflow does not run Terraform commands, validate the
+   generated HCL, apply infrastructure, or certify compliance.
+
+Terraform and compliance use the configured `NVIDIA_MODEL`. Senior review and
+repair currently override it with `nvidia/nemotron-3-super-120b-a12b`. The
+agents' system prompts are maintained in
+[`app/services/llm/roles/`](app/services/llm/roles/); the senior role file has
+separate review and repair prompt sections.
 
 ## Technology
 
@@ -70,12 +142,29 @@ The API starts without NVIDIA or AWS credentials. Health is available at
 `http://127.0.0.1:8000/health`; development docs are at
 `http://127.0.0.1:8000/docs`.
 
+Agent behavior prompts are maintained in
+[`app/services/llm/roles/`](app/services/llm/roles/): `terraform_role.md`,
+`compliance_role.md`, and `senior_role.md`. The senior role has separate review
+and repair sections. Prompt edits are read on the next agent request without
+changing Python code; the chat workflow returns its senior assessment in
+`assistant_response`, proposed Terraform in `terraform`, and evidence-bound
+compliance results in `compliance`.
+
 For schema-managed deployments, run `alembic upgrade head` before starting the
 app. A fresh local development launch creates its SQLite schema automatically.
 SQLite uses `data/indra.db`; a PostgreSQL-compatible `DATABASE_URL` can be
 configured for other environments. Install the PostgreSQL driver with
 `python -m pip install -e '.[postgres]'` and use a SQLAlchemy URL such as
 `postgresql+psycopg://...`.
+
+A live smoke test using a maintainer-provided Token Factory endpoint and model
+returned all three workflow fields, but the generated HCL had a
+`required_providers` block outside the required `terraform` block and the
+senior review missed that syntax issue. Treat live model output as unverified:
+the chat workflow does not run Terraform validation, plan, or deployment. Use
+a controlled workspace to check generated HCL before relying on it. The smoke
+test used no source passages, so its compliance result correctly reported
+insufficient evidence; it was not a compliance certification.
 
 ## Configuration
 
