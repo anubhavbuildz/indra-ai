@@ -7,34 +7,30 @@ The versioned API is mounted at `/api/v1`. FastAPI docs are available at
 | --- | --- | --- |
 | GET | `/health` | Process health; no external provider calls |
 | GET | `/ready` | Local database/index configuration state |
-| POST | `/api/v1/chat` | Senior review, repaired Terraform proposal, and compliance assessment in separate fields; never runs proposed actions |
+| POST | `/api/v1/chat` | Run configured-region AWS checks, summarize findings, and return a senior review |
 | POST / GET | `/api/v1/projects` | Create and paginate projects |
 | GET / PATCH | `/api/v1/projects/{project_id}` | Read or update safe project metadata |
 | GET | `/api/v1/rag/status` | Index availability and counts |
 | POST | `/api/v1/rag/query` | Return attributed passages or an empty not-indexed response |
-| POST | `/api/v1/terraform/generate` | Propose HCL; does not execute it |
-| POST | `/api/v1/terraform/repair` | Revise safe HCL from caller-supplied diagnostics; does not run Terraform |
-| POST | `/api/v1/terraform/validate` | Fixed init/format/validate operations |
-| POST | `/api/v1/terraform/plan` | Fixed init/validate/plan operations; never applies |
-| POST | `/api/v1/terraform/apply` | Always returns 501 |
-| POST | `/api/v1/terraform/destroy` | Always returns 501 |
 | GET | `/api/v1/aws/identity` | Optional STS identity from the standard credential chain |
+
+Chat accepts `message`, optional `project_id`, and bounded `history`. The Cloud
+agent uses configured inference to interpret the request and select from a
+fixed allowlist of read-only Boto3 audit functions for S3, IAM, EC2/EBS, VPC,
+RDS, CloudTrail, and GuardDuty. EC2/EBS, VPC, RDS, and GuardDuty use
+`AWS_REGION`; CloudTrail discovers enabled regions. The model cannot supply
+arbitrary function names, arguments, or regions. Cloud returns the structured
+tool results. Next, Compliance summarizes that report, and Senior reviews both
+the report and summary. These steps run sequentially; RAG is not yet part of
+the Compliance step. The response keeps
+`cloud_agent_response` (the structured audit report),
+`compliance_agent_response`, and `senior_agent_response` in separate fields,
+along with `operation_id`, `status`, and an empty `sources` list reserved for
+future RAG integration. AWS credentials are never accepted in request bodies.
+The route requires AWS read permissions and configured inference for the Cloud,
+Compliance, and Senior steps. The AWS identity route independently checks the
+process credential chain.
 
 Expected errors use `{ "error": { "code": "...", "message": "...",
 "details": {} } }`. Validation errors include field paths and error types,
-not submitted values. Operational response summaries avoid raw Terraform and
-provider output.
-
-The chat response includes `assistant_response` (the senior agent's final
-assessment of both outputs), `terraform` (the proposed Terraform after
-senior-agent repair based on that assessment), and `compliance` as separate
-fields. These values are not concatenated. The repaired proposal is not
-Terraform-validated, planned, or deployed by the chat workflow. System prompts
-are maintained in the packaged Markdown files under
-`app/services/llm/roles/`; the senior role separates review and repair prompts.
-
-Terraform repair accepts `project_id`, `code`, and a non-empty `errors` list.
-The source and result are checked against the Terraform execution policy. The
-repair endpoint calls the configured OpenAI-compatible provider using
-`nvidia/nemotron-3-super-120b-a12b`; it does not run `fmt`, `validate`, `plan`,
-`apply`, or `destroy`.
+not submitted values.

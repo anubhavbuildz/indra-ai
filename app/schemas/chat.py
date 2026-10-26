@@ -2,6 +2,8 @@
 
 from pydantic import BaseModel, Field
 
+from app.schemas.audit_schema import AuditReport
+
 
 class ChatMessage(BaseModel):
     role: str = Field(pattern="^(user|assistant)$")
@@ -15,9 +17,9 @@ class ChatRequest(BaseModel):
 
 
 class ChatResponse(BaseModel):
-    assistant_response: str
-    terraform: str
-    compliance: str
-    proposed_actions: list[dict[str, str]]
+    cloud_agent_response: AuditReport
+    compliance_agent_response: str
+    senior_agent_response: str
     sources: list[dict[str, str]]
+    operation_id: str
     status: str

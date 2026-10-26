@@ -5,11 +5,11 @@ from unittest.mock import Mock, patch
 from botocore.exceptions import NoCredentialsError
 
 from app.core.config import Settings
-from app.services.aws_service import AWSService
+from app.services.aws.aws_service import AWSService
 
 
 def test_missing_credentials_return_not_configured():
-    with patch("app.services.aws_service.boto3.Session", side_effect=NoCredentialsError()):
+    with patch("app.services.aws.aws_service.boto3.Session", side_effect=NoCredentialsError()):
         response = AWSService(Settings(_env_file=None)).identity()
 
     assert response["status"] == "not_configured"
@@ -25,7 +25,7 @@ def test_identity_returns_only_non_secret_metadata():
     }
     session = Mock()
     session.client.return_value = sts
-    with patch("app.services.aws_service.boto3.Session", return_value=session):
+    with patch("app.services.aws.aws_service.boto3.Session", return_value=session):
         response = AWSService(Settings(_env_file=None)).identity()
 
     assert response["status"] == "configured"

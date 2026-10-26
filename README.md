@@ -1,131 +1,163 @@
-# Indra Backend
+# Indra AI Backend
 
-Indra is an early-stage, hackathon-oriented AI cloud-infrastructure assistant
-backend. It provides project metadata APIs, optional model inference, local
-retrieval, and a controlled Terraform plan boundary. It does not provide a
-frontend.
+Indra is a FastAPI backend for read-only AWS security audits and AI-assisted
+review. A Cloud agent uses the configured Nebius model to select audit
+functions from a fixed allowlist, executes those functions through Boto3, and
+returns a typed audit report. Compliance summarizes the report, then Senior
+reviews the report and summary. Each agent result is returned in its own API
+field.
 
-> Compliance findings are decision support only. They are not a certification,
-> legal advice, or a guarantee that infrastructure is secure.
+The backend also provides project metadata endpoints, an optional AWS caller
+identity check, and a standalone local retrieval API. RAG is not currently part
+of the chat-agent workflow.
 
-## V1 features and limitations
+## Current capabilities
 
-- FastAPI API with development docs, request IDs, safe errors, and size limits.
-- SQLAlchemy project/operation persistence, SQLite by default, and Alembic.
-- Optional NVIDIA inference, enabled only when a verified full endpoint,
-  exact model ID, API key, and explicitly supported API format are configured.
-- Shared OpenAI-compatible async client base for chat, Terraform, and
-  compliance agents; the LLM workflow runs Terraform proposal and compliance
-  review concurrently, then asks the senior agent to assess both outputs and
-  revise the Terraform proposal. The senior assessment, revised Terraform,
-  and compliance assessment are returned as separate fields.
-- Editable agent system prompts in `app/services/llm/roles/`; these Markdown
-  files are included in package builds and loaded when each agent runs.
-- Local 384-dimensional feature-hash retrieval with FAISS and attributed,
-  trusted metadata. The baseline is lexical, not semantic.
-- Optional AWS caller identity using the standard credential chain; credentials
-  are not accepted through chat or persisted.
-- Terraform proposal, caller-diagnostic repair, formatting, validation, and
-  plan-only boundaries. Repair uses the senior Nemotron agent and does not run
-  Terraform commands.
+- **AWS audit:** Read-only checks for S3, IAM, EC2/EBS, VPC, RDS, CloudTrail,
+  and GuardDuty.
+- **LLM tool selection:** Cloud interprets the user's request and selects
+  applicable audit functions from a fixed allowlist. Tool arguments are
+  validated, and regional tools always use `AWS_REGION`.
+- **Sequential review:** Cloud audit → Compliance summary → Senior review.
+- **Structured output:** The chat API returns the audit report and each
+  downstream agent's response separately.
+- **Local retrieval API:** Ingest authorized Markdown/text into a local FAISS
+  index and query it independently. Retrieval is not yet connected to chat.
+- **Project metadata:** Create, list, read, and update projects using
+  SQLAlchemy.
+- **AWS identity:** Optional STS caller identity lookup through the standard
+  AWS credential chain.
+- **Persistence:** SQLite by default, with PostgreSQL-compatible database URLs.
+- **Health endpoints:** Process health and basic local readiness status.
 
-This scaffold has no authentication, authorization, tenant isolation, complete
-audit system, or frontend. Apply and destroy are disabled. Do not use it as a
-production deployment control plane.
+This project is a decision-support scaffold, not a cloud control plane. It does
+not apply AWS changes, certify compliance, or guarantee security.
 
 ## Architecture
 
 ```mermaid
 flowchart LR
-  Client --> FastAPI
-  FastAPI --> Services
-  Services --> Database[(SQLite / PostgreSQL)]
-  Services --> NVIDIA[Optional inference]
-  Services --> RAG[FAISS + trusted local metadata]
-  Services --> TF[Terraform plan-only boundary]
-  Services --> AWS[Optional STS identity]
+    User[Client] --> API[FastAPI]
+    API --> Chat[Chat workflow]
+    Chat --> Cloud[Cloud agent]
+    Cloud --> Nebius[Nebius Token Factory]
+    Nebius -->|read-only tool selections| Cloud
+    Cloud --> Audit[Boto3 audit functions]
+    Audit --> AWS[AWS APIs via standard credential chain]
+    Audit --> Report[Validated audit report]
+    Report --> Compliance[Compliance summarizer]
+    Compliance --> Nebius
+    Compliance --> Senior[Senior reviewer]
+    Report --> Senior
+    Senior --> Nebius
+    Report --> Response[Separate API response fields]
+    Compliance --> Response
+    Senior --> Response
+    API --> Projects[Project service]
+    Projects --> DB[(SQLite / PostgreSQL)]
+    API --> Retrieval[Standalone RAG API]
+    Retrieval --> FAISS[Local FAISS index + trusted metadata]
+    API --> STS[Optional AWS STS identity lookup]
 ```
 
-See [architecture](docs/architecture.md), [API overview](docs/api.md), and
-[security notes](docs/security.md).
+### Chat request lifecycle
 
-## Agent workflow
+1. The API validates a bounded user message and optional conversation history.
+2. Cloud sends the request to the configured model with the available audit
+   functions. The model can select only the exposed functions; it cannot choose
+   arbitrary AWS operations, pass resource arguments, or choose other regions.
+3. The application executes selected functions through the local Boto3 auditor.
+   S3 and IAM checks are global; EC2, VPC, and RDS checks use `AWS_REGION`.
+4. The tool results are validated as an `AuditReport`.
+5. Compliance creates a short summary grounded in that report.
+6. Senior reviews the audit report and Compliance summary.
+7. The API returns each result independently. `sources` is currently empty
+   because RAG has not been integrated into this workflow.
 
-For each chat request, the API retrieves any matching local source passages and
-passes the requirements, retrieved evidence, and conversation history into the
-LLM workflow:
+If the user requests a broad audit, Cloud may select all applicable audit
+functions. A service-specific request may result in only matching checks.
+Findings are point-in-time observations; the absence of a finding is not a
+guarantee that a resource is secure.
 
-```mermaid
-flowchart TD
-    Client[Chat request] --> API[FastAPI chat endpoint]
-    API --> Retrieve[Retrieve local source passages]
-    API --> Inputs[Requirements + conversation history]
-    Retrieve --> Context[Workflow inputs]
-    Inputs --> Context
+### Checks included
 
-    Context --> Terraform[Terraform agent]
-    Context --> Compliance[Compliance agent]
-    Terraform --> Proposal[Terraform proposal]
-    Compliance --> Assessment[Evidence-bound compliance assessment]
+| Service | Current checks |
+| --- | --- |
+| S3 | Public access block, public bucket policy/ACL, default encryption, versioning, TLS enforcement, and server access logging |
+| IAM | Presence of root-account access keys |
+| EC2 / EBS | IPv4/IPv6 world-open security-group ingress, public IPs on running instances, unencrypted volumes, EBS default encryption, and public snapshots |
+| VPC | Default VPCs and VPC Flow Logs |
+| RDS | Public accessibility, storage encryption, Multi-AZ, instance/cluster backup retention and deletion protection, and public manual instance/cluster snapshots |
+| CloudTrail | Multi-region trail coverage, active logging, log-file validation, and log bucket public-access-block/encryption configuration across enabled regions |
+| GuardDuty | Detector presence and enabled status in the configured region |
 
-    Proposal --> Review[Senior agent review]
-    Assessment --> Review
-    Context --> Review
+The checks are intentionally read-only. Some permission or service errors are
+returned as audit findings; the caller's AWS identity must have the read
+permissions needed for the selected checks.
 
-    Proposal --> Repair[Senior agent repair]
-    Review --> Repair
+CloudTrail region discovery depends on `ec2:DescribeRegions`; regional trail,
+GuardDuty, RDS, and EC2 checks also require their corresponding read
+permissions. Findings include a `check_id` and may include check-specific
+`evidence`. Missing permissions are represented as audit errors rather than
+being treated as a successful check.
 
-    Review --> Response[assistant_response]
-    Repair --> TerraformOut[terraform]
-    Assessment --> ComplianceOut[compliance]
-    Response --> Result[Chat response: separate fields]
-    TerraformOut --> Result
-    ComplianceOut --> Result
+## API overview
 
-    Result -. "No Terraform execution or validation" .-> Safety[Proposal only]
+The API prefix defaults to `/api/v1`. In development, interactive API
+documentation is available at `/docs` and `/redoc`.
+
+| Method | Path | Description |
+| --- | --- | --- |
+| `GET` | `/health` | Process health; does not call AWS or the model |
+| `GET` | `/ready` | Basic database and local retrieval-index readiness |
+| `POST` | `/api/v1/chat` | Sequential AWS audit and three-agent review |
+| `GET`, `POST` | `/api/v1/projects` | List or create project metadata |
+| `GET`, `PATCH` | `/api/v1/projects/{project_id}` | Read or update project metadata |
+| `GET` | `/api/v1/aws/identity` | Read-only STS caller identity lookup |
+| `GET` | `/api/v1/rag/status` | Local retrieval index status |
+| `POST` | `/api/v1/rag/query` | Query local retrieval passages |
+
+Example chat request:
+
+```json
+{
+  "message": "Check my AWS account for critical security issues.",
+  "history": []
+}
 ```
 
-Terraform generation and compliance review run concurrently; the diagram
-shows both branches feeding the subsequent senior review.
+The response includes:
 
-1. **Terraform and compliance run concurrently.** The Terraform agent generates
-   an infrastructure proposal from the requirements. At the same time, the
-   compliance agent reviews the requirements against only the retrieved source
-   passages; with no passages, its result should report insufficient evidence.
-2. **Senior review assesses both results.** After both agents finish, the senior
-   agent receives the requirements, Terraform proposal, compliance assessment,
-   source metadata, and conversation history. It returns a user-facing
-   assessment without merging the Terraform or compliance content into that
-   assessment.
-3. **Senior repair revises the proposal.** The senior agent receives the
-   original Terraform and its own review as repair diagnostics and returns the
-   revised Terraform proposal. The compliance result remains the original
-   evidence-bound assessment.
-4. **The API returns three separate values:** `assistant_response` (senior
-   assessment), `terraform` (revised proposal), and `compliance` (compliance
-   assessment). The workflow does not run Terraform commands, validate the
-   generated HCL, apply infrastructure, or certify compliance.
+```json
+{
+  "cloud_agent_response": {
+    "audited_regions": ["us-east-1"],
+    "audited_services": ["s3", "iam", "ec2", "vpc", "rds"],
+    "total_issues": 0,
+    "critical_count": 0,
+    "high_count": 0,
+    "medium_count": 0,
+    "low_count": 0,
+    "findings": []
+  },
+  "compliance_agent_response": "Compliance summary...",
+  "senior_agent_response": "Senior review...",
+  "sources": [],
+  "operation_id": "generated-operation-id",
+  "status": "completed"
+}
+```
 
-Terraform and compliance use the configured `NVIDIA_MODEL`. Senior review and
-repair currently override it with `nvidia/nemotron-3-super-120b-a12b`. The
-agents' system prompts are maintained in
-[`app/services/llm/roles/`](app/services/llm/roles/); the senior role file has
-separate review and repair prompt sections.
+The report above is an example shape only; actual selected services and
+findings depend on the request and the live AWS account. Errors use the API's
+structured error response and do not include submitted credentials.
 
-## Technology
+## Requirements and setup
 
-Python 3.12+, FastAPI, Uvicorn, Pydantic v2/settings, SQLAlchemy 2.x, Alembic,
-FAISS, httpx, Boto3, pytest, pytest-cov, Ruff, and Terraform CLI.
-
-## Prerequisites
-
-- Python 3.12 or newer.
-- Terraform CLI only if you want to use validation or plan endpoints.
-- NVIDIA credentials only after confirming a specific Token Factory model,
-  full endpoint, and request format.
-- AWS credentials are optional and use the standard AWS credential chain.
-
-## Install and run locally
+- Python 3.12 or newer
+- AWS credentials configured through the Boto3 standard credential chain for
+  chat audits and the identity endpoint
+- A Nebius Token Factory API key for chat inference
 
 From the repository root:
 
@@ -135,112 +167,145 @@ source .venv/bin/activate
 python -m pip install --upgrade pip
 python -m pip install -e '.[dev]'
 cp .env.example .env
+```
+
+Set `NVIDIA_API_KEY` in `.env`. The configured default model and endpoint are
+`nvidia/Nemotron-3_5-Lightning` and
+`https://api.tokenfactory.nebius.com/v1`. The project uses the
+OpenAI-compatible Chat Completions format. Do not commit `.env` or share its
+contents.
+
+AWS credentials are not accepted in API request bodies. Configure an
+appropriately scoped IAM role/profile or other standard Boto3 credential
+source, and grant only the read permissions required by the checks. Avoid
+using AWS root credentials.
+
+Run locally:
+
+```bash
 uvicorn app.main:app --reload
 ```
 
-The API starts without NVIDIA or AWS credentials. Health is available at
-`http://127.0.0.1:8000/health`; development docs are at
-`http://127.0.0.1:8000/docs`.
+The app initializes the configured database schema on startup. Alembic
+migrations are available for database-managed deployments:
 
-Agent behavior prompts are maintained in
-[`app/services/llm/roles/`](app/services/llm/roles/): `terraform_role.md`,
-`compliance_role.md`, and `senior_role.md`. The senior role has separate review
-and repair sections. Prompt edits are read on the next agent request without
-changing Python code; the chat workflow returns its senior assessment in
-`assistant_response`, proposed Terraform in `terraform`, and evidence-bound
-compliance results in `compliance`.
+```bash
+alembic upgrade head
+```
 
-For schema-managed deployments, run `alembic upgrade head` before starting the
-app. A fresh local development launch creates its SQLite schema automatically.
-SQLite uses `data/indra.db`; a PostgreSQL-compatible `DATABASE_URL` can be
-configured for other environments. Install the PostgreSQL driver with
-`python -m pip install -e '.[postgres]'` and use a SQLAlchemy URL such as
-`postgresql+psycopg://...`.
+SQLite is the default. For PostgreSQL, set `DATABASE_URL` and install the
+optional driver:
 
-A live smoke test using a maintainer-provided Token Factory endpoint and model
-returned all three workflow fields, but the generated HCL had a
-`required_providers` block outside the required `terraform` block and the
-senior review missed that syntax issue. Treat live model output as unverified:
-the chat workflow does not run Terraform validation, plan, or deployment. Use
-a controlled workspace to check generated HCL before relying on it. The smoke
-test used no source passages, so its compliance result correctly reported
-insufficient evidence; it was not a compliance certification.
+```bash
+python -m pip install -e '.[postgres]'
+```
 
 ## Configuration
 
-Copy `.env.example` to `.env` and set only values you have verified. Important
-settings:
+All settings can be supplied as environment variables or through `.env`.
+Defaults are defined in `app/core/config.py`; `.env.example` is the template.
 
 | Variable | Default | Purpose |
 | --- | --- | --- |
-| `APP_NAME` | `Indra API` | Service title |
-| `APP_ENV` | `development` | Enables docs only in development |
+| `APP_NAME` | `Indra API` | API service name |
+| `APP_ENV` | `development` | Enables `/docs` and `/redoc` in development |
+| `DEBUG` | `false` | FastAPI debug setting |
 | `API_V1_PREFIX` | `/api/v1` | Versioned API prefix |
-| `DATABASE_URL` | `sqlite:///./data/indra.db` | SQLAlchemy URL |
-| `NVIDIA_BASE_URL` | empty | Full provider endpoint; no path is guessed |
-| `NVIDIA_API_KEY` | empty | Provider credential; never returned or logged |
-| `NVIDIA_MODEL` | empty | Exact model identifier selected by maintainer |
-| `NVIDIA_API_FORMAT` | empty | Explicitly opt into a confirmed adapter format |
-| `EMBEDDING_MODEL` | `local-feature-hash-v1` | Local lexical baseline identifier |
-| `FAISS_INDEX_PATH` | `./faiss_store/index.faiss` | FAISS index file |
-| `FAISS_METADATA_PATH` | `./faiss_store/metadata.pkl` | Trusted local metadata |
-| `TERRAFORM_BIN` | `terraform` | Executable name/path set by operator |
-| `TERRAFORM_WORKSPACE_ROOT` | `./data/terraform_workspaces` | Controlled operation workspaces |
-| `AWS_REGION` | `us-east-1` | AWS identity lookup region |
-| `CORS_ORIGINS` | empty | Comma-separated explicit origins |
+| `DATABASE_URL` | `sqlite:///./data/indra.db` | SQLAlchemy database URL |
+| `NVIDIA_BASE_URL` | `https://api.tokenfactory.nebius.com/v1` | OpenAI-compatible Nebius endpoint |
+| `NVIDIA_API_KEY` | empty | Nebius credential; required for model calls |
+| `NVIDIA_MODEL` | `nvidia/Nemotron-3_5-Lightning` | Inference model |
+| `NVIDIA_API_FORMAT` | `openai-chat-completions` | Supported provider adapter |
+| `AWS_REGION` | `us-east-1` | Regional AWS audit and identity lookup region |
+| `EMBEDDING_MODEL` | `local-feature-hash-v1` | Local deterministic retrieval embedding |
+| `FAISS_INDEX_PATH` | `./faiss_store/index.faiss` | Local FAISS index |
+| `FAISS_METADATA_PATH` | `./faiss_store/metadata.pkl` | Trusted local index metadata |
+| `KNOWLEDGE_BASE_PATH` | `./knowledge_base` | Default local document directory |
+| `CORS_ORIGINS` | empty | Comma-separated allowed browser origins |
+| `MAX_REQUEST_BYTES` | `1048576` | Maximum HTTP request body size |
 
-`openai-chat-completions` is the only currently implemented NVIDIA API format.
-Set `NVIDIA_API_FORMAT=openai-chat-completions` only after verifying that the
-selected Token Factory model supports the compatible request and response
-format. `NVIDIA_BASE_URL` must be the full endpoint. No NVIDIA model ID or
-endpoint is bundled or inferred.
+The local embedding is deterministic feature hashing, not a semantic embedding
+model. It requires no model download.
 
-## RAG ingestion and trust
+## Local retrieval (standalone)
 
-Put authorized UTF-8 Markdown or text documents in `knowledge_base/`, then run:
+RAG endpoints work separately from chat. Place authorized UTF-8 `.md` or `.txt`
+documents in `knowledge_base/`, then build the local index:
 
 ```bash
 python scripts/ingest_documents.py
+```
+
+Or choose a different authorized source directory:
+
+```bash
 python scripts/ingest_documents.py --source-dir /path/to/authorized-docs
 ```
 
-The ingester downloads nothing. Retrieval metadata includes local source
-titles and leaves source URLs, dates, versions, and section IDs empty if the
-input does not provide them. Rebuild and deploy `index.faiss` and
-`metadata.pkl` as a matching pair. The pickle is trusted, locally generated
-metadata: `pickle.load` is unsafe for untrusted files. Never upload or load a
-user-supplied pickle. The default feature-hash vectors are a local lexical
-baseline, not semantic model embeddings.
+The ingestion script downloads no documents. It creates a matching FAISS index
+and metadata file. The metadata is a locally generated pickle file and must be
+treated as trusted input; never load a user-supplied pickle.
 
-## Terraform safety
+## Development and validation
 
-Terraform operates only through a fixed command allowlist, argument arrays,
-`shell=False`, server-generated per-operation workspaces, execution timeouts,
-and output limits. Generated code is a proposal, never an execution command.
-The V1 HCL policy permits AWS resources/provider only and rejects modules,
-provider endpoint overrides, inline credentials, provisioners, and backend
-blocks. V1 allows format check, backend-disabled init, validate, and plan. It does not
-run `apply` or `destroy`; both endpoints return 501. Do not treat these
-controls as production isolation or authorization.
-
-Terraform state and plan files can contain secrets. Do not commit state,
-plans, `.terraform/`, credentials, or generated workspaces. Review HCL and
-plan output through your normal secure process before any deployment.
-
-## Tests, lint, and formatting
+Install development dependencies with `python -m pip install -e '.[dev]'`.
 
 ```bash
+pytest
 pytest --cov=app --cov-report=term-missing
 ruff check .
 ruff format --check .
+python -m compileall -q app tests
 ```
 
-Shortcuts are available with `make test`, `make lint`, and `make format`.
-CI runs on Python 3.12 and requires no live provider or cloud credentials.
+Convenience targets are available:
 
-## Governance
+```bash
+make test
+make lint
+make format
+make ingest
+```
 
-See [CONTRIBUTING.md](CONTRIBUTING.md), [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md),
-[SECURITY.md](SECURITY.md), [SUPPORT.md](SUPPORT.md), and [CHANGELOG.md](CHANGELOG.md).
-The [MIT license](LICENSE) contains copyright-holder and year placeholders for
-the maintainer to replace before publishing.
+The normal test suite uses mocked AWS and provider responses and does not
+require live credentials. Live integration checks require configured Nebius
+and AWS credentials and can incur provider/AWS usage. Confirm your target
+account and permissions before running them.
+
+## Security and limitations
+
+- There is no authentication, authorization, tenant isolation, or complete
+  audit trail. Project IDs are references, not access controls.
+- AWS requests use the server's standard Boto3 credential chain. Do not run
+  with privileged/root credentials.
+- Chat only performs the configured allowlisted read-only checks; it does not
+  remediate findings or assess every AWS service or control.
+- Compliance and Senior outputs are model-generated decision support, not
+  formal compliance mappings, legal advice, certification, or a security
+  guarantee.
+- Chat does not yet use local RAG; the response `sources` array is empty.
+- RAG's pickle metadata is trusted local data and must not be replaced with
+  untrusted files.
+
+## Project layout
+
+```text
+app/
+  api/                 FastAPI routes and router registration
+  core/                Settings, error handling, logging, middleware
+  db/                  SQLAlchemy session and models
+  schemas/             Request, response, and audit Pydantic schemas
+  services/
+    aws/               AWS identity service
+    llm/               Cloud, Compliance, Senior agents and workflow
+    providers/         Provider adapters
+    rag_service.py     Local FAISS retrieval and index construction
+  tools/audit/         Direct Boto3 audit functions
+scripts/               Local retrieval ingestion and environment checks
+tests/                 API, service, audit, and workflow tests
+docs/                  API, architecture, and security notes
+```
+
+More detail: [end-to-end project overview](docs/project-overview.md),
+[API overview](docs/api.md), [architecture](docs/architecture.md),
+[security notes](docs/security.md), and [contribution guide](CONTRIBUTING.md).

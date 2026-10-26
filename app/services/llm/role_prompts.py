@@ -3,7 +3,7 @@
 from pathlib import Path
 from typing import Literal
 
-RoleFile = Literal["terraform_role.md", "compliance_role.md", "senior_role.md"]
+RoleFile = Literal["cloud_role.md", "compliance_role.md", "senior_role.md"]
 ROLE_DIRECTORY = Path(__file__).with_name("roles")
 
 

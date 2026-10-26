@@ -13,6 +13,7 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker
 
 from app.core.config import Settings, get_settings
+from app.db.models import Operation, Project, User  # noqa: F401
 
 
 @lru_cache

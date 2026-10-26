@@ -20,13 +20,13 @@ Include:
 - A minimal proof of concept or logs with secrets removed.
 - Any suggested mitigation.
 
-Never send actual API keys, AWS credentials, cloud account secrets, customer
-data, Terraform state, or unredacted plan output. The project has no committed
-response-time promise.
+Never send actual API keys, AWS credentials, cloud account secrets, or customer
+data. The project has no committed response-time
+promise.
 
 ## Security boundaries
 
 The scaffold does not implement authentication, authorization, tenant
-isolation, or a complete audit workflow. Terraform apply and destroy are
-disabled. Compliance findings are decision support, not a certification or
-guarantee of security.
+isolation, or a complete audit workflow. Chat runs read-only AWS checks and
+provides point-in-time decision support, not a certification or guarantee of
+security.

@@ -230,15 +230,6 @@ faiss_store/*
 *.db
 *.sqlite
 *.sqlite3
-terraform.tfstate
-terraform.tfstate.*
-*.tfstate
-*.tfstate.*
-*.tfplan
-*.plan
-.terraform/
-*.tfvars
-*.tfvars.json
 crash.log
 crash.*.log
 *.pem
