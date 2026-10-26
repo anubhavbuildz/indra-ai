@@ -40,9 +40,9 @@ Run Terraform checks in a controlled workspace before relying on generated HCL.
 
 The default embedding is local deterministic feature hashing, which produces
 384-dimensional normalized lexical vectors and requires no downloaded model.
-It is not a semantic model. NVIDIA inference is intentionally gated on an
-explicit endpoint, model identifier, key, and a confirmed API-format setting.
-The service does not guess provider endpoints or model IDs.
+It is not a semantic model. NVIDIA inference uses the configured Nebius Token
+Factory endpoint and `nvidia/Nemotron-3_5-Lightning` model by default. A valid
+`NVIDIA_API_KEY` is still required to enable inference.
 
 There is no authentication or authorization implementation in this
 scaffold. Project identifiers are references, not access controls.

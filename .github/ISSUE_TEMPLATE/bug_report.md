@@ -22,4 +22,4 @@ Describe the problem without including credentials, tokens, account identifiers,
 - Indra version/commit:
 
 ## Logs
-Include only redacted logs. Never attach `.env`, Prowler reports, or secrets.
+Include only redacted logs. Never attach `.env` files or secrets.

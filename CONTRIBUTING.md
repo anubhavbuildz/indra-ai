@@ -1,7 +1,7 @@
 # Contributing
 
 Thanks for helping improve Indra. This is an early-stage backend project;
-discuss substantial API, provider, schema, or Prowler-safety changes in an
+discuss substantial API, provider, or schema changes in an
 issue before investing in a large implementation.
 
 ## Local setup
@@ -24,7 +24,7 @@ have a verified integration configuration.
   impact in the pull request.
 - Include tests for changed behavior and update relevant documentation.
 - Keep commits focused; do not commit local databases, FAISS artifacts,
-  Prowler scan reports, generated credentials, or `.env`.
+  generated credentials, or `.env`.
 - Do not include secrets or cloud credentials in issues, pull requests,
   screenshots, logs, fixtures, or source files.
 - Do not describe unperformed provider calls, compliance checks, or cloud
@@ -48,5 +48,4 @@ with `pre-commit install`.
 
 For a feature request, state the problem, smallest useful behavior, and
 security/privacy effects. For a bug report, include a minimal reproduction
-and redacted logs. Never attach credentials, Prowler reports, or sensitive
-account data.
+and redacted logs. Never attach credentials or sensitive account data.

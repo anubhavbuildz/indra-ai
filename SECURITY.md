@@ -20,13 +20,13 @@ Include:
 - A minimal proof of concept or logs with secrets removed.
 - Any suggested mitigation.
 
-Never send actual API keys, AWS credentials, cloud account secrets, customer
-data, or unredacted Prowler reports. The project has no committed response-time
+Never send actual API keys, AWS credentials, cloud account secrets, or customer
+data. The project has no committed response-time
 promise.
 
 ## Security boundaries
 
 The scaffold does not implement authentication, authorization, tenant
-isolation, or a complete audit workflow. Prowler is used only for read-only
-assessment; no remediation action is available. Findings are decision
-support, not a certification or guarantee of security.
+isolation, or a complete audit workflow. Chat runs read-only AWS checks and
+provides point-in-time decision support, not a certification or guarantee of
+security.

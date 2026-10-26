@@ -22,10 +22,19 @@ class Settings(BaseSettings):
     debug: bool = Field(default=False, validation_alias="DEBUG")
     api_v1_prefix: str = Field(default="/api/v1", validation_alias="API_V1_PREFIX")
     database_url: str = Field(default="sqlite:///./data/indra.db", validation_alias="DATABASE_URL")
-    nvidia_base_url: str = Field(default="", validation_alias="NVIDIA_BASE_URL")
+    nvidia_base_url: str = Field(
+        default="https://api.tokenfactory.nebius.com/v1",
+        validation_alias="NVIDIA_BASE_URL",
+    )
     nvidia_api_key: str = Field(default="", validation_alias="NVIDIA_API_KEY", repr=False)
-    nvidia_model: str = Field(default="", validation_alias="NVIDIA_MODEL")
-    nvidia_api_format: str = Field(default="", validation_alias="NVIDIA_API_FORMAT")
+    nvidia_model: str = Field(
+        default="nvidia/Nemotron-3_5-Lightning",
+        validation_alias="NVIDIA_MODEL",
+    )
+    nvidia_api_format: str = Field(
+        default="openai-chat-completions",
+        validation_alias="NVIDIA_API_FORMAT",
+    )
     embedding_model: str = Field(
         default="local-feature-hash-v1", validation_alias="EMBEDDING_MODEL"
     )
@@ -37,10 +46,6 @@ class Settings(BaseSettings):
     )
     knowledge_base_path: Path = Field(
         default=Path("./knowledge_base"), validation_alias="KNOWLEDGE_BASE_PATH"
-    )
-    prowler_bin: str = Field(default="prowler", validation_alias="PROWLER_BIN")
-    prowler_timeout_seconds: int = Field(
-        default=900, ge=1, le=3_600, validation_alias="PROWLER_TIMEOUT_SECONDS"
     )
     aws_region: str = Field(default="us-east-1", validation_alias="AWS_REGION")
     cors_origins: str = Field(default="", validation_alias="CORS_ORIGINS")
@@ -62,7 +67,6 @@ class Settings(BaseSettings):
                 and self.nvidia_api_format
             ),
             "aws": True,
-            "prowler": bool(self.prowler_bin),
         }
 
 

@@ -1,4 +1,4 @@
-"""Chat endpoint response tests for the three-agent Prowler workflow."""
+"""Guidance-backed chat endpoint tests."""
 
 import asyncio
 from unittest.mock import AsyncMock
@@ -8,49 +8,44 @@ from app.core.config import Settings
 from app.schemas.chat import ChatRequest
 
 
-def test_chat_returns_prowler_compliance_and_senior_assessments(monkeypatch):
-    findings = [{"finding_info": {"title": "Encryption disabled"}}]
+def test_chat_returns_guidance_answer_and_forwards_history(monkeypatch):
     sources = [{"chunk_id": "aws-guidance-1", "source_title": "Storage guidance"}]
-    scan_workflow = AsyncMock(
+    workflow = AsyncMock(
         return_value={
             "operation_id": "operation-1",
-            "region": "us-east-1",
-            "findings_count": 1,
-            "findings": findings,
-            "prowler_summary": "Prowler assessment.",
-            "compliance": "Evidence-based compliance assessment.",
-            "response": "Senior review of both assessments.",
+            "cloud_agent_response": {
+                "audited_regions": ["us-east-1"],
+                "total_issues": 0,
+                "critical_count": 0,
+                "high_count": 0,
+                "medium_count": 0,
+                "low_count": 0,
+                "findings": [],
+            },
+            "compliance_agent_response": "Compliance assessment.",
+            "senior_agent_response": "Senior review.",
             "sources": sources,
         }
     )
-    monkeypatch.setattr(chat_route, "scan_workflow", scan_workflow)
+    monkeypatch.setattr(chat_route, "chat_workflow", workflow)
 
     result = asyncio.run(
         chat_route.chat(
             ChatRequest(
-                message="Prioritize the most urgent findings.",
-                region="eu-west-1",
-                services=["s3", "iam"],
-                prowler_args=["--checks", "check-a"],
-                history=[{"role": "user", "content": "Check the account."}],
+                message="How should I review storage configuration?",
+                history=[{"role": "user", "content": "I manage an AWS account."}],
             ),
             Settings(_env_file=None),
         )
     )
 
-    assert result.assistant_response == "Senior review of both assessments."
-    assert result.prowler_summary == "Prowler assessment."
-    assert result.compliance == "Evidence-based compliance assessment."
-    assert result.findings == findings
-    assert result.findings_count == 1
+    assert result.cloud_agent_response.total_issues == 0
+    assert result.compliance_agent_response == "Compliance assessment."
+    assert result.senior_agent_response == "Senior review."
     assert result.sources == sources
-    scan_workflow.assert_awaited_once()
-    assert scan_workflow.await_args.args[1:] == (
-        "Prioritize the most urgent findings.",
-        [{"role": "user", "content": "Check the account."}],
+    assert result.operation_id == "operation-1"
+    workflow.assert_awaited_once_with(
+        Settings(_env_file=None),
+        "How should I review storage configuration?",
+        [{"role": "user", "content": "I manage an AWS account."}],
     )
-    assert scan_workflow.await_args.kwargs == {
-        "region": "eu-west-1",
-        "services": ["s3", "iam"],
-        "prowler_args": ["--checks", "check-a"],
-    }

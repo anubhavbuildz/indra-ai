@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends
 
 from app.core.config import Settings, get_settings
 from app.schemas.aws import AWSIdentityResponse
-from app.services.aws_service import AWSService
+from app.services.aws.aws_service import AWSService
 
 router = APIRouter(prefix="/aws", tags=["aws"])
 

@@ -2,6 +2,7 @@
 
 import json
 import logging
+from collections.abc import Sequence
 from typing import TYPE_CHECKING, Self, cast
 
 from openai import (
@@ -12,7 +13,11 @@ from openai import (
     AuthenticationError,
     RateLimitError,
 )
-from openai.types.chat import ChatCompletionMessageParam, ChatCompletionToolUnionParam
+from openai.types.chat import (
+    ChatCompletionMessageFunctionToolCall,
+    ChatCompletionMessageParam,
+    ChatCompletionToolUnionParam,
+)
 
 from app.core.config import Settings
 from app.core.errors import AppError
@@ -55,6 +60,10 @@ class BaseLLM:
                 "provider_format_unsupported",
                 "The configured NVIDIA API format is not supported by this adapter.",
             )
+
+    def ensure_configured(self) -> None:
+        """Validate inference settings without creating a provider client."""
+        self._ensure_configured()
 
     @property
     def client(self) -> AsyncOpenAI:
@@ -199,6 +208,80 @@ class BaseLLM:
                 502, "provider_invalid_response", "The inference provider response was invalid."
             )
         return arguments
+
+    async def request_tool_calls(
+        self,
+        message: str,
+        tools: Sequence[ChatCompletionToolUnionParam],
+        history: list[dict[str, str]] | None = None,
+        *,
+        system_prompt: str | None = None,
+    ) -> list[ChatCompletionMessageFunctionToolCall]:
+        """Ask the provider to select one or more supplied tools for the request."""
+        messages: list[ChatCompletionMessageParam] = []
+        if system_prompt:
+            messages.append({"role": "system", "content": system_prompt})
+        for item in history or []:
+            role = item.get("role")
+            content = item.get("content")
+            if role not in {"user", "assistant"} or not isinstance(content, str):
+                raise AppError(422, "invalid_conversation", "Conversation history is invalid.")
+            messages.append(cast(ChatCompletionMessageParam, {"role": role, "content": content}))
+        messages.append(
+            {
+                "role": "user",
+                "content": [{"type": "text", "text": message}],
+            }
+        )
+
+        try:
+            response = await self.client.chat.completions.create(
+                model=self.settings.nvidia_model,
+                messages=messages,
+                temperature=0,
+                max_completion_tokens=128,
+                tools=tools,
+                tool_choice="auto",
+                parallel_tool_calls=False,
+            )
+        except APITimeoutError as exc:
+            raise AppError(504, "provider_timeout", "The inference provider timed out.") from exc
+        except AuthenticationError as exc:
+            raise AppError(
+                502, "provider_auth_error", "The inference provider rejected its credentials."
+            ) from exc
+        except RateLimitError as exc:
+            raise AppError(
+                503,
+                "provider_rate_limited",
+                "The inference provider is rate limiting requests.",
+            ) from exc
+        except APIConnectionError as exc:
+            raise AppError(
+                502, "provider_unavailable", "The inference provider is unavailable."
+            ) from exc
+        except APIStatusError as exc:
+            logger.warning("Inference provider returned status=%s.", exc.status_code)
+            raise AppError(
+                502, "provider_error", "The inference provider returned an error."
+            ) from exc
+
+        try:
+            tool_calls = response.choices[0].message.tool_calls
+        except (AttributeError, IndexError, TypeError) as exc:
+            raise AppError(
+                502, "provider_invalid_response", "The inference provider response was invalid."
+            ) from exc
+        if not tool_calls:
+            raise AppError(
+                502, "provider_invalid_response", "The inference provider response was invalid."
+            )
+        function_calls = [call for call in tool_calls if call.type == "function"]
+        if len(function_calls) != len(tool_calls):
+            raise AppError(
+                502, "provider_invalid_response", "The inference provider response was invalid."
+            )
+        return function_calls
 
     async def close(self) -> None:
         """Close the shared async client if it was initialized."""

@@ -1,95 +1,163 @@
-# Indra Backend
+# Indra AI Backend
 
-Indra is an AI-assisted AWS security assessment backend. It runs the
-operator-installed Prowler CLI against the configured AWS credential chain,
-reads JSON-OCSF findings, and asks a configured Prowler agent to summarize
-them against retrieved guidance. In parallel, a compliance agent assesses the
-scan findings against the same guidance. A senior agent reviews both
-assessments. It does not generate or execute Terraform and does not provide a
-frontend.
+Indra is a FastAPI backend for read-only AWS security audits and AI-assisted
+review. A Cloud agent uses the configured Nebius model to select audit
+functions from a fixed allowlist, executes those functions through Boto3, and
+returns a typed audit report. Compliance summarizes the report, then Senior
+reviews the report and summary. Each agent result is returned in its own API
+field.
 
-> Prowler results are point-in-time decision support. They are not a security
-> certification or a guarantee that an AWS account is secure.
+The backend also provides project metadata endpoints, an optional AWS caller
+identity check, and a standalone local retrieval API. RAG is not currently part
+of the chat-agent workflow.
 
-## V1 features and limitations
+## Current capabilities
 
-- FastAPI API with safe errors, request IDs, and request-size limits.
-- SQLAlchemy project/operation persistence, SQLite by default, and Alembic.
-- Optional NVIDIA inference through an explicitly configured OpenAI-compatible
-  endpoint, model, key, and API format.
-- Prowler CLI scans use the configured AWS credential chain. Requests can set
-  the region, service subset, and additional Prowler CLI argument tokens. The
-  backend invokes the executable without a shell; requests cannot provide
-  shell commands or AWS credentials.
-- JSON-OCSF reports are read from a server-created temporary directory and
-  returned with agent assessments; reports are not persisted.
-- Local FAISS retrieval with trusted local metadata.
-- Optional AWS caller identity via the standard AWS credential chain.
+- **AWS audit:** Read-only checks for S3, IAM, EC2/EBS, VPC, RDS, CloudTrail,
+  and GuardDuty.
+- **LLM tool selection:** Cloud interprets the user's request and selects
+  applicable audit functions from a fixed allowlist. Tool arguments are
+  validated, and regional tools always use `AWS_REGION`.
+- **Sequential review:** Cloud audit → Compliance summary → Senior review.
+- **Structured output:** The chat API returns the audit report and each
+  downstream agent's response separately.
+- **Local retrieval API:** Ingest authorized Markdown/text into a local FAISS
+  index and query it independently. Retrieval is not yet connected to chat.
+- **Project metadata:** Create, list, read, and update projects using
+  SQLAlchemy.
+- **AWS identity:** Optional STS caller identity lookup through the standard
+  AWS credential chain.
+- **Persistence:** SQLite by default, with PostgreSQL-compatible database URLs.
+- **Health endpoints:** Process health and basic local readiness status.
 
-This scaffold has no authentication, authorization, tenant isolation, or
-complete audit system. It is not a production cloud control plane.
+This project is a decision-support scaffold, not a cloud control plane. It does
+not apply AWS changes, certify compliance, or guarantee security.
 
 ## Architecture
 
 ```mermaid
 flowchart LR
-  Client --> FastAPI
-  FastAPI --> ProwlerAgent
-  ProwlerAgent --> Scanner[Prowler scanner tool]
-  Scanner --> CLI[Prowler AWS CLI]
-  CLI --> AWS[AWS read-only checks via credential chain]
-  CLI --> Findings[JSON-OCSF findings]
-  Findings --> ProwlerReview[Prowler agent review]
-  Findings --> Compliance[Evidence-based compliance review]
-  RAG[FAISS guidance retrieval] --> ProwlerReview
-  RAG --> Compliance
-  ProwlerReview --> Senior[Senior reviewer]
-  Compliance --> Senior
-  Senior --> Response[Final review + findings]
-  FastAPI --> Database[(SQLite / PostgreSQL)]
-  ProwlerReview --> NVIDIA[Optional configured inference]
-  Compliance --> NVIDIA
-  Senior --> NVIDIA
+    User[Client] --> API[FastAPI]
+    API --> Chat[Chat workflow]
+    Chat --> Cloud[Cloud agent]
+    Cloud --> Nebius[Nebius Token Factory]
+    Nebius -->|read-only tool selections| Cloud
+    Cloud --> Audit[Boto3 audit functions]
+    Audit --> AWS[AWS APIs via standard credential chain]
+    Audit --> Report[Validated audit report]
+    Report --> Compliance[Compliance summarizer]
+    Compliance --> Nebius
+    Compliance --> Senior[Senior reviewer]
+    Report --> Senior
+    Senior --> Nebius
+    Report --> Response[Separate API response fields]
+    Compliance --> Response
+    Senior --> Response
+    API --> Projects[Project service]
+    Projects --> DB[(SQLite / PostgreSQL)]
+    API --> Retrieval[Standalone RAG API]
+    Retrieval --> FAISS[Local FAISS index + trusted metadata]
+    API --> STS[Optional AWS STS identity lookup]
 ```
 
-## Scan workflow
+### Chat request lifecycle
 
-`POST /api/v1/prowler/scan` and `POST /api/v1/chat` start a fresh scan. The
-request may include `region`, `services`, and `prowler_args`; omitted region
-uses `AWS_REGION`, and omitted services use Prowler's default scope. Additional
-arguments are passed as individual CLI tokens and cannot override options
-managed by the scanner.
+1. The API validates a bounded user message and optional conversation history.
+2. Cloud sends the request to the configured model with the available audit
+   functions. The model can select only the exposed functions; it cannot choose
+   arbitrary AWS operations, pass resource arguments, or choose other regions.
+3. The application executes selected functions through the local Boto3 auditor.
+   S3 and IAM checks are global; EC2, VPC, and RDS checks use `AWS_REGION`.
+4. The tool results are validated as an `AuditReport`.
+5. Compliance creates a short summary grounded in that report.
+6. Senior reviews the audit report and Compliance summary.
+7. The API returns each result independently. `sources` is currently empty
+   because RAG has not been integrated into this workflow.
 
-The `ProwlerAgent` calls the scanner tool, which invokes the Prowler AWS CLI
-with `shell=False`, the standard AWS credential chain, a timeout, and report
-size/count limits. It parses the JSON-OCSF output and removes the temporary
-report directory after the scan. The workflow retrieves local guidance, then
-runs the Prowler review and evidence-based compliance review concurrently
-using the findings and retrieved sources. The senior agent reviews both
-assessments and returns the final response. API responses include the agent
-assessments, operation ID, region, findings, finding count, and source
-references. No AWS resources are modified by these routes.
+If the user requests a broad audit, Cloud may select all applicable audit
+functions. A service-specific request may result in only matching checks.
+Findings are point-in-time observations; the absence of a finding is not a
+guarantee that a resource is secure.
 
-## Technology and prerequisites
+### Checks included
 
-Python 3.12+, FastAPI, Uvicorn, Pydantic v2/settings, SQLAlchemy 2.x, Alembic,
-FAISS, httpx, Boto3, pytest, pytest-cov, Ruff, and the Prowler CLI.
+| Service | Current checks |
+| --- | --- |
+| S3 | Public access block, public bucket policy/ACL, default encryption, versioning, TLS enforcement, and server access logging |
+| IAM | Presence of root-account access keys |
+| EC2 / EBS | IPv4/IPv6 world-open security-group ingress, public IPs on running instances, unencrypted volumes, EBS default encryption, and public snapshots |
+| VPC | Default VPCs and VPC Flow Logs |
+| RDS | Public accessibility, storage encryption, Multi-AZ, instance/cluster backup retention and deletion protection, and public manual instance/cluster snapshots |
+| CloudTrail | Multi-region trail coverage, active logging, log-file validation, and log bucket public-access-block/encryption configuration across enabled regions |
+| GuardDuty | Detector presence and enabled status in the configured region |
 
-- Install Prowler separately in an isolated environment (for example, with
-  `pipx`) and ensure its executable is on `PATH`, or set `PROWLER_BIN` to its
-  executable path. Do not install its dependencies into Indra's Python
-  environment.
-- Configure AWS credentials using the standard AWS credential chain (for
-  example, an AWS profile or workload role). The API does not accept AWS
-  access keys in requests.
-- Use a dedicated non-root IAM user or role for scans; do not run Prowler with
-  AWS root-account credentials. Grant only the read permissions required for
-  the services you intend to assess, following Prowler's current AWS setup
-  guidance.
-- Configure NVIDIA inference only if summaries are required. Health, local
-  project operations, and RAG can run without NVIDIA or AWS credentials.
+The checks are intentionally read-only. Some permission or service errors are
+returned as audit findings; the caller's AWS identity must have the read
+permissions needed for the selected checks.
 
-## Install and run locally
+CloudTrail region discovery depends on `ec2:DescribeRegions`; regional trail,
+GuardDuty, RDS, and EC2 checks also require their corresponding read
+permissions. Findings include a `check_id` and may include check-specific
+`evidence`. Missing permissions are represented as audit errors rather than
+being treated as a successful check.
+
+## API overview
+
+The API prefix defaults to `/api/v1`. In development, interactive API
+documentation is available at `/docs` and `/redoc`.
+
+| Method | Path | Description |
+| --- | --- | --- |
+| `GET` | `/health` | Process health; does not call AWS or the model |
+| `GET` | `/ready` | Basic database and local retrieval-index readiness |
+| `POST` | `/api/v1/chat` | Sequential AWS audit and three-agent review |
+| `GET`, `POST` | `/api/v1/projects` | List or create project metadata |
+| `GET`, `PATCH` | `/api/v1/projects/{project_id}` | Read or update project metadata |
+| `GET` | `/api/v1/aws/identity` | Read-only STS caller identity lookup |
+| `GET` | `/api/v1/rag/status` | Local retrieval index status |
+| `POST` | `/api/v1/rag/query` | Query local retrieval passages |
+
+Example chat request:
+
+```json
+{
+  "message": "Check my AWS account for critical security issues.",
+  "history": []
+}
+```
+
+The response includes:
+
+```json
+{
+  "cloud_agent_response": {
+    "audited_regions": ["us-east-1"],
+    "audited_services": ["s3", "iam", "ec2", "vpc", "rds"],
+    "total_issues": 0,
+    "critical_count": 0,
+    "high_count": 0,
+    "medium_count": 0,
+    "low_count": 0,
+    "findings": []
+  },
+  "compliance_agent_response": "Compliance summary...",
+  "senior_agent_response": "Senior review...",
+  "sources": [],
+  "operation_id": "generated-operation-id",
+  "status": "completed"
+}
+```
+
+The report above is an example shape only; actual selected services and
+findings depend on the request and the live AWS account. Errors use the API's
+structured error response and do not include submitted credentials.
+
+## Requirements and setup
+
+- Python 3.12 or newer
+- AWS credentials configured through the Boto3 standard credential chain for
+  chat audits and the identity endpoint
+- A Nebius Token Factory API key for chat inference
 
 From the repository root:
 
@@ -99,82 +167,144 @@ source .venv/bin/activate
 python -m pip install --upgrade pip
 python -m pip install -e '.[dev]'
 cp .env.example .env
+```
+
+Set `NVIDIA_API_KEY` in `.env`. The configured default model and endpoint are
+`nvidia/Nemotron-3_5-Lightning` and
+`https://api.tokenfactory.nebius.com/v1`. The project uses the
+OpenAI-compatible Chat Completions format. Do not commit `.env` or share its
+contents.
+
+AWS credentials are not accepted in API request bodies. Configure an
+appropriately scoped IAM role/profile or other standard Boto3 credential
+source, and grant only the read permissions required by the checks. Avoid
+using AWS root credentials.
+
+Run locally:
+
+```bash
 uvicorn app.main:app --reload
 ```
 
-The API starts without Prowler, NVIDIA, or AWS credentials. Health is
-available at `http://127.0.0.1:8000/health`; development docs are at
-`http://127.0.0.1:8000/docs`.
+The app initializes the configured database schema on startup. Alembic
+migrations are available for database-managed deployments:
 
-For database-managed deployments, run `alembic upgrade head` before starting
-the app. SQLite uses `data/indra.db`; PostgreSQL-compatible `DATABASE_URL`
-values are supported. Install the optional PostgreSQL driver with
-`python -m pip install -e '.[postgres]'`.
+```bash
+alembic upgrade head
+```
+
+SQLite is the default. For PostgreSQL, set `DATABASE_URL` and install the
+optional driver:
+
+```bash
+python -m pip install -e '.[postgres]'
+```
 
 ## Configuration
 
-Copy `.env.example` to `.env` and set only values you have verified.
+All settings can be supplied as environment variables or through `.env`.
+Defaults are defined in `app/core/config.py`; `.env.example` is the template.
 
 | Variable | Default | Purpose |
 | --- | --- | --- |
-| `APP_NAME` | `Indra API` | Service title |
-| `APP_ENV` | `development` | Enables docs only in development |
+| `APP_NAME` | `Indra API` | API service name |
+| `APP_ENV` | `development` | Enables `/docs` and `/redoc` in development |
+| `DEBUG` | `false` | FastAPI debug setting |
 | `API_V1_PREFIX` | `/api/v1` | Versioned API prefix |
-| `DATABASE_URL` | `sqlite:///./data/indra.db` | SQLAlchemy URL |
-| `NVIDIA_BASE_URL` | empty | Full provider endpoint; no path is guessed |
-| `NVIDIA_API_KEY` | empty | Provider credential; never returned or logged |
-| `NVIDIA_MODEL` | empty | Exact model identifier selected by maintainer |
-| `NVIDIA_API_FORMAT` | empty | Explicitly opt into a confirmed adapter format |
-| `PROWLER_BIN` | `prowler` | Prowler executable name or path |
-| `PROWLER_TIMEOUT_SECONDS` | `900` | Maximum scan duration (1–3600 seconds) |
-| `AWS_REGION` | `us-east-1` | Region scanned by Prowler and AWS identity lookup |
-| `CORS_ORIGINS` | empty | Comma-separated explicit origins |
+| `DATABASE_URL` | `sqlite:///./data/indra.db` | SQLAlchemy database URL |
+| `NVIDIA_BASE_URL` | `https://api.tokenfactory.nebius.com/v1` | OpenAI-compatible Nebius endpoint |
+| `NVIDIA_API_KEY` | empty | Nebius credential; required for model calls |
+| `NVIDIA_MODEL` | `nvidia/Nemotron-3_5-Lightning` | Inference model |
+| `NVIDIA_API_FORMAT` | `openai-chat-completions` | Supported provider adapter |
+| `AWS_REGION` | `us-east-1` | Regional AWS audit and identity lookup region |
+| `EMBEDDING_MODEL` | `local-feature-hash-v1` | Local deterministic retrieval embedding |
+| `FAISS_INDEX_PATH` | `./faiss_store/index.faiss` | Local FAISS index |
+| `FAISS_METADATA_PATH` | `./faiss_store/metadata.pkl` | Trusted local index metadata |
+| `KNOWLEDGE_BASE_PATH` | `./knowledge_base` | Default local document directory |
+| `CORS_ORIGINS` | empty | Comma-separated allowed browser origins |
+| `MAX_REQUEST_BYTES` | `1048576` | Maximum HTTP request body size |
 
-Only `openai-chat-completions` is implemented for NVIDIA inference. Set
-`NVIDIA_API_FORMAT` only after verifying the selected model supports that
-request/response format. No provider endpoint or model is inferred.
+The local embedding is deterministic feature hashing, not a semantic embedding
+model. It requires no model download.
 
-## RAG ingestion and trust
+## Local retrieval (standalone)
 
-Put authorized UTF-8 Markdown or text documents in `knowledge_base/`, then run:
+RAG endpoints work separately from chat. Place authorized UTF-8 `.md` or `.txt`
+documents in `knowledge_base/`, then build the local index:
 
 ```bash
 python scripts/ingest_documents.py
+```
+
+Or choose a different authorized source directory:
+
+```bash
 python scripts/ingest_documents.py --source-dir /path/to/authorized-docs
 ```
 
-The ingester downloads nothing. Retrieval metadata preserves supplied
-attribution and leaves unknown source details empty. Deploy `index.faiss` and
-`metadata.pkl` as a matching pair. Pickle is trusted, locally generated
-metadata: never load a user-supplied pickle.
+The ingestion script downloads no documents. It creates a matching FAISS index
+and metadata file. The metadata is a locally generated pickle file and must be
+treated as trusted input; never load a user-supplied pickle.
 
-## Security boundaries
+## Development and validation
 
-- There is no authentication, authorization, tenant isolation, or complete
-  audit workflow. Project IDs are not authorization tokens.
-- AWS credentials remain in the standard credential chain and are not
-  accepted through API requests or written to logs.
-- The CLI receives a Prowler AWS command assembled from fixed scanner options
-  and optional Prowler argument tokens. It runs without a shell in a restricted
-  environment. Its JSON report is limited to 5 MB and 5,000 findings.
-- Prompts treat report contents as untrusted data. The agent only summarizes
-  findings; it cannot apply remediations or change AWS resources.
-- Ensure the AWS identity used by Prowler is appropriate for read-only
-  assessment and is not the AWS root identity. Scan results and summaries may
-  contain sensitive resource identifiers; protect API access and logs
-  accordingly.
-
-## Tests, lint, and formatting
+Install development dependencies with `python -m pip install -e '.[dev]'`.
 
 ```bash
+pytest
 pytest --cov=app --cov-report=term-missing
 ruff check .
 ruff format --check .
+python -m compileall -q app tests
 ```
 
-Shortcuts are available with `make test`, `make lint`, and `make format`.
-Tests use mocked CLI/provider responses and do not require live cloud
-credentials.
+Convenience targets are available:
 
-See [architecture](docs/architecture.md), [API overview](docs/api.md),
-[security notes](docs/security.md), and [CONTRIBUTING.md](CONTRIBUTING.md).
+```bash
+make test
+make lint
+make format
+make ingest
+```
+
+The normal test suite uses mocked AWS and provider responses and does not
+require live credentials. Live integration checks require configured Nebius
+and AWS credentials and can incur provider/AWS usage. Confirm your target
+account and permissions before running them.
+
+## Security and limitations
+
+- There is no authentication, authorization, tenant isolation, or complete
+  audit trail. Project IDs are references, not access controls.
+- AWS requests use the server's standard Boto3 credential chain. Do not run
+  with privileged/root credentials.
+- Chat only performs the configured allowlisted read-only checks; it does not
+  remediate findings or assess every AWS service or control.
+- Compliance and Senior outputs are model-generated decision support, not
+  formal compliance mappings, legal advice, certification, or a security
+  guarantee.
+- Chat does not yet use local RAG; the response `sources` array is empty.
+- RAG's pickle metadata is trusted local data and must not be replaced with
+  untrusted files.
+
+## Project layout
+
+```text
+app/
+  api/                 FastAPI routes and router registration
+  core/                Settings, error handling, logging, middleware
+  db/                  SQLAlchemy session and models
+  schemas/             Request, response, and audit Pydantic schemas
+  services/
+    aws/               AWS identity service
+    llm/               Cloud, Compliance, Senior agents and workflow
+    providers/         Provider adapters
+    rag_service.py     Local FAISS retrieval and index construction
+  tools/audit/         Direct Boto3 audit functions
+scripts/               Local retrieval ingestion and environment checks
+tests/                 API, service, audit, and workflow tests
+docs/                  API, architecture, and security notes
+```
+
+More detail: [API overview](docs/api.md), [architecture](docs/architecture.md),
+[security notes](docs/security.md), and [contribution guide](CONTRIBUTING.md).

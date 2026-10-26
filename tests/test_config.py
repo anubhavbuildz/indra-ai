@@ -9,10 +9,10 @@ def test_defaults_allow_startup_without_provider_credentials():
     assert settings.app_name == "Indra API"
     assert settings.database_url == "sqlite:///./data/indra.db"
     assert not settings.nvidia_api_key
-    assert not settings.nvidia_base_url
-    assert not settings.nvidia_model
-    assert settings.prowler_bin == "prowler"
-    assert settings.prowler_timeout_seconds == 900
+    assert settings.nvidia_base_url == "https://api.tokenfactory.nebius.com/v1"
+    assert settings.nvidia_model == "nvidia/Nemotron-3_5-Lightning"
+    assert settings.nvidia_api_format == "openai-chat-completions"
+    assert not settings.integrations_ready["nvidia"]
 
 
 def test_credentials_are_not_in_settings_repr():

@@ -3,54 +3,75 @@
 ```mermaid
 flowchart LR
     Client --> FastAPI
-    FastAPI --> ProwlerService
-    ProwlerService --> CLI[Prowler AWS CLI]
-    CLI --> AWS[AWS read-only checks]
-    ProwlerService --> JSON[Temporary JSON-OCSF report]
-    JSON --> Agent[ProwlerAgent]
-    Agent --> Compliance[ComplianceAgent + RAG sources]
-    Agent --> Senior[SeniorAgent]
+    FastAPI --> Chat[Sequential chat workflow]
+    Chat --> Cloud[Cloud tool-selection agent]
+    Cloud --> Nebius[Nebius Token Factory]
+    Nebius -->|allowlisted function calls| Cloud
+    Cloud --> Auditor[Read-only Boto3 audit functions]
+    Auditor --> AWS[AWS APIs via standard credential chain]
+    Auditor --> Report[Validated AuditReport]
+    Report --> Compliance[Compliance summary]
+    Compliance --> Nebius
+    Report --> Senior[Senior review]
     Compliance --> Senior
-    Senior --> Result[Final review + findings]
-    FastAPI --> DB[(SQLAlchemy database)]
-    Agent --> NVIDIA[Optional configured inference]
-    FastAPI --> FAISS[Local FAISS index + trusted metadata]
+    Senior --> Nebius
+    Report --> ChatResponse[Separate chat response fields]
+    Compliance --> ChatResponse
+    Senior --> ChatResponse
+    FastAPI --> Projects[Project service]
+    Projects --> DB[(SQLite or PostgreSQL)]
+    FastAPI --> RAG[Standalone retrieval API]
+    RAG --> FAISS[Local FAISS index and trusted metadata]
+    FastAPI --> STS[Optional AWS identity lookup]
 ```
 
-The application is a single FastAPI process. Routes validate requests and
-inject settings; services own subprocess, provider, persistence, and retrieval
-boundaries. SQLAlchemy supports SQLite for local development and compatible
-PostgreSQL URLs. Alembic manages schema migrations.
+The application is a FastAPI service. Routes validate input and inject
+settings; service modules own provider, AWS, persistence, and retrieval
+boundaries. SQLAlchemy uses SQLite by default and supports PostgreSQL-compatible
+URLs. Alembic migrations are available for managed deployments.
 
-`ProwlerService` invokes only the configured executable with a fixed AWS scan
-command, JSON-OCSF output, configured region, `shell=False`, a restricted
-environment, and a timeout. The report lives in a server-created temporary
-directory, is size/count-checked, parsed, then removed with the directory.
-Prowler findings are passed to `ProwlerAgent`, which returns a prioritized
-summary without claiming remediation or certification. The agent batches all
-findings to fit its configured input limit, then consolidates summaries when
-multiple batches are required. `ComplianceAgent` assesses that summary against
-retrieved knowledge-base passages. `SeniorAgent` reviews the Prowler summary,
-compliance assessment, and supplied passages, identifying agreement,
-disagreement, and uncertainty without inventing evidence. The API returns all
-three assessments and the original parsed findings.
+## Chat workflow
 
-Both `POST /api/v1/prowler/scan` and `POST /api/v1/chat` initiate a fresh scan
-of `AWS_REGION`. Chat also forwards the user's question and bounded history to
-the agent. Scan routes require the Prowler executable, AWS credential-chain
-configuration, and configured NVIDIA inference. The rest of the app does not
-require those integrations to start.
+`POST /api/v1/chat` runs these stages sequentially:
 
-Prowler's report content is untrusted input. The agent is instructed to ignore
-embedded instructions and ground explanations only in report data. The
-configured AWS identity should be limited to the read-only permissions needed
-for assessment. No scan route changes AWS resources.
+1. **CloudAgent** sends the user's request and a fixed allowlist of read-only
+   audit functions to the configured OpenAI-compatible model. It accepts only
+   function calls from that allowlist with empty arguments.
+2. The application executes the selected functions through `AWSAuditor`.
+   S3 and IAM checks are global; EC2, VPC, RDS, and GuardDuty checks use
+   `AWS_REGION`; CloudTrail checks discover enabled regions. AWS credentials
+   come from the standard Boto3 credential chain.
+3. Results are validated against the Pydantic `AuditReport` schema.
+4. **ComplianceAgent** creates a short summary using the report and user
+   request.
+5. **SeniorAgent** reviews the same report and Compliance summary.
+6. The API returns the structured report, Compliance summary, and Senior
+   review in distinct fields. The response `sources` list is empty; local RAG
+   has not been integrated into chat.
 
-The default embedding is local deterministic feature hashing, which produces
-384-dimensional normalized lexical vectors and requires no downloaded model.
-It is not a semantic model. NVIDIA inference is gated on an explicit endpoint,
-model identifier, key, and confirmed API-format setting.
+Checks include S3 public policy/ACL, TLS, versioning, and logging; IPv4/IPv6
+public security-group ingress; CloudTrail logging and log-bucket protection;
+GuardDuty detector status; EBS volume/default encryption and public snapshots;
+and RDS instance/cluster backup, deletion-protection, and public snapshot checks.
+They do not modify resources and are not a comprehensive assessment of every
+AWS service or control.
 
-There is no authentication or authorization implementation in this scaffold.
-Project identifiers are references, not access controls. Protect access to
-scan results because they may contain sensitive resource identifiers.
+## Other services
+
+- **AWS identity:** `GET /api/v1/aws/identity` calls STS
+  `GetCallerIdentity` using the standard credential chain.
+- **Projects:** CRUD-like metadata endpoints persist through SQLAlchemy.
+- **RAG:** Separate status/query endpoints use a local FAISS index and
+  locally generated metadata. The default embedding implementation is
+  deterministic feature hashing, not a semantic model. The index is built
+  from authorized local Markdown and text documents.
+- **Health:** `/health` reports process status. `/ready` reports basic
+  database/index configuration and does not test live AWS or model access.
+
+## Provider configuration
+
+Inference defaults to Nebius Token Factory at
+`https://api.tokenfactory.nebius.com/v1` using model
+`nvidia/Nemotron-3_5-Lightning` and the OpenAI Chat Completions adapter. A
+configured `NVIDIA_API_KEY` is required for the Cloud, Compliance, and Senior
+LLM calls.
