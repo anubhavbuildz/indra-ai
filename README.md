@@ -7,9 +7,9 @@ returns a typed audit report. Compliance summarizes the report, then Senior
 reviews the report and summary. Each agent result is returned in its own API
 field.
 
-The backend also provides project metadata endpoints, an optional AWS caller
-identity check, and a standalone local retrieval API. RAG is not currently part
-of the chat-agent workflow.
+The backend also provides persisted assessment history, an optional AWS caller
+identity check, and environment-configured JWT login. Retrieval/RAG is
+temporarily out of scope and will be added separately.
 
 ## Current capabilities
 
@@ -21,10 +21,10 @@ of the chat-agent workflow.
 - **Sequential review:** Cloud audit → Compliance summary → Senior review.
 - **Structured output:** The chat API returns the audit report and each
   downstream agent's response separately.
-- **Local retrieval API:** Ingest authorized Markdown/text into a local FAISS
-  index and query it independently. Retrieval is not yet connected to chat.
-- **Project metadata:** Create, list, read, and update projects using
-  SQLAlchemy.
+- **Assessment history:** Each completed chat audit is saved as an Assessment,
+  including the structured audit report and Senior Reviewer output.
+- **Authentication:** Issue short-lived JWTs for one environment-configured
+  login account; existing API routes do not yet enforce tokens.
 - **AWS identity:** Optional STS caller identity lookup through the standard
   AWS credential chain.
 - **Persistence:** SQLite by default, with PostgreSQL-compatible database URLs.
@@ -53,10 +53,8 @@ flowchart LR
     Report --> Response[Separate API response fields]
     Compliance --> Response
     Senior --> Response
-    API --> Projects[Project service]
-    Projects --> DB[(SQLite / PostgreSQL)]
-    API --> Retrieval[Standalone RAG API]
-    Retrieval --> FAISS[Local FAISS index + trusted metadata]
+    API --> Assessments[Assessment persistence]
+    Assessments --> DB[(SQLite / PostgreSQL)]
     API --> STS[Optional AWS STS identity lookup]
 ```
 
@@ -72,7 +70,7 @@ flowchart LR
 5. Compliance creates a short summary grounded in that report.
 6. Senior reviews the audit report and Compliance summary.
 7. The API returns each result independently. `sources` is currently empty
-   because RAG has not been integrated into this workflow.
+   because retrieval is not included in this version.
 
 If the user requests a broad audit, Cloud may select all applicable audit
 functions. A service-specific request may result in only matching checks.
@@ -109,13 +107,12 @@ documentation is available at `/docs` and `/redoc`.
 | Method | Path | Description |
 | --- | --- | --- |
 | `GET` | `/health` | Process health; does not call AWS or the model |
-| `GET` | `/ready` | Basic database and local retrieval-index readiness |
+| `GET` | `/ready` | Basic database readiness configuration |
+| `POST` | `/api/v1/auth/login` | Issue a short-lived JWT for the configured environment account |
 | `POST` | `/api/v1/chat` | Sequential AWS audit and three-agent review |
-| `GET`, `POST` | `/api/v1/projects` | List or create project metadata |
-| `GET`, `PATCH` | `/api/v1/projects/{project_id}` | Read or update project metadata |
+| `GET` | `/api/v1/assessments` | List persisted audit assessments |
+| `GET` | `/api/v1/assessments/{assessment_id}` | Read audit and reviewer output |
 | `GET` | `/api/v1/aws/identity` | Read-only STS caller identity lookup |
-| `GET` | `/api/v1/rag/status` | Local retrieval index status |
-| `POST` | `/api/v1/rag/query` | Query local retrieval passages |
 
 Example chat request:
 
@@ -143,7 +140,7 @@ The response includes:
   "compliance_agent_response": "Compliance summary...",
   "senior_agent_response": "Senior review...",
   "sources": [],
-  "operation_id": "generated-operation-id",
+  "assessment_id": "persisted-assessment-id",
   "status": "completed"
 }
 ```
@@ -212,39 +209,16 @@ Defaults are defined in `app/core/config.py`; `.env.example` is the template.
 | `DEBUG` | `false` | FastAPI debug setting |
 | `API_V1_PREFIX` | `/api/v1` | Versioned API prefix |
 | `DATABASE_URL` | `sqlite:///./data/indra.db` | SQLAlchemy database URL |
+| `AUTH_USERNAME` | empty | Optional single-account login username |
+| `AUTH_PASSWORD` | empty | Optional single-account login password |
+| `JWT_SECRET_KEY` | empty | JWT signing key, at least 32 bytes when configured |
 | `NVIDIA_BASE_URL` | `https://api.tokenfactory.nebius.com/v1` | OpenAI-compatible Nebius endpoint |
 | `NVIDIA_API_KEY` | empty | Nebius credential; required for model calls |
 | `NVIDIA_MODEL` | `nvidia/Nemotron-3_5-Lightning` | Inference model |
 | `NVIDIA_API_FORMAT` | `openai-chat-completions` | Supported provider adapter |
 | `AWS_REGION` | `us-east-1` | Regional AWS audit and identity lookup region |
-| `EMBEDDING_MODEL` | `local-feature-hash-v1` | Local deterministic retrieval embedding |
-| `FAISS_INDEX_PATH` | `./faiss_store/index.faiss` | Local FAISS index |
-| `FAISS_METADATA_PATH` | `./faiss_store/metadata.pkl` | Trusted local index metadata |
-| `KNOWLEDGE_BASE_PATH` | `./knowledge_base` | Default local document directory |
 | `CORS_ORIGINS` | empty | Comma-separated allowed browser origins |
 | `MAX_REQUEST_BYTES` | `1048576` | Maximum HTTP request body size |
-
-The local embedding is deterministic feature hashing, not a semantic embedding
-model. It requires no model download.
-
-## Local retrieval (standalone)
-
-RAG endpoints work separately from chat. Place authorized UTF-8 `.md` or `.txt`
-documents in `knowledge_base/`, then build the local index:
-
-```bash
-python scripts/ingest_documents.py
-```
-
-Or choose a different authorized source directory:
-
-```bash
-python scripts/ingest_documents.py --source-dir /path/to/authorized-docs
-```
-
-The ingestion script downloads no documents. It creates a matching FAISS index
-and metadata file. The metadata is a locally generated pickle file and must be
-treated as trusted input; never load a user-supplied pickle.
 
 ## Development and validation
 
@@ -264,7 +238,6 @@ Convenience targets are available:
 make test
 make lint
 make format
-make ingest
 ```
 
 The normal test suite uses mocked AWS and provider responses and does not
@@ -274,8 +247,13 @@ account and permissions before running them.
 
 ## Security and limitations
 
-- There is no authentication, authorization, tenant isolation, or complete
-  audit trail. Project IDs are references, not access controls.
+- Login can issue a JWT for a single environment-configured account, but
+  existing routes do not yet require or validate it. There is no authorization,
+  tenant isolation, or complete audit trail. Assessment IDs are references,
+  not access controls.
+- The environment-backed login is a bootstrap mechanism, not a full identity
+  system; it does not include user management, password reset, rate limiting,
+  or account lockout. Deploy behind HTTPS and use secret management.
 - AWS requests use the server's standard Boto3 credential chain. Do not run
   with privileged/root credentials.
 - Chat only performs the configured allowlisted read-only checks; it does not
@@ -283,9 +261,9 @@ account and permissions before running them.
 - Compliance and Senior outputs are model-generated decision support, not
   formal compliance mappings, legal advice, certification, or a security
   guarantee.
-- Chat does not yet use local RAG; the response `sources` array is empty.
-- RAG's pickle metadata is trusted local data and must not be replaced with
-  untrusted files.
+- Retrieval/RAG is not currently included. Chat returns an empty `sources`
+  array; a future RAG feature will need to add its own endpoints, ingestion,
+  validation, tests, and security controls.
 
 ## Project layout
 
@@ -299,11 +277,10 @@ app/
     aws/               AWS identity service
     llm/               Cloud, Compliance, Senior agents and workflow
     providers/         Provider adapters
-    rag_service.py     Local FAISS retrieval and index construction
   tools/audit/         Direct Boto3 audit functions
-scripts/               Local retrieval ingestion and environment checks
-tests/                 API, service, audit, and workflow tests
-docs/                  API, architecture, and security notes
+  scripts/               Local environment checks
+  tests/                 API, service, audit, and workflow tests
+  docs/                  API, architecture, and security notes
 ```
 
 More detail: [end-to-end project overview](docs/project-overview.md),

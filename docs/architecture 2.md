@@ -6,7 +6,6 @@ flowchart LR
     FastAPI --> Services
     Services --> SQLite[(SQLAlchemy database)]
     Services --> NVIDIA[Optional configured inference]
-    Services --> FAISS[Local FAISS index + trusted metadata]
     Services --> Terraform[Fixed Terraform operations]
     Services --> AWS[Optional default credential chain]
 ```
@@ -38,11 +37,9 @@ catch. A successful model response is therefore not evidence of syntactic
 validity, a successful Terraform validation, compliance, or deployability.
 Run Terraform checks in a controlled workspace before relying on generated HCL.
 
-The default embedding is local deterministic feature hashing, which produces
-384-dimensional normalized lexical vectors and requires no downloaded model.
-It is not a semantic model. NVIDIA inference uses the configured Nebius Token
+NVIDIA inference uses the configured Nebius Token
 Factory endpoint and `nvidia/Nemotron-3_5-Lightning` model by default. A valid
 `NVIDIA_API_KEY` is still required to enable inference.
 
 There is no authentication or authorization implementation in this
-scaffold. Project identifiers are references, not access controls.
+scaffold. Assessment identifiers are references, not access controls.

@@ -1,9 +1,8 @@
 """Typed application settings loaded from environment and optional .env file."""
 
 from functools import lru_cache
-from pathlib import Path
 
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -22,6 +21,9 @@ class Settings(BaseSettings):
     debug: bool = Field(default=False, validation_alias="DEBUG")
     api_v1_prefix: str = Field(default="/api/v1", validation_alias="API_V1_PREFIX")
     database_url: str = Field(default="sqlite:///./data/indra.db", validation_alias="DATABASE_URL")
+    auth_username: str = Field(default="", validation_alias="AUTH_USERNAME", repr=False)
+    auth_password: str = Field(default="", validation_alias="AUTH_PASSWORD", repr=False)
+    jwt_secret_key: str = Field(default="", validation_alias="JWT_SECRET_KEY", repr=False)
     nvidia_base_url: str = Field(
         default="https://api.tokenfactory.nebius.com/v1",
         validation_alias="NVIDIA_BASE_URL",
@@ -35,21 +37,17 @@ class Settings(BaseSettings):
         default="openai-chat-completions",
         validation_alias="NVIDIA_API_FORMAT",
     )
-    embedding_model: str = Field(
-        default="local-feature-hash-v1", validation_alias="EMBEDDING_MODEL"
-    )
-    faiss_index_path: Path = Field(
-        default=Path("./faiss_store/index.faiss"), validation_alias="FAISS_INDEX_PATH"
-    )
-    faiss_metadata_path: Path = Field(
-        default=Path("./faiss_store/metadata.pkl"), validation_alias="FAISS_METADATA_PATH"
-    )
-    knowledge_base_path: Path = Field(
-        default=Path("./knowledge_base"), validation_alias="KNOWLEDGE_BASE_PATH"
-    )
     aws_region: str = Field(default="us-east-1", validation_alias="AWS_REGION")
     cors_origins: str = Field(default="", validation_alias="CORS_ORIGINS")
     max_request_bytes: int = Field(default=1_048_576, ge=1_024, le=10_485_760)
+
+    @field_validator("jwt_secret_key")
+    @classmethod
+    def validate_jwt_secret_key(cls, value: str) -> str:
+        """Require a sufficiently strong key when JWT login is configured."""
+        if value and len(value.encode("utf-8")) < 32:
+            raise ValueError("JWT_SECRET_KEY must contain at least 32 bytes.")
+        return value
 
     @property
     def cors_origin_list(self) -> list[str]:
