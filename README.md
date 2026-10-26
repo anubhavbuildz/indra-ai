@@ -306,5 +306,6 @@ tests/                 API, service, audit, and workflow tests
 docs/                  API, architecture, and security notes
 ```
 
-More detail: [API overview](docs/api.md), [architecture](docs/architecture.md),
+More detail: [end-to-end project overview](docs/project-overview.md),
+[API overview](docs/api.md), [architecture](docs/architecture.md),
 [security notes](docs/security.md), and [contribution guide](CONTRIBUTING.md).
