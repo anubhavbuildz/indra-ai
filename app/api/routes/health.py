@@ -21,6 +21,4 @@ def ready(settings: Annotated[Settings, Depends(get_settings)]) -> dict[str, obj
     return {
         "status": "ready",
         "database_configured": bool(settings.database_url),
-        "rag_index_configured": settings.faiss_index_path.exists()
-        and settings.faiss_metadata_path.exists(),
     }

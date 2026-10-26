@@ -1,4 +1,4 @@
-.PHONY: install dev test lint format ingest
+.PHONY: install dev test lint format
 
 install:
 	python -m pip install -e '.[dev]'
@@ -14,6 +14,3 @@ lint:
 
 format:
 	ruff format .
-
-ingest:
-	python scripts/ingest_documents.py

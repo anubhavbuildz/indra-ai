@@ -7,17 +7,17 @@ from sqlalchemy import DateTime, ForeignKey, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
-from app.db.models.project import utc_now
+from app.db.models.assessment import utc_now
 
 
 class Operation(Base):
-    """Safe summary of a project operation; never stores credentials."""
+    """Infrastructure operation associated with an assessment."""
 
     __tablename__ = "operations"
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid4()))
-    project_id: Mapped[str] = mapped_column(
-        String(36), ForeignKey("projects.id", ondelete="CASCADE"), nullable=False
+    assessment_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("assessments.id", ondelete="CASCADE"), nullable=False
     )
     operation_type: Mapped[str] = mapped_column(String(40), nullable=False)
     status: Mapped[str] = mapped_column(String(32), nullable=False)

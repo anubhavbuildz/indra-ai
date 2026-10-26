@@ -18,16 +18,14 @@ flowchart LR
     Report --> ChatResponse[Separate chat response fields]
     Compliance --> ChatResponse
     Senior --> ChatResponse
-    FastAPI --> Projects[Project service]
-    Projects --> DB[(SQLite or PostgreSQL)]
-    FastAPI --> RAG[Standalone retrieval API]
-    RAG --> FAISS[Local FAISS index and trusted metadata]
+    FastAPI --> Assessments[Assessment persistence]
+    Assessments --> DB[(SQLite or PostgreSQL)]
     FastAPI --> STS[Optional AWS identity lookup]
 ```
 
 The application is a FastAPI service. Routes validate input and inject
-settings; service modules own provider, AWS, persistence, and retrieval
-boundaries. SQLAlchemy uses SQLite by default and supports PostgreSQL-compatible
+settings; service modules own provider, AWS, and persistence boundaries.
+SQLAlchemy uses SQLite by default and supports PostgreSQL-compatible
 URLs. Alembic migrations are available for managed deployments.
 
 ## Chat workflow
@@ -46,8 +44,8 @@ URLs. Alembic migrations are available for managed deployments.
    request.
 5. **SeniorAgent** reviews the same report and Compliance summary.
 6. The API returns the structured report, Compliance summary, and Senior
-   review in distinct fields. The response `sources` list is empty; local RAG
-   has not been integrated into chat.
+   review in distinct fields. Retrieval is not currently included and the
+   response `sources` list is empty.
 
 Checks include S3 public policy/ACL, TLS, versioning, and logging; IPv4/IPv6
 public security-group ingress; CloudTrail logging and log-bucket protection;
@@ -60,13 +58,13 @@ AWS service or control.
 
 - **AWS identity:** `GET /api/v1/aws/identity` calls STS
   `GetCallerIdentity` using the standard credential chain.
-- **Projects:** CRUD-like metadata endpoints persist through SQLAlchemy.
-- **RAG:** Separate status/query endpoints use a local FAISS index and
-  locally generated metadata. The default embedding implementation is
-  deterministic feature hashing, not a semantic model. The index is built
-  from authorized local Markdown and text documents.
+- **Assessments:** Each successful chat persists its audit report and reviewer
+  outputs through SQLAlchemy; read endpoints expose assessment history.
 - **Health:** `/health` reports process status. `/ready` reports basic
-  database/index configuration and does not test live AWS or model access.
+  database configuration and does not test live AWS or model access.
+
+Retrieval/RAG is intentionally excluded for now and can be added later as a
+separate feature.
 
 ## Provider configuration
 
