@@ -32,3 +32,7 @@
 - Retrieved passages are untrusted prompt data. Compliance must distinguish
   guidance from actual audit findings; source citations do not establish that
   a control is implemented or that an account is compliant.
+- The browser frontend receives agent output as ordinary API strings.
+  Compliance and Senior text is rendered through React Markdown with the GFM
+  plugin; raw HTML support is not enabled. Do not replace this with direct
+  HTML injection or expose AWS/provider credentials through `VITE_` variables.

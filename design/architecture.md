@@ -2,7 +2,7 @@
 
 ```mermaid
 flowchart LR
-    Client --> FastAPI
+    Browser[React 19 Vite frontend] -->|HTTPS JSON API, bearer JWT| FastAPI
     FastAPI --> Chat[Sequential chat workflow]
     Chat --> Cloud[Cloud tool-selection agent]
     Cloud --> Nebius[Nebius Token Factory]
@@ -24,6 +24,12 @@ flowchart LR
     Assessments --> DB[(SQLite or PostgreSQL)]
     FastAPI --> STS[Optional AWS identity lookup]
 ```
+
+The browser application is a JavaScript-only React/Vite SPA. It calls the
+existing API routes through the shared frontend API client; it does not call
+AWS or the inference provider directly. Compliance and Senior response text
+is rendered as Markdown in the UI, while Cloud audit data remains structured
+JSON.
 
 The application is a FastAPI service. Routes validate input and inject
 settings; service modules own provider, AWS, and persistence boundaries.
@@ -70,6 +76,11 @@ The chat workflow requires a matching local FAISS index and trusted metadata
 file. The configured embedding model must match the one used to create the
 index. Retrieval is limited to the Compliance review; it does not initiate
 additional AWS checks.
+
+The chat response is non-streaming: the frontend receives Cloud,
+Compliance, Senior, sources, and the assessment identifier together when the
+workflow completes. UI states should reflect the API request status rather
+than imply that individual agents stream progress.
 
 ## Provider configuration
 

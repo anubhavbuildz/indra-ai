@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Check, Cloud, Database, ExternalLink, Globe2, RefreshCw, Save, Shield, UserRound } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -14,24 +14,11 @@ export default function Settings() {
   const [saved, setSaved] = useState(false);
   const [urlError, setUrlError] = useState("");
   const [busy, setBusy] = useState(false);
-  const [compactTables, setCompactTables] = useState(
-    () => localStorage.getItem("indraa.compactTables") === "true",
-  );
-  const [reducedMotion, setReducedMotion] = useState(
-    () => localStorage.getItem("indraa.reducedMotion") === "true",
-  );
   const queryClient = useQueryClient();
   const health = useBackendHealth();
   const rag = useRagStatus();
   const identity = useAwsIdentity();
   const readiness = useQuery({ queryKey: ["backend-readiness"], queryFn: api.ready, retry: false });
-
-  useEffect(() => {
-    document.documentElement.classList.toggle("compact-tables", compactTables);
-    document.documentElement.classList.toggle("reduce-motion", reducedMotion);
-    localStorage.setItem("indraa.compactTables", String(compactTables));
-    localStorage.setItem("indraa.reducedMotion", String(reducedMotion));
-  }, [compactTables, reducedMotion]);
 
   function saveSettings(event) {
     event.preventDefault();
@@ -100,19 +87,6 @@ export default function Settings() {
                 loading={identity.isLoading}
               />
             </div>
-          </Card>
-          <Card className="preferences-card">
-            <div className="section-heading">
-              <div><div className="section-title">Interface preferences</div><div className="section-subtitle">Saved locally in this browser.</div></div>
-            </div>
-            <label className="preference-row">
-              <span><strong>Compact findings tables</strong><small>Show more finding rows at once.</small></span>
-              <input type="checkbox" checked={compactTables} onChange={(event) => setCompactTables(event.target.checked)} />
-            </label>
-            <label className="preference-row">
-              <span><strong>Reduce motion</strong><small>Limit decorative transitions and animations.</small></span>
-              <input type="checkbox" checked={reducedMotion} onChange={(event) => setReducedMotion(event.target.checked)} />
-            </label>
           </Card>
           <Card className="settings-security-note">
             <Shield size={17} />

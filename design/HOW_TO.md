@@ -73,37 +73,13 @@ Authorization: Bearer <access_token>
 
 `/`, `/health`, `/ready`, and development API documentation are public.
 
-Framework-neutral TypeScript helper:
+Vite JavaScript example:
 
-```typescript
+```js
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000";
 
-type LoginResponse = {
-  access_token: string;
-  token_type: "bearer";
-  expires_in: number;
-};
-
-type ChatResponse = {
-  cloud_agent_response: {
-    audited_regions: string[];
-    audited_services: string[];
-    total_issues: number;
-    critical_count: number;
-    high_count: number;
-    medium_count: number;
-    low_count: number;
-    findings: Array<Record<string, unknown>>;
-  };
-  compliance_agent_response: string;
-  senior_agent_response: string;
-  sources: Array<{ title: string; source: string; uri?: string }>;
-  assessment_id: string;
-  status: "completed";
-};
-
-async function login(username: string, password: string): Promise<string> {
+async function login(username, password) {
   const response = await fetch(`${API_BASE_URL}/api/v1/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -112,11 +88,11 @@ async function login(username: string, password: string): Promise<string> {
   if (!response.ok) {
     throw new Error(`Login failed (${response.status})`);
   }
-  const result = (await response.json()) as LoginResponse;
+  const result = await response.json();
   return result.access_token;
 }
 
-async function runAudit(token: string, message: string): Promise<ChatResponse> {
+async function runAudit(token, message) {
   const response = await fetch(`${API_BASE_URL}/api/v1/chat`, {
     method: "POST",
     headers: {
@@ -129,12 +105,10 @@ async function runAudit(token: string, message: string): Promise<ChatResponse> {
     throw new Error("Your session expired. Please sign in again.");
   }
   if (!response.ok) {
-    const error = (await response.json()) as {
-      error?: { code?: string; message?: string };
-    };
+    const error = await response.json();
     throw new Error(error.error?.message ?? `Audit request failed (${response.status})`);
   }
-  return (await response.json()) as ChatResponse;
+  return response.json();
 }
 ```
 
@@ -148,7 +122,7 @@ The backend returns all three results from the same chat request, in separate
 fields. Render them as separate panels or tabs; do not merge the Compliance
 or Senior prose into the structured Cloud report.
 
-```typescript
+```js
 const result = await runAudit(accessToken, prompt);
 
 renderCloudReport(result.cloud_agent_response);
@@ -156,6 +130,12 @@ renderComplianceSummary(result.compliance_agent_response);
 renderSeniorReview(result.senior_agent_response);
 renderSources(result.sources);
 ```
+
+The supplied React frontend displays Compliance and Senior responses with its
+shared `MarkdownView` component, backed by `react-markdown` and `remark-gfm`.
+This handles common Markdown and GFM tables without enabling raw HTML. Keep
+the Cloud report as structured data (for example, formatted JSON) rather than
+passing it through the Markdown renderer.
 
 - `cloud_agent_response` is the structured AWS audit report, including counts
   and findings.

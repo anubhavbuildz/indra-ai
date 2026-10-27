@@ -5,11 +5,21 @@ review. It returns a structured Cloud audit report, a separate Compliance
 summary informed by local FAISS guidance, and an independent Senior review.
 Completed chat assessments are persisted in SQLAlchemy-backed storage.
 
+The [React frontend](frontend/README.md) connects to this API and renders the
+Compliance and Senior text responses as Markdown, including GitHub-flavored
+tables. The backend response contract remains unchanged.
+
 ## Quick start
 
 ### Local Python
 
 Requirements: Python 3.12 or newer.
+
+If you plan to use AWS features, complete the [AWS CLI and identity setup](AWS_SETUP.md)
+first. Use AWS CLI v2 and an approved non-root identity; never use the AWS
+account root user or create root access keys. AWS CLI setup is not required
+when the backend uses another supported credential source, such as a workload
+identity.
 
 ```bash
 python -m pip install -e '.[dev]'
@@ -21,6 +31,10 @@ least 32 bytes to enable login. Set `NVIDIA_API_KEY` for chat inference.
 Configure AWS credentials through the standard Boto3 credential chain; do not
 send AWS credentials to the API. Chat also requires a matching local FAISS
 index and trusted metadata pair.
+
+The optional AWS identity endpoint only verifies the caller identity. The
+audit workflow requires read permissions for the AWS services it inspects;
+see [AWS setup](AWS_SETUP.md) and the [security notes](design/security.md).
 
 ```bash
 uvicorn app.main:app --reload
@@ -50,6 +64,20 @@ files for RAG. The named `indra-data` volume preserves the SQLite database.
 See the [frontend integration how-to](design/HOW_TO.md) for the frontend CORS,
 login, bearer-token, and response-handling walkthrough.
 
+### React frontend
+
+```bash
+cd frontend
+npm install
+cp .env.example .env
+npm run dev
+```
+
+Set `VITE_API_BASE_URL` to the backend origin when it is not
+`http://localhost:8000`, and allow the frontend's exact origin in backend
+`CORS_ORIGINS`. Backend credentials and provider secrets must never be placed
+in Vite environment variables.
+
 ## API at a glance
 
 The versioned API prefix defaults to `/api/v1`. All versioned routes except
@@ -71,10 +99,14 @@ login require `Authorization: Bearer <access_token>`. The root, `/health`,
 `POST /api/v1/chat` returns three distinct results:
 
 - `cloud_agent_response`: structured audit report.
-- `compliance_agent_response`: Compliance summary text.
-- `senior_agent_response`: Senior review text.
+- `compliance_agent_response`: Compliance summary text, displayed as Markdown
+  by the frontend.
+- `senior_agent_response`: Senior review text, displayed as Markdown by the
+  frontend.
 
 It also returns retrieved `sources`, an `assessment_id`, and `status`.
+Markdown rendering is a frontend presentation concern; these API fields stay
+plain strings and are also stored as text in assessment history.
 
 ## Documentation
 
@@ -88,6 +120,7 @@ Implementation, API, deployment, and testing references are collected in
 - [Project overview](design/project-overview.md)
 - [Security boundaries](design/security.md)
 - [Testing strategy](design/testing.md)
+- [Function-level test cases and manual checklist](design/test_case.md)
 
 The old Terraform architecture draft is retained as a clearly marked
 [historical document](design/archive/architecture-legacy.md) and does not
@@ -104,6 +137,22 @@ python -m compileall -q app tests
 
 Routine tests mock AWS and inference calls. Live integration checks require
 explicitly configured credentials and may incur costs.
+
+The frontend also has independent lint and production-build checks:
+
+```bash
+cd frontend
+npm run lint
+npm run build
+```
+
+The Markdown renderer uses React Markdown with the GFM plugin. Its smoke check
+covers headings, emphasis, lists, inline code, and tables; live workflow
+testing additionally depends on AWS and inference availability.
+The most recent live workflow retry timed out at the remote inference provider,
+so real agent output has not been revalidated through the renderer. An earlier
+live S3 workflow succeeded before the Markdown integration. See the
+[testing notes](design/testing.md) for the distinction.
 
 ## Security and limitations
 

@@ -225,7 +225,6 @@ __marimo__/
 !.env.example
 data/*
 !data/.gitkeep
-faiss_store/*
 !faiss_store/.gitkeep
 frontend/node_modules/
 frontend/dist/

@@ -2,7 +2,8 @@
 
 This document describes an earlier, incompatible Terraform workflow and is
 preserved only as historical reference. It does not describe the current
-application; see [../architecture.md](../architecture.md).
+application or its React frontend; see [../architecture.md](../architecture.md),
+[../HOW_TO.md](../HOW_TO.md), and [../api.md](../api.md) for current behavior.
 
 ```mermaid
 flowchart LR
