@@ -6,9 +6,10 @@
 - The login endpoint supports one environment-configured account and issues a
   30-minute HS256 JWT. Configure `AUTH_USERNAME`, `AUTH_PASSWORD`, and a unique
   `JWT_SECRET_KEY` of at least 32 bytes. Do not commit these secrets.
-- JWTs are not currently required or validated by existing application routes.
-  There is no authorization, tenant isolation, or complete audit system.
-  Assessment IDs are not authorization tokens.
+- All versioned API routes require a valid bearer JWT except the public login
+  route. `/`, `/health`, `/ready`, and development API documentation remain
+  public. There is no tenant isolation or complete audit system. Assessment
+  IDs are not authorization tokens.
 - Chat runs only the allowlisted read-only Boto3 checks for S3, IAM, EC2/EBS,
   VPC, RDS, CloudTrail, and GuardDuty. S3 and IAM are global checks; EC2/EBS,
   VPC, RDS, and GuardDuty use `AWS_REGION`; CloudTrail discovers enabled
@@ -24,5 +25,10 @@
   model calls; never commit or log the key.
 - Keep AWS and NVIDIA credentials out of issues, pull requests, test fixtures,
   logs, and source control. `.env.example` contains placeholders only.
-- Retrieval/RAG is not currently included; review the design and security
-  boundaries before adding document ingestion or index loading.
+- Chat reads only the configured local FAISS index and its paired, locally
+  generated trusted pickle metadata. Never accept pickle or index files from
+  users or public API requests. Keep the index and metadata as a matching pair,
+  and verify source documents before rebuilding them.
+- Retrieved passages are untrusted prompt data. Compliance must distinguish
+  guidance from actual audit findings; source citations do not establish that
+  a control is implemented or that an account is compliant.

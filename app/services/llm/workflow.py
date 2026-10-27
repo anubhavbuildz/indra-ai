@@ -7,6 +7,7 @@ from app.schemas.audit_schema import AuditReport
 from app.services.llm.cloud_agent import CloudAgent
 from app.services.llm.compliance_agent import ComplianceAgent
 from app.services.llm.senior_agent import SeniorAgent
+from app.services.rag import RagService
 
 
 class WorkflowResult(TypedDict):
@@ -23,7 +24,8 @@ async def chat_workflow(
     question: str,
     history: list[dict[str, str]] | None = None,
 ) -> WorkflowResult:
-    """Run AWS tools, summarize their result with Compliance, then review with Senior."""
+    """Run AWS tools, retrieve guidance, summarize with Compliance, then review with Senior."""
+    rag_service = RagService(settings)
     async with (
         CloudAgent(settings) as cloud_agent,
         ComplianceAgent(settings) as compliance_agent,
@@ -34,10 +36,12 @@ async def chat_workflow(
             question=question,
             history=history,
         )
+        retrieved_passages = await rag_service.query(question)
         compliance_response = await compliance_agent.review(
             question=question,
             audit_result=audit_report,
             history=history,
+            retrieved_passages=retrieved_passages,
         )
         senior_response = await senior_agent.review(
             question=question,
@@ -49,5 +53,5 @@ async def chat_workflow(
         "cloud_agent_response": audit_report.model_dump(),
         "compliance_agent_response": compliance_response,
         "senior_agent_response": senior_response,
-        "sources": [],
+        "sources": [passage.as_source() for passage in retrieved_passages],
     }

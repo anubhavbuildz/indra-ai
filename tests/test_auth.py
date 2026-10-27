@@ -60,6 +60,65 @@ def test_login_rejects_invalid_credentials(auth_client: TestClient) -> None:
     assert response.json()["error"]["code"] == "invalid_credentials"
 
 
+@pytest.mark.parametrize(
+    ("method", "path", "payload"),
+    [
+        ("get", "/api/v1/assessments", None),
+        ("post", "/api/v1/chat", {"message": "Run a security review."}),
+        ("get", "/api/v1/rag/status", None),
+        ("get", "/api/v1/aws/identity", None),
+    ],
+)
+def test_versioned_routes_reject_missing_bearer_token(
+    auth_client: TestClient,
+    method: str,
+    path: str,
+    payload: dict[str, str] | None,
+) -> None:
+    if payload is None:
+        response = getattr(auth_client, method)(path)
+    else:
+        response = getattr(auth_client, method)(path, json=payload)
+
+    assert response.status_code == 401
+    assert response.json()["error"]["code"] == "authentication_required"
+
+
+def test_protected_route_accepts_login_token(auth_client: TestClient) -> None:
+    login_response = auth_client.post(
+        "/api/v1/auth/login",
+        json={"username": "test-user", "password": "test-password"},
+    )
+    token = login_response.json()["access_token"]
+
+    response = auth_client.get(
+        "/api/v1/rag/status",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == 200
+    assert "available" in response.json()
+
+
+def test_protected_route_rejects_invalid_bearer_token(auth_client: TestClient) -> None:
+    response = auth_client.get(
+        "/api/v1/rag/status",
+        headers={"Authorization": "Bearer not-a-valid-jwt"},
+    )
+
+    assert response.status_code == 401
+    assert response.json()["error"]["code"] == "invalid_token"
+
+
+def test_openapi_documents_bearer_auth_on_protected_routes(auth_client: TestClient) -> None:
+    response = auth_client.get("/openapi.json")
+
+    assert response.status_code == 200
+    schema = response.json()
+    assert "security" not in schema["paths"]["/api/v1/auth/login"]["post"]
+    assert schema["paths"]["/api/v1/chat"]["post"]["security"] == [{"HTTPBearer": []}]
+
+
 def test_login_reports_missing_configuration() -> None:
     app.dependency_overrides[get_settings] = lambda: Settings(_env_file=None)
     try:

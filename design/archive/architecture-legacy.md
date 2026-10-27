@@ -1,4 +1,8 @@
-# Architecture
+# Archived architecture draft
+
+This document describes an earlier, incompatible Terraform workflow and is
+preserved only as historical reference. It does not describe the current
+application; see [../architecture.md](../architecture.md).
 
 ```mermaid
 flowchart LR

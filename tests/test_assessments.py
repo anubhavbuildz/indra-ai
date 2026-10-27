@@ -8,6 +8,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
+from app.core.config import Settings, get_settings
 from app.db.base import Base
 from app.db.models.assessment import Assessment
 from app.db.session import get_db
@@ -15,7 +16,9 @@ from app.main import app
 
 
 @pytest.fixture
-def assessment_client() -> Generator[TestClient, None, None]:
+def assessment_client(
+    test_auth_settings: Settings,
+) -> Generator[TestClient, None, None]:
     engine = create_engine(
         "sqlite://",
         connect_args={"check_same_thread": False},
@@ -32,11 +35,18 @@ def assessment_client() -> Generator[TestClient, None, None]:
             session.close()
 
     app.dependency_overrides[get_db] = override_db
+    app.dependency_overrides[get_settings] = lambda: test_auth_settings
     try:
         with TestClient(app) as client:
+            login = client.post(
+                "/api/v1/auth/login",
+                json={"username": "test-user", "password": "test-password"},
+            )
+            client.headers["Authorization"] = f"Bearer {login.json()['access_token']}"
             yield client
     finally:
         app.dependency_overrides.pop(get_db, None)
+        app.dependency_overrides.pop(get_settings, None)
         engine.dispose()
 
 

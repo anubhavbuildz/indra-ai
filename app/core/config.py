@@ -1,9 +1,12 @@
 """Typed application settings loaded from environment and optional .env file."""
 
 from functools import lru_cache
+from pathlib import Path
 
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 
 class Settings(BaseSettings):
@@ -36,6 +39,18 @@ class Settings(BaseSettings):
     nvidia_api_format: str = Field(
         default="openai-chat-completions",
         validation_alias="NVIDIA_API_FORMAT",
+    )
+    embedding_model: str = Field(
+        default="sentence-transformers/all-MiniLM-L6-v2",
+        validation_alias="EMBEDDING_MODEL",
+    )
+    faiss_index_path: Path = Field(
+        default=Path("faiss_store/security.index"),
+        validation_alias="FAISS_INDEX_PATH",
+    )
+    faiss_metadata_path: Path = Field(
+        default=Path("faiss_store/security.pkl"),
+        validation_alias="FAISS_METADATA_PATH",
     )
     aws_region: str = Field(default="us-east-1", validation_alias="AWS_REGION")
     cors_origins: str = Field(default="", validation_alias="CORS_ORIGINS")
