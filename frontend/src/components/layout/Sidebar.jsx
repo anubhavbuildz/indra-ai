@@ -9,10 +9,10 @@ import {
   LayoutDashboard,
   Search,
   Settings,
-  Shield,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { cn } from "../../lib/utils";
+import indraaMark from "../../assets/indraa-mark.svg";
 
 const navigation = [
   { label: "Overview", path: "/", icon: LayoutDashboard },
@@ -30,12 +30,12 @@ export function Sidebar({ open, onClose, compact, onToggleCompact }) {
       <aside className={cn("sidebar", compact && "sidebar-compact", open && "sidebar-open")}>
         <div className="brand-row">
           <div className="brand-mark">
-            <Shield size={20} strokeWidth={2.2} />
+            <img src={indraaMark} alt="" />
           </div>
           {!compact && (
             <div className="brand-wordmark">
-              <span>indraa</span>
-              <small>SECURITY INTELLIGENCE</small>
+              <span>INDRAA</span>
+              <small>AI CLOUD SECURITY POSTURE</small>
             </div>
           )}
           <button className="sidebar-collapse" onClick={onToggleCompact} aria-label="Toggle sidebar">

@@ -41,6 +41,28 @@ npm run preview
   `AWS_REGION` and cannot be changed per request.
 - Findings, report history, RAG status/query, AWS identity, backend health,
   and readiness come from their existing backend endpoints.
+- Compliance and Senior responses are rendered with `react-markdown` and
+  `remark-gfm`, so headings, emphasis, lists, inline code, links, and tables
+  appear as formatted content. Raw HTML in model output is not enabled.
+- The structured Cloud Agent report remains formatted JSON rather than being
+  interpreted as Markdown.
 
 See [the frontend integration guide](../design/HOW_TO.md) for request and
-response examples, CORS, token handling, and deployment notes.
+response examples, Markdown rendering, CORS, token handling, and deployment
+notes.
+
+## Validate
+
+```bash
+npm run lint
+npm run build
+```
+
+These checks do not contact AWS or the inference provider. A live audit
+workflow requires backend authentication, configured AWS read access, a
+matching local FAISS store, and a reachable inference provider.
+
+The renderer smoke check passed, but the latest live workflow attempt timed
+out at the inference provider before returning agent text. An earlier
+successful live S3 workflow predates Markdown rendering; see the
+[testing notes](../design/testing.md).

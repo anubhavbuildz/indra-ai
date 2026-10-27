@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, Eye, EyeOff, Fingerprint, LockKeyhole, Shield } from "lucide-react";
+import { ArrowRight, Eye, EyeOff, Fingerprint, LockKeyhole } from "lucide-react";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { getErrorMessage } from "../lib/utils";
 import { Button, Input } from "../components/ui/Primitives";
+import agentIllustration from "../assets/three-specialist-agents.svg";
+import indraaMark from "../assets/indraa-mark.svg";
 
 export default function Login() {
   const { signIn, isAuthenticated } = useAuth();
@@ -36,9 +38,9 @@ export default function Login() {
     <main className="login-page">
       <div className="login-grid" />
       <div className="login-brand">
-        <span className="brand-mark"><Shield size={20} /></span>
-        <span>indraa</span>
-        <small>SECURITY INTELLIGENCE</small>
+        <span className="brand-mark"><img src={indraaMark} alt="" /></span>
+        <span>INDRAA</span>
+        <small>AI CLOUD SECURITY POSTURE</small>
       </div>
       <div className="login-layout">
         <motion.section
@@ -50,13 +52,11 @@ export default function Login() {
           <div className="login-kicker"><span className="status-dot" /> PRIVATE CLOUD SECURITY WORKSPACE</div>
           <h1>Know what’s<br />hiding in your<br /><em>cloud.</em></h1>
           <p>Evidence-led AWS security review, with three specialist agents working in sequence.</p>
-          <div className="login-agent-line">
-            <span><i className="agent-line-blue" /> Cloud</span>
-            <b />
-            <span><i className="agent-line-purple" /> Compliance</span>
-            <b />
-            <span><i className="agent-line-green" /> Senior</span>
-          </div>
+          <img
+            className="login-agent-illustration"
+            src={agentIllustration}
+            alt="Cloud Agent audits infrastructure, Compliance Agent synthesizes guidance, and Senior Agent verifies evidence."
+          />
         </motion.section>
         <motion.section
           className="login-card"
@@ -105,7 +105,7 @@ export default function Login() {
         </motion.section>
       </div>
       <div className="login-footnote">
-        <span>INDRAA · CLOUD SECURITY INTELLIGENCE</span>
+        <span>INDRAA · AI CLOUD SECURITY POSTURE</span>
         <span>POWERED BY <b>NVIDIA</b></span>
       </div>
     </main>

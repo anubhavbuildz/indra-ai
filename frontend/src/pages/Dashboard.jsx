@@ -57,7 +57,7 @@ export default function Dashboard() {
       <div className="overview-banner">
         <div className="overview-banner-orb"><ShieldCheck size={26} /></div>
         <div className="overview-banner-copy">
-          <div className="banner-label">INDRAA SECURITY INTELLIGENCE <span>LIVE</span></div>
+          <div className="banner-label">INDRAA AI CLOUD SECURITY POSTURE <span>LIVE</span></div>
           <strong>{latest ? "Your latest assessment is ready to review." : "Your cloud security workspace is ready."}</strong>
           <p>{latest ? `Last completed ${formatDate(latest.created_at)} · ${findings.length} findings returned.` : "Run a read-only AWS audit to surface real findings and evidence."}</p>
         </div>

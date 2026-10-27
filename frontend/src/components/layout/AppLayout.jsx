@@ -23,7 +23,7 @@ export function AppLayout() {
           <Outlet />
         </main>
         <footer className="app-footer">
-          <span>INDRAA CLOUD SECURITY INTELLIGENCE</span>
+          <span>INDRAA AI CLOUD SECURITY POSTURE</span>
           <span>{username ? `SIGNED IN · ${username}` : "SECURE WORKSPACE"}</span>
           <button onClick={signOut}>Sign out</button>
         </footer>
