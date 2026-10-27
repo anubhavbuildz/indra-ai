@@ -15,6 +15,12 @@ tables. The backend response contract remains unchanged.
 
 Requirements: Python 3.12 or newer.
 
+If you plan to use AWS features, complete the [AWS CLI and identity setup](AWS_SETUP.md)
+first. Use AWS CLI v2 and an approved non-root identity; never use the AWS
+account root user or create root access keys. AWS CLI setup is not required
+when the backend uses another supported credential source, such as a workload
+identity.
+
 ```bash
 python -m pip install -e '.[dev]'
 cp .env.example .env
@@ -25,6 +31,10 @@ least 32 bytes to enable login. Set `NVIDIA_API_KEY` for chat inference.
 Configure AWS credentials through the standard Boto3 credential chain; do not
 send AWS credentials to the API. Chat also requires a matching local FAISS
 index and trusted metadata pair.
+
+The optional AWS identity endpoint only verifies the caller identity. The
+audit workflow requires read permissions for the AWS services it inspects;
+see [AWS setup](AWS_SETUP.md) and the [security notes](design/security.md).
 
 ```bash
 uvicorn app.main:app --reload
