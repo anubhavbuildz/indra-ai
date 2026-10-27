@@ -9,6 +9,7 @@ import {
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
+import { MarkdownView } from "../reports/MarkdownView";
 import { Badge, Card } from "../ui/Primitives";
 
 const agents = [
@@ -116,7 +117,7 @@ export function AgentWorkflow({ result, running = false, compact = false }) {
                       {agent.key === "cloud_agent_response" ? (
                         <pre>{outputText(agent.key, value)}</pre>
                       ) : (
-                        <div className="agent-prose">{outputText(agent.key, value)}</div>
+                        <MarkdownView className="agent-prose" text={outputText(agent.key, value)} />
                       )}
                     </motion.div>
                   )}

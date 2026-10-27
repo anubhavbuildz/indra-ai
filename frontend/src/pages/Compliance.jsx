@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { BookOpenCheck, Database, ExternalLink, FileSearch, Search, ShieldCheck } from "lucide-react";
 import { SourceList } from "../components/compliance/SourceList";
+import { MarkdownView } from "../components/reports/MarkdownView";
 import { Button, Card, ErrorState, Input, LoadingState, PageHeading } from "../components/ui/Primitives";
 import { useLatestAudit, useRagQueryMutation, useRagStatus } from "../hooks/useApi";
 import { getErrorMessage } from "../lib/utils";
@@ -92,7 +93,10 @@ export default function Compliance() {
         </div>
         {latest.data?.compliance_agent_response ? (
           <>
-            <div className="agent-prose compliance-prose">{latest.data.compliance_agent_response}</div>
+            <MarkdownView
+              className="agent-prose compliance-prose"
+              text={latest.data.compliance_agent_response}
+            />
             <SourceList sources={latest.data.sources || []} />
           </>
         ) : (

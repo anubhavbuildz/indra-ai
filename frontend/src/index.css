@@ -293,7 +293,7 @@ textarea { width: 100%; padding: 10px; resize: vertical; color: #e2eaf3; backgro
 .agent-output-desc { color: #7c8a9e; font-size: 8px; }
 .agent-output-content { overflow: hidden; border-top: 1px solid #222d3b; }
 .agent-output-content pre { max-height: 360px; overflow: auto; margin: 0; padding: 14px; color: #b6c7d7; background: #0c121b; font: 9px/1.7 var(--mono); white-space: pre-wrap; overflow-wrap: anywhere; }
-.agent-prose { padding: 15px; color: #c0cbd8; font-size: 10px; line-height: 1.8; white-space: pre-wrap; }
+.agent-prose { padding: 15px; color: #c0cbd8; font-size: 10px; line-height: 1.8; }
 .audit-complete-banner { display: flex; align-items: center; gap: 8px; padding: 11px 13px; color: #a8d9c4; border: 1px solid #2c5247; border-radius: 7px; background: rgba(34, 109, 79, .1); font-size: 9px; }
 .audit-complete-banner > span { width: 19px; height: 19px; display: grid; place-items: center; color: #0b211a; border-radius: 50%; background: #75dcb1; }
 .audit-complete-banner code { color: #b9c9d8; font: 9px var(--mono); }
@@ -405,12 +405,24 @@ textarea { width: 100%; padding: 10px; resize: vertical; color: #e2eaf3; backgro
 .report-markdown-title { display: flex; align-items: center; gap: 9px; padding-bottom: 12px; border-bottom: 1px solid #273240; }
 .report-markdown-title > span { width: 28px; height: 28px; display: grid; place-items: center; color: #85dbef; border-radius: 7px; background: rgba(35, 115, 145, .14); }
 .report-markdown-title > strong { flex: 1; color: #dfe8f2; font-size: 10px; }
-.markdown-view { color: #bdc9d7; font-size: 10px; line-height: 1.8; }
-.markdown-view p { margin: 12px 0; }
+.markdown-view { color: #bdc9d7; font-size: 10px; line-height: 1.8; overflow-wrap: anywhere; }
+.markdown-view p { margin: 12px 0; white-space: pre-wrap; }
 .markdown-view h2, .markdown-view h3, .markdown-view h4 { color: #dfe8f2; margin: 16px 0 7px; }
 .markdown-view h3 { font-size: 13px; }.markdown-view h4 { font-size: 11px; }
-.markdown-view ul { padding-left: 20px; color: #b6c5d3; }
+.markdown-view ul, .markdown-view ol { padding-left: 20px; color: #b6c5d3; }
 .markdown-view li { padding: 3px 0; }
+.markdown-view strong { color: #e2eaf3; }
+.markdown-view code { padding: 1px 4px; color: #a9d8e6; border-radius: 3px; background: #101923; font: .92em var(--mono); }
+.markdown-view pre { overflow-x: auto; padding: 12px; border: 1px solid #273240; border-radius: 6px; background: #0c121b; }
+.markdown-view pre code { padding: 0; background: none; }
+.markdown-view blockquote { margin: 12px 0; padding: 2px 12px; color: #9eacbd; border-left: 2px solid #527d91; }
+.markdown-view hr { margin: 16px 0; border: 0; border-top: 1px solid #273240; }
+.markdown-view a { color: #81cfe2; text-decoration: underline; text-underline-offset: 2px; }
+.markdown-table-wrap { max-width: 100%; overflow-x: auto; margin: 12px 0; }
+.markdown-view table { width: 100%; border-collapse: collapse; text-align: left; }
+.markdown-view th, .markdown-view td { min-width: 90px; padding: 7px 9px; vertical-align: top; border: 1px solid #2a3645; }
+.markdown-view th { color: #dfe8f2; background: #151e29; font-weight: 600; }
+.markdown-view td { color: #b9c7d6; }
 .report-source-note { margin-top: 12px; color: #7a899c; font-size: 8px; }
 
 .settings-layout { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(240px, .7fr); align-items: start; gap: 14px; }
