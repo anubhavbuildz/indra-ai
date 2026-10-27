@@ -41,6 +41,12 @@ Compliance, and Senior steps. Chat also requires the configured local FAISS
 index and matching metadata. The AWS identity route independently checks the
 process credential chain.
 
+The Compliance and Senior response properties remain plain text strings and
+may contain Markdown. Markdown formatting is performed by clients, not by the
+API. The React frontend uses `react-markdown` with `remark-gfm` for headings,
+lists, emphasis, links, and tables; it does not enable raw HTML. Treat response
+text as untrusted and do not inject it as HTML.
+
 `POST /api/v1/rag/query` accepts a JSON `question` from 1 to 8,000 characters:
 
 ```json

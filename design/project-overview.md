@@ -36,12 +36,16 @@ secure.
   valid bearer token.
 - **Health and readiness:** Local endpoints report process status and basic
   database configuration without calling AWS or the inference provider.
+- **React frontend:** A React 19/Vite JavaScript SPA calls the authenticated
+  API, presents separate agent outputs, and renders Compliance and Senior
+  text as Markdown. The Cloud report remains structured JSON.
 
 ## Architecture
 
 ```mermaid
 flowchart TD
-    Client[API client] --> Middleware[Request limits and request ID]
+    Browser[React 19 Vite frontend] -->|JSON and bearer JWT| Middleware[Request limits and request ID]
+    APIClient[Other API clients] --> Middleware
     Middleware --> Routes[FastAPI routes and Pydantic schemas]
     Routes --> Chat[Chat workflow]
     Chat --> Cloud[Cloud tool-selection agent]
@@ -61,6 +65,11 @@ flowchart TD
     Assessments --> DB[(SQLite by default / PostgreSQL compatible)]
     Routes --> Identity[Optional STS identity service]
 ```
+
+The frontend uses the existing API contract; Markdown is presentation only.
+Its shared Markdown view supports GitHub-flavored Markdown tables and does
+not enable raw HTML. Agent output is received as plain text in the existing
+response fields.
 
 ### Request and application layers
 
@@ -282,10 +291,25 @@ python -m compileall -q app tests
 Tests use mocks for external AWS/provider dependencies and should not require
 live credentials. Live calls can incur AWS or provider usage.
 
+The frontend runs independently from `frontend/`:
+
+```bash
+npm install
+npm run dev
+npm run lint
+npm run build
+```
+
+Set `VITE_API_BASE_URL` to the backend origin and configure the backend's
+`CORS_ORIGINS` for the frontend origin. Never put AWS or inference credentials
+in browser-visible Vite variables.
+
 ## Security boundaries and limitations
 
-- There is no API authorization, tenant isolation, or complete audit trail.
-  Assessment IDs are references, not access controls.
+- Versioned API routes require a bearer JWT except login; the configured
+  single account does not provide user management, tenant isolation, token
+  revocation, or a complete audit trail. Assessment IDs are not authorization
+  tokens.
 - AWS chat uses a fixed allowlist of read-only audit calls. It does not modify
   AWS resources and does not cover every service or control.
 - AWS identity calls STS only; it does not inspect account resources or IAM
@@ -297,6 +321,9 @@ live credentials. Live calls can incur AWS or provider usage.
   prompt data and is not proof of account compliance.
 - Do not store credentials in assessments, operations, prompts, documents, logs,
   or source control. Keep `.env` private and use least-privilege cloud access.
+- The frontend renders model text with React Markdown and does not enable raw
+  HTML. Keep this safe rendering behavior; never insert model output as
+  trusted HTML.
 
 ## Further reading
 

@@ -12,11 +12,18 @@ certify compliance. Chat assessment history stores the question, audit report,
 Compliance review, and Senior review; RAG citations are returned in the chat
 response but are not persisted with the assessment.
 
+The JavaScript-only React frontend is a separate HTTP API client. It does not
+import backend modules or connect to AWS/FAISS directly. Its API client
+handles authenticated requests and its presentation layer keeps Cloud,
+Compliance, Senior, and source data separate. A shared React Markdown view
+formats Compliance and Senior response strings; the Cloud report remains
+structured JSON.
+
 ## 2. Component map
 
 ```mermaid
 flowchart TD
-    Client --> Main[app.main: FastAPI app]
+    Browser[React 19 Vite SPA] -->|JSON API and bearer JWT| Main[app.main: FastAPI app]
     Main --> Router[app.api.router: versioned route registration]
     Router --> ChatRoute[POST /chat]
     ChatRoute --> ChatService[ChatService.run]
@@ -64,6 +71,19 @@ flowchart TD
 | `app/repositories/` | Database queries and writes for persisted assessments. |
 | `app/db/` | SQLAlchemy models, engine/session lifecycle, and migration-backed schema initialization. |
 | `app/core/` | Environment configuration, common errors and handlers, logging, middleware, and login/JWT helpers. |
+
+### Browser response path
+
+1. The frontend API service attaches the bearer token and sends a chat request
+   to `POST /api/v1/chat`.
+2. The browser waits for the full non-streaming response; it does not invent
+   per-agent progress or outputs.
+3. The workflow response is stored and presented as separate Cloud,
+   Compliance, Senior, and source sections.
+4. Compliance and Senior strings are passed to the shared Markdown component
+   using React Markdown and the GFM plugin. Raw HTML is not enabled.
+5. Cloud findings remain structured JSON for counts, evidence, and resource
+   details; they are not parsed as agent-response Markdown.
 
 ## 3. Application startup and shared dependencies
 

@@ -60,6 +60,9 @@ Unit tests must not call live AWS, a hosted LLM, or download a Hugging Face
 model. Keep test data synthetic; never put credentials or real account data
 in fixtures.
 
+For a function-by-function behavior/constraint matrix and a test-session
+checklist, use [test_case.md](./test_case.md).
+
 ## Integration-test coverage
 
 Integration tests should verify that actual application components work
@@ -81,6 +84,34 @@ together while replacing external systems at their edges:
 
 These tests should be repeatable and offline. They must not depend on the
 ignored developer `faiss_store/` files or an individual's local credentials.
+
+## Frontend verification
+
+Run the frontend checks from `frontend/`:
+
+```bash
+npm run lint
+npm run build
+```
+
+The shared Markdown view should be smoke-tested with headings, emphasis,
+lists, inline code, links, and GFM tables. Verify that raw HTML is not
+rendered as trusted markup, that Cloud report JSON stays JSON, and that empty
+and loading/error states do not present fabricated agent outputs. The
+frontend's API workflow is non-streaming; agent completion must not be
+simulated independently of the completed chat response.
+
+## Latest recorded frontend/live check
+
+After adding Markdown rendering, frontend lint, production build, and the
+renderer smoke check passed. The most recent live workflow retry completed
+backend readiness, login, and AWS identity checks, but the remote inference
+provider timed out during chat; that retry produced no agent results. An
+earlier real S3-only workflow did complete and produced three findings with
+separate Compliance and Senior reviews, but it predates the Markdown renderer.
+Therefore that earlier run validates the backend workflow, not live rendering
+of real agent output through the updated frontend. Keep these results
+distinct; do not report the post-renderer live end-to-end attempt as passed.
 
 ## Optional live integration checks
 
