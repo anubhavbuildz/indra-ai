@@ -5,9 +5,9 @@
 Indra is a backend for AWS security assessment and AI-assisted review. It
 provides a single API for selecting a bounded set of read-only AWS checks,
 returning structured findings, and producing two sequential model reviews of
-those findings. It also offers persisted assessment history, environment-configured JWT login,
-and an optional AWS caller-identity check. Retrieval/RAG is not currently
-included.
+those findings using relevant guidance from a local FAISS index. It also offers
+persisted assessment history, environment-configured JWT login, and an
+optional AWS caller-identity check.
 
 The problem it addresses is the effort required to collect security-relevant
 AWS configuration signals and turn them into a clear, reviewable summary.
@@ -24,15 +24,16 @@ secure.
 
 - **AWS audit chat:** A model selects from a fixed list of read-only audit
   functions. The backend validates those selections, runs the matching AWS
-  checks, validates the structured report, and returns it with separate
-  Compliance and Senior reviews.
+  checks, validates the structured report, retrieves local guidance, and
+  returns separate Compliance and Senior reviews with source attributions.
 - **Assessment history:** Each successful chat run creates an assessment
   record containing the question, audit report, Compliance review, and Senior
   Reviewer output.
 - **AWS identity:** An optional endpoint calls STS `GetCallerIdentity` using
   the server's standard Boto3 credential chain.
 - **Authentication:** A single environment-configured account can obtain
-  short-lived JWT access tokens. Existing routes do not yet enforce them.
+  short-lived JWT access tokens; all versioned routes except login require a
+  valid bearer token.
 - **Health and readiness:** Local endpoints report process status and basic
   database configuration without calling AWS or the inference provider.
 
@@ -49,7 +50,9 @@ flowchart TD
     Allowlist --> Auditor[AWSAuditor]
     Auditor --> AWS[AWS APIs via Boto3 credential chain]
     Auditor --> Report[Validated AuditReport]
+    Chat --> RAG[Local FAISS retrieval]
     Report --> Compliance[Compliance summary agent]
+    RAG --> Compliance
     Compliance --> Senior[Senior review agent]
     Report --> Response[Structured chat response]
     Compliance --> Response
@@ -81,7 +84,7 @@ The application is divided into:
 | `migrations/` | Alembic environment and versioned schema changes |
 | `scripts/` | Local environment checks |
 | `tests/` | API, service, workflow, configuration, and audit tests |
-| `docs/` | API, architecture, security, and project documentation |
+| `design/` | API, architecture, security, project, deployment, and testing documentation |
 
 ## AWS audit and chat workflow
 
@@ -100,11 +103,14 @@ The application is divided into:
 5. Results are validated against the `AuditReport` schema. Findings include
    service, region, check identifiers, severity, details, and any available
    evidence or error.
-6. The Compliance agent summarizes the structured report. The Senior agent
-   then reviews that report and the Compliance summary for unsupported claims
-   and uncertainty.
-7. The API returns the report, Compliance summary, Senior review, an operation
-   identifier, a completed status, and a `sources` array.
+6. The workflow retrieves relevant local guidance from FAISS using the
+   configured sentence-transformers model and passes it to Compliance with
+   source attribution.
+7. The Compliance agent summarizes the report and distinguishes findings
+   from general guidance. The Senior agent then reviews the report and
+   Compliance summary for unsupported claims and uncertainty.
+8. The API returns the report, Compliance summary, Senior review, a persisted
+   assessment identifier, a completed status, and the retrieved `sources`.
 
 The current audit functions cover:
 
@@ -142,7 +148,9 @@ at the root.
 | `GET` | `/health` | Process health; no AWS or model call |
 | `GET` | `/ready` | Basic database configuration status |
 | `POST` | `/api/v1/auth/login` | Issue a short-lived JWT for the configured environment account |
-| `POST` | `/api/v1/chat` | AWS audit and sequential model review |
+| `POST` | `/api/v1/chat` | AWS audit, FAISS guidance retrieval, and sequential model review |
+| `GET` | `/api/v1/rag/status` | Local FAISS and metadata readiness |
+| `POST` | `/api/v1/rag/query` | Retrieve local guidance passages and sources |
 | `GET` | `/api/v1/assessments` | List persisted audit assessments |
 | `GET` | `/api/v1/assessments/{assessment_id}` | Read audit and reviewer output |
 | `GET` | `/api/v1/aws/identity` | Optional STS caller identity lookup |
@@ -163,12 +171,18 @@ Request validation errors report field locations and error types rather than
 echoing submitted values. The request middleware enforces a configurable body
 size limit and attaches an `X-Request-ID` response header.
 
-## Retrieval status
+## Retrieval
 
-Retrieval/RAG is intentionally removed from the current application and will
-be designed and implemented separately. Chat returns an empty `sources`
-array; no RAG endpoints, index loader, embedding service, or ingestion command
-are available at this stage.
+Chat retrieves up to three documents from the locally configured FAISS index
+and sends their relevant summaries and guidance to the Compliance agent.
+Sources are returned in the chat response and are not persisted in assessment
+history. Set `EMBEDDING_MODEL`, `FAISS_INDEX_PATH`, and `FAISS_METADATA_PATH`
+to the model and matching artifacts used to build the index. The default model
+is `sentence-transformers/all-MiniLM-L6-v2`. The store artifacts are local and
+git-ignored; chat returns a structured service error if the index or matching
+metadata is unavailable. The status route checks file presence without
+loading FAISS or the embedding model; retrieval validates the index/metadata
+pair. The application does not provide ingestion or index-building endpoints.
 
 ## Persistence and database migrations
 
@@ -198,8 +212,10 @@ source of defaults.
 For the single-account login endpoint, set `AUTH_USERNAME`,
 `AUTH_PASSWORD`, and a unique `JWT_SECRET_KEY` of at least 32 bytes.
 `POST /api/v1/auth/login` accepts a JSON username/password pair and returns a
-30-minute HS256 access token. The app does not currently enforce these tokens
-on the other API routes; login is not authorization or route protection.
+30-minute HS256 access token. Send it as
+`Authorization: Bearer <access_token>` when calling any other versioned API
+route. The login route is public; `/`, `/health`, `/ready`, and development
+documentation are also public.
 
 | Variable | Default | Use |
 | --- | --- | --- |
@@ -215,6 +231,9 @@ on the other API routes; login is not authorization or route protection.
 | `NVIDIA_API_KEY` | empty | Server-side inference credential |
 | `NVIDIA_MODEL` | `nvidia/Nemotron-3_5-Lightning` | Inference model |
 | `NVIDIA_API_FORMAT` | `openai-chat-completions` | Provider adapter format |
+| `EMBEDDING_MODEL` | `sentence-transformers/all-MiniLM-L6-v2` | Local embedding model; must match the FAISS index |
+| `FAISS_INDEX_PATH` | `faiss_store/security.index` | Local FAISS index |
+| `FAISS_METADATA_PATH` | `faiss_store/security.pkl` | Trusted metadata paired with the index |
 | `AWS_REGION` | `us-east-1` | Regional audits and STS identity |
 | `CORS_ORIGINS` | empty | Comma-separated allowed origins |
 | `MAX_REQUEST_BYTES` | `1048576` | Request-body limit, bounded by settings validation |
@@ -239,6 +258,8 @@ cp .env.example .env
 Set `NVIDIA_API_KEY` in `.env` to enable model calls. Configure AWS access
 through a suitably scoped role/profile or another standard Boto3 credential
 source. Do not use privileged credentials for routine operation.
+The embedding model may be downloaded the first time chat retrieves guidance
+if it is not already cached.
 
 Start the API:
 
@@ -271,8 +292,9 @@ live credentials. Live calls can incur AWS or provider usage.
   policies.
 - Model-generated Compliance and Senior reviews are decision support, not
   formal compliance mappings, legal advice, certification, or guarantees.
-- Retrieval/RAG is currently out of scope; chat cannot cite local knowledge
-  base passages.
+- FAISS retrieval reads only trusted local pickle metadata; never accept
+  metadata or index files from user requests. Retrieved content is untrusted
+  prompt data and is not proof of account compliance.
 - Do not store credentials in assessments, operations, prompts, documents, logs,
   or source control. Keep `.env` private and use least-privilege cloud access.
 

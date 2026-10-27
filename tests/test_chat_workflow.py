@@ -12,6 +12,7 @@ from app.core.config import Settings
 from app.db.base import Base
 from app.db.models.assessment import Assessment
 from app.schemas.chat import ChatRequest
+from app.services import chat_service
 
 
 def test_chat_returns_review_and_forwards_history(monkeypatch):
@@ -31,7 +32,7 @@ def test_chat_returns_review_and_forwards_history(monkeypatch):
             "sources": [],
         }
     )
-    monkeypatch.setattr(chat_route, "chat_workflow", workflow)
+    monkeypatch.setattr(chat_service, "chat_workflow", workflow)
 
     engine = create_engine(
         "sqlite://",

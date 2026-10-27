@@ -10,7 +10,9 @@ flowchart LR
     Cloud --> Auditor[Read-only Boto3 audit functions]
     Auditor --> AWS[AWS APIs via standard credential chain]
     Auditor --> Report[Validated AuditReport]
-    Report --> Compliance[Compliance summary]
+    Chat --> RAG[Local FAISS retrieval]
+    Report --> Compliance[Compliance summary with guidance]
+    RAG --> Compliance
     Compliance --> Nebius
     Report --> Senior[Senior review]
     Compliance --> Senior
@@ -40,12 +42,13 @@ URLs. Alembic migrations are available for managed deployments.
    `AWS_REGION`; CloudTrail checks discover enabled regions. AWS credentials
    come from the standard Boto3 credential chain.
 3. Results are validated against the Pydantic `AuditReport` schema.
-4. **ComplianceAgent** creates a short summary using the report and user
-   request.
-5. **SeniorAgent** reviews the same report and Compliance summary.
-6. The API returns the structured report, Compliance summary, and Senior
-   review in distinct fields. Retrieval is not currently included and the
-   response `sources` list is empty.
+4. The workflow embeds the request with the configured sentence-transformers
+   model and retrieves up to three matching local documents from FAISS.
+5. **ComplianceAgent** creates a short summary using the report, request, and
+   retrieved guidance, distinguishing account findings from general guidance.
+6. **SeniorAgent** reviews the same report and Compliance summary.
+7. The API returns the structured report, Compliance summary, Senior review,
+   and attributed `sources`.
 
 Checks include S3 public policy/ACL, TLS, versioning, and logging; IPv4/IPv6
 public security-group ingress; CloudTrail logging and log-bucket protection;
@@ -63,8 +66,10 @@ AWS service or control.
 - **Health:** `/health` reports process status. `/ready` reports basic
   database configuration and does not test live AWS or model access.
 
-Retrieval/RAG is intentionally excluded for now and can be added later as a
-separate feature.
+The chat workflow requires a matching local FAISS index and trusted metadata
+file. The configured embedding model must match the one used to create the
+index. Retrieval is limited to the Compliance review; it does not initiate
+additional AWS checks.
 
 ## Provider configuration
 

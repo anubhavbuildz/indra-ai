@@ -11,6 +11,7 @@ from app.core.errors import AppError
 from app.schemas.audit_schema import AuditReport
 from app.services.llm import workflow
 from app.services.llm.cloud_agent import CloudAgent
+from app.services.rag import RetrievedPassage
 
 
 def configured_settings() -> Settings:
@@ -157,6 +158,12 @@ def test_chat_workflow_invokes_cloud_agent_with_audit_context(monkeypatch):
         low_count=0,
         findings=[],
     )
+    passage = RetrievedPassage(
+        title="Security guidance",
+        content="Enable encryption for stored data.",
+        source_name="Security guidance",
+        source_uri="https://example.invalid/security",
+    )
     cloud_agent = Mock()
     calls: list[str] = []
 
@@ -172,6 +179,7 @@ def test_chat_workflow_invokes_cloud_agent_with_audit_context(monkeypatch):
     async def compliance_review(**kwargs):
         calls.append("compliance")
         assert kwargs["audit_result"] == audit_report
+        assert kwargs["retrieved_passages"] == [passage]
         return "Compliance assessment."
 
     compliance_agent.review = AsyncMock(side_effect=compliance_review)
@@ -199,6 +207,14 @@ def test_chat_workflow_invokes_cloud_agent_with_audit_context(monkeypatch):
     monkeypatch.setattr(workflow, "ComplianceAgent", lambda _: AgentContext(compliance_agent))
     monkeypatch.setattr(workflow, "SeniorAgent", lambda _: AgentContext(senior_agent))
 
+    class Retriever:
+        async def query(self, question):
+            calls.append("retrieval")
+            assert question == "Audit my AWS configuration."
+            return [passage]
+
+    monkeypatch.setattr(workflow, "RagService", lambda _: Retriever())
+
     result = asyncio.run(
         workflow.chat_workflow(
             configured_settings(),
@@ -210,12 +226,19 @@ def test_chat_workflow_invokes_cloud_agent_with_audit_context(monkeypatch):
     assert result["cloud_agent_response"] == audit_report.model_dump()
     assert result["compliance_agent_response"] == "Compliance assessment."
     assert result["senior_agent_response"] == "Senior review."
-    assert result["sources"] == []
-    assert calls == ["cloud", "compliance", "senior"]
+    assert result["sources"] == [
+        {
+            "title": "Security guidance",
+            "source": "Security guidance",
+            "uri": "https://example.invalid/security",
+        }
+    ]
+    assert calls == ["cloud", "retrieval", "compliance", "senior"]
     cloud_agent.run_audit.assert_awaited_once()
     compliance_agent.review.assert_awaited_once_with(
         question="Audit my AWS configuration.",
         audit_result=audit_report,
         history=[{"role": "user", "content": "Prioritize urgent risks."}],
+        retrieved_passages=[passage],
     )
     senior_agent.review.assert_awaited_once()

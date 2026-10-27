@@ -227,6 +227,11 @@ data/*
 !data/.gitkeep
 faiss_store/*
 !faiss_store/.gitkeep
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
 *.db
 *.sqlite
 *.sqlite3

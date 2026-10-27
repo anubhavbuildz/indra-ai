@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="660" height="270" viewBox="0 0 660 270" fill="none">
+  <defs>
+    <linearGradient id="panel" x1="30" y1="27" x2="619" y2="242" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#111D2A"/>
+      <stop offset="1" stop-color="#0D1420"/>
+    </linearGradient>
+    <linearGradient id="cloud" x1="88" y1="75" x2="88" y2="133" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#68DDF7"/>
+      <stop offset="1" stop-color="#2784B4"/>
+    </linearGradient>
+    <linearGradient id="compliance" x1="330" y1="75" x2="330" y2="133" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#C6A7FF"/>
+      <stop offset="1" stop-color="#7654C9"/>
+    </linearGradient>
+    <linearGradient id="senior" x1="572" y1="75" x2="572" y2="133" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8AE8C1"/>
+      <stop offset="1" stop-color="#358F72"/>
+    </linearGradient>
+    <filter id="glow" x="0" y="0" width="660" height="270" filterUnits="userSpaceOnUse">
+      <feGaussianBlur stdDeviation="18"/>
+    </filter>
+  </defs>
+  <ellipse cx="330" cy="135" rx="244" ry="88" fill="#2879A2" fill-opacity=".08" filter="url(#glow)"/>
+  <rect x="17.5" y="16.5" width="625" height="237" rx="19.5" fill="url(#panel)" fill-opacity=".9" stroke="#28394B"/>
+  <path d="M225 116h54m102 0h54" stroke="#45566B" stroke-width="1.5" stroke-dasharray="4 6"/>
+  <path d="M225 116h54m102 0h54" stroke="#78DDF2" stroke-opacity=".35" stroke-width="1.5"/>
+  <circle cx="252" cy="116" r="3" fill="#72DDF4"/>
+  <circle cx="408" cy="116" r="3" fill="#83E1B9"/>
+
+  <g>
+    <rect x="35" y="44" width="190" height="145" rx="13" fill="#131F2C" stroke="#315267"/>
+    <circle cx="130" cy="103" r="35" fill="#153648" stroke="#38718B"/>
+    <path d="M115 112h30a11 11 0 0 0 0-22 16 16 0 0 0-30-4 13 13 0 0 0 0 26Z" stroke="url(#cloud)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M130 112v-14m-7 7 7-7 7 7" stroke="#75DFF5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="130" y="158" fill="#E5EDF6" font-family="Inter,Arial,sans-serif" font-size="12" font-weight="600" text-anchor="middle">Cloud Agent</text>
+    <text x="130" y="175" fill="#8091A5" font-family="Inter,Arial,sans-serif" font-size="9" text-anchor="middle">Infrastructure audit</text>
+    <circle cx="202" cy="57" r="3" fill="#6ADBF4"/>
+  </g>
+
+  <g>
+    <rect x="235" y="44" width="190" height="145" rx="13" fill="#131F2C" stroke="#514375"/>
+    <circle cx="330" cy="103" r="35" fill="#2B2344" stroke="#67558D"/>
+    <path d="M319 94h22m-22 8h22m-22 8h15" stroke="url(#compliance)" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="m344 110 4 4 8-9" stroke="#D3B7FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="330" y="158" fill="#E5EDF6" font-family="Inter,Arial,sans-serif" font-size="12" font-weight="600" text-anchor="middle">Compliance Agent</text>
+    <text x="330" y="175" fill="#9A8DB6" font-family="Inter,Arial,sans-serif" font-size="9" text-anchor="middle">Guidance synthesis</text>
+    <circle cx="402" cy="57" r="3" fill="#B59AF5"/>
+  </g>
+
+  <g>
+    <rect x="435" y="44" width="190" height="145" rx="13" fill="#131F2C" stroke="#345B4F"/>
+    <circle cx="530" cy="103" r="35" fill="#18372F" stroke="#3C745F"/>
+    <path d="M530 82 548 89v13c0 12-8 20-18 25-10-5-18-13-18-25V89l18-7Z" stroke="url(#senior)" stroke-width="2.5" stroke-linejoin="round"/>
+    <path d="m522 102 6 6 11-12" stroke="#9AF0CB" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="530" y="158" fill="#E5EDF6" font-family="Inter,Arial,sans-serif" font-size="12" font-weight="600" text-anchor="middle">Senior Agent</text>
+    <text x="530" y="175" fill="#86A99A" font-family="Inter,Arial,sans-serif" font-size="9" text-anchor="middle">Evidence verification</text>
+    <circle cx="602" cy="57" r="3" fill="#76D9AA"/>
+  </g>
+
+  <rect x="243" y="211" width="174" height="23" rx="11.5" fill="#111A26" stroke="#29394A"/>
+  <circle cx="260" cy="222.5" r="3" fill="#6ADBF4"/>
+  <text x="330" y="226" fill="#91A1B4" font-family="Inter,Arial,sans-serif" font-size="8" letter-spacing="1.2" text-anchor="middle">ONE EVIDENCE-LED REVIEW</text>
+</svg>

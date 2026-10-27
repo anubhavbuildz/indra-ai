@@ -1,8 +1,10 @@
 # Support
 
-Start with the [README](README.md), [API overview](docs/api.md),
-[architecture](docs/architecture.md), and [security notes](docs/security.md).
-The FastAPI interactive documentation is served at `/docs` in development.
+Start with the [README](README.md), [API overview](design/api.md),
+[architecture](design/architecture.md), and [security notes](design/security.md).
+The [frontend integration how-to](design/HOW_TO.md) covers login, bearer
+tokens, CORS, and handling the agent responses. FastAPI interactive
+documentation is served at `/docs` in development.
 
 For usage questions, open a GitHub issue using a clear question and the
 relevant redacted configuration. For reproducible defects, use the bug
