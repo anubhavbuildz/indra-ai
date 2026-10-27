@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { AlertTriangle, ArrowRight, Check, Cloud, Database, Globe2, Info, LoaderCircle, LockKeyhole, Play, ShieldCheck } from "lucide-react";
+import { ArrowRight, Check, Cloud, Globe2, Info, LoaderCircle, LockKeyhole, Play, ShieldCheck } from "lucide-react";
 import { AgentWorkflow } from "../components/agents/AgentWorkflow";
 import { Button, Card, ErrorState, PageHeading } from "../components/ui/Primitives";
 import { useChatMutation, useAwsIdentity } from "../hooks/useApi";
@@ -19,11 +19,13 @@ const services = [
 
 export default function CloudAudit() {
   const [selected, setSelected] = useState(services.map(([id]) => id));
+  const [acceptedRegion, setAcceptedRegion] = useState("");
   const [regionNote, setRegionNote] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const queryClient = useQueryClient();
   const mutation = useChatMutation();
   const identity = useAwsIdentity();
+  const configuredRegion = identity.data?.region || "";
   const result = mutation.data;
 
   function toggleService(id) {
@@ -37,6 +39,10 @@ export default function CloudAudit() {
     setErrorMessage("");
     if (!selected.length) {
       setErrorMessage("Select at least one AWS service for the audit request.");
+      return;
+    }
+    if (!configuredRegion || acceptedRegion !== configuredRegion) {
+      setErrorMessage("Confirm the backend-configured AWS region before running the audit.");
       return;
     }
     const selectedNames = services.filter(([id]) => selected.includes(id)).map(([, name]) => name);
@@ -110,9 +116,33 @@ export default function CloudAudit() {
               </div>
               <div className="region-readonly">
                 <Globe2 size={16} />
-                <span>{identity.data?.region || "Backend-configured region"}</span>
+                <span>{configuredRegion || (identity.isLoading ? "Loading configured region…" : "Region unavailable")}</span>
                 <LockKeyhole size={13} className="region-lock" />
               </div>
+              {configuredRegion ? (
+                <button
+                  className={`region-accept-button ${acceptedRegion === configuredRegion ? "region-accepted" : ""}`}
+                  type="button"
+                  aria-pressed={acceptedRegion === configuredRegion}
+                  onClick={() => setAcceptedRegion(acceptedRegion === configuredRegion ? "" : configuredRegion)}
+                >
+                  {acceptedRegion === configuredRegion ? <Check size={15} /> : <Globe2 size={15} />}
+                  {acceptedRegion === configuredRegion
+                    ? `Region ${configuredRegion} accepted`
+                    : `Accept ${configuredRegion} for this audit`}
+                </button>
+              ) : (
+                <div className="region-unavailable" role={identity.isError ? "alert" : undefined}>
+                  {identity.isError
+                    ? `Could not load the configured AWS region: ${getErrorMessage(identity.error)}`
+                    : "Waiting for the backend-configured AWS region."}
+                  {identity.isError && (
+                    <button type="button" onClick={() => identity.refetch()} disabled={identity.isFetching}>
+                      {identity.isFetching ? "Retrying…" : "Retry"}
+                    </button>
+                  )}
+                </div>
+              )}
               <div className="service-help">The backend uses its configured AWS_REGION; the API does not accept a per-request region override.</div>
             </div>
             <label className="config-block region-notes-label">
@@ -132,21 +162,20 @@ export default function CloudAudit() {
                 {mutation.isPending ? <><LoaderCircle className="spin" size={15} /> Running audit</> : <><Play size={14} fill="currentColor" /> Run audit</>}
               </Button>
             </div>
+            {mutation.isPending && (
+              <div className="audit-progress" role="status" aria-live="polite">
+                <span>Audit in progress — running the selected checks and reviewing results.</span>
+                <div
+                  className="audit-progress-track"
+                  role="progressbar"
+                  aria-label="Audit progress"
+                  aria-valuetext="Audit in progress"
+                >
+                  <span />
+                </div>
+              </div>
+            )}
           </form>
-        </Card>
-        <Card className="audit-side-card">
-          <div className="section-title">Execution context</div>
-          <div className="execution-list">
-            <div><span className="execution-icon"><Cloud size={15} /></span><span><strong>AWS checks</strong><small>Allowlisted, read-only Boto3 operations</small></span></div>
-            <div><span className="execution-icon execution-violet"><Database size={15} /></span><span><strong>Local guidance</strong><small>FAISS retrieval before Compliance review</small></span></div>
-            <div><span className="execution-icon execution-green"><ShieldCheck size={15} /></span><span><strong>Three responses</strong><small>Cloud, Compliance, and Senior fields</small></span></div>
-          </div>
-          <div className="execution-divider" />
-          <div className="execution-meta">
-            <div><span>Connected AWS identity</span><strong>{identity.data?.account || (identity.isLoading ? "Checking…" : identity.data?.status || "Not verified")}</strong></div>
-            <div><span>Configured region</span><strong>{identity.data?.region || "Backend controlled"}</strong></div>
-          </div>
-          <div className="audit-disclaimer"><AlertTriangle size={14} /> Findings are point-in-time signals, not a compliance certification.</div>
         </Card>
       </div>
 
@@ -156,7 +185,7 @@ export default function CloudAudit() {
         <div className="audit-complete-banner">
           <span><Check size={14} /></span>
           Audit complete · Assessment <code>{result.assessment_id}</code>
-          <a href="/reports"><ArrowRight size={14} /> View report</a>
+          <a href={`/findings/${result.assessment_id}`}><ArrowRight size={14} /> View assessment</a>
         </div>
       )}
     </motion.div>

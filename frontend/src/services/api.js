@@ -91,12 +91,6 @@ export const api = {
 
   ragStatus: () => request(`${API_PREFIX}/rag/status`),
 
-  ragQuery: (question) =>
-    request(`${API_PREFIX}/rag/query`, {
-      method: "POST",
-      body: JSON.stringify({ question }),
-    }),
-
   awsIdentity: () => request(`${API_PREFIX}/aws/identity`),
 
   health: () => request("/health"),

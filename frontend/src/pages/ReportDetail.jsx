@@ -40,7 +40,7 @@ export default function ReportDetail() {
 
   return (
     <motion.div className="page-stack" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
-      <Link to="/reports" className="back-link"><ArrowLeft size={14} /> All reports</Link>
+      <Link to="/findings" className="back-link"><ArrowLeft size={14} /> Back to findings</Link>
       {query.isLoading ? <LoadingState label="Loading assessment report…" /> : query.error ? <ErrorState error={query.error} onRetry={() => query.refetch()} /> : item && (
         <>
           <PageHeading

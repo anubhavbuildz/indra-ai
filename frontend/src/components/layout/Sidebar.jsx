@@ -3,9 +3,7 @@ import {
   Activity,
   Bot,
   ChevronLeft,
-  ClipboardCheck,
   Cloud,
-  FileText,
   LayoutDashboard,
   Search,
   Settings,
@@ -19,8 +17,6 @@ const navigation = [
   { label: "Cloud audit", path: "/audit", icon: Cloud },
   { label: "AI agents", path: "/agents", icon: Bot },
   { label: "Findings", path: "/findings", icon: Search },
-  { label: "Compliance", path: "/compliance", icon: ClipboardCheck },
-  { label: "Reports", path: "/reports", icon: FileText },
 ];
 
 export function Sidebar({ open, onClose, compact, onToggleCompact }) {

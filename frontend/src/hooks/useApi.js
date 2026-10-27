@@ -57,7 +57,3 @@ export function useLatestAudit() {
 export function useChatMutation() {
   return useMutation({ mutationFn: ({ message, history }) => api.chat(message, history) });
 }
-
-export function useRagQueryMutation() {
-  return useMutation({ mutationFn: (question) => api.ragQuery(question) });
-}
