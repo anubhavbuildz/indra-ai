@@ -465,7 +465,7 @@ Designed before new test code. Counts are logical cases; parameterized execution
 | Test input | Named test fixtures in `frontend/src/qa.test.jsx`; invalid variants where named |
 | Steps | Run the mapped test using HOW_TO_TEST.md commands; inspect assertions and evidence |
 | Expected output | All mapped assertions pass; no live cloud or paid inference |
-| Actual output | 3 mapped executions; Passed. See raw evidence. |
+| Actual output | 10 mapped executions; Passed. See raw evidence. |
 | Status | Passed |
 | Evidence | design/qa/evidence/ generated logs and JUnit |
 | Automation | Automated |

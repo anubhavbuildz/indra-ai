@@ -6,7 +6,7 @@ Actual fixture-backed tests and local scanner execution are summarized below. Ap
 
 ## Environment
 
-Generated: 2026-10-28T19:13:48.818856+05:30 (Asia/Kolkata). Commit: `e65b14c5b7051d0289870dfaa999d2d1d2ac4d94`; uncommitted working tree changes included.
+Generated: 2026-10-28T19:31:57.928859+05:30 (Asia/Kolkata). Commit: `41ede85b75df79a7423448468d0d6abec551b2f8`; uncommitted working tree changes included.
 
 - OS: Linux-6.12.113+deb13-amd64-x86_64-with-glibc2.41
 - Python: 3.13.5; pytest 9.2.0; pytest-asyncio 1.4.1; pytest-cov 6.3.0
@@ -19,7 +19,7 @@ Counts are executed test instances, plus explicit inventory blockers. Security i
 
 | Category | Total | Passed | Failed | Skipped | Blocked |
 |---|---:|---:|---:|---:|---:|
-| Unit | 55 | 55 | 0 | 0 | 0 |
+| Unit | 62 | 62 | 0 | 0 | 0 |
 | Integration | 40 | 40 | 0 | 0 | 0 |
 | E2E | 11 | 9 | 0 | 0 | 2 |
 | Security | 14 | 13 | 0 | 0 | 1 |
