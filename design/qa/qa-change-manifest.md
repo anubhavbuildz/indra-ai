@@ -1,3 +1,5 @@
+> Historical manifest from the initial QA implementation. The later user-authorized documentation moves are recorded in [relocations.json](relocations.json).
+
 # QA change manifest
 
 No existing files moved, renamed or deleted. All 163 baseline tracked paths remain.
