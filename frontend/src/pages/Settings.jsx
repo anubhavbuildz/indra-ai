@@ -99,7 +99,7 @@ export default function Settings() {
             <div className="account-label">AUTHENTICATED ACCOUNT</div>
             <strong>{username || "Configured user"}</strong>
             <Badge tone="green"><span className="status-dot" /> JWT session active</Badge>
-            <small>Tokens are held in memory and cleared when the browser app is refreshed or you sign out.</small>
+            <small>Your token is saved in this browser until its two-hour expiry or until you sign out.</small>
           </Card>
           <Card className="backend-features">
             <div className="section-title">Connected capabilities</div>

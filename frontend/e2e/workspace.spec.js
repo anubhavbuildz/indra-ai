@@ -18,7 +18,11 @@ async function navigate(page, name) {
 test("E2E-001 startup, real login, synthetic audit and saved report", async ({page, request}) => {
   const errors = []; page.on("pageerror", error => errors.push(error.message));
   expect((await request.get(`${backend}/health`)).ok()).toBeTruthy();
-  await login(page); await navigate(page, "Cloud audit");
+  await login(page);
+  await page.reload();
+  await expect(page.getByRole("heading", {name: "Security overview"})).toBeVisible();
+  await expect.poll(() => page.evaluate(() => localStorage.getItem("indraa.accessToken"))).toBeTruthy();
+  await navigate(page, "Cloud audit");
   await page.getByRole("button", {name: "Accept us-east-1 for this audit"}).click();
   const completed = page.waitForResponse(r => r.url().endsWith("/api/v1/chat") && r.request().method() === "POST");
   await page.getByRole("button", {name: "Run audit", exact: true}).click();
@@ -29,8 +33,7 @@ test("E2E-001 startup, real login, synthetic audit and saved report", async ({pa
   await expect(page.getByText("Synthetic public bucket")).toBeVisible();
   await page.getByRole("button", {name: "Expand finding details"}).click();
   await expect(page.getByText('"fixture": true', {exact: false})).toBeVisible();
-  // Client-side navigation retains the in-memory session.
-  await page.evaluate(id => {history.pushState({}, "", `/reports/${id}`); window.dispatchEvent(new PopStateEvent("popstate"));}, payload.assessment_id);
+  await page.goto(`/reports/${payload.assessment_id}`);
   await expect(page.getByText("Senior agent assessment", {exact: true})).toBeVisible();
   await expect(page.getByText("Synthetic fixture review.", {exact: false}).first()).toBeVisible();
   expect(errors).toEqual([]);
@@ -56,4 +59,5 @@ test("E2E-001 protected route and session expiry", async ({page}) => {
     await api.awsIdentity().catch(() => {});
   });
   await expect(page.getByLabel("Username")).toBeVisible();
+  expect(await page.evaluate(() => localStorage.getItem("indraa.accessToken"))).toBeNull();
 });

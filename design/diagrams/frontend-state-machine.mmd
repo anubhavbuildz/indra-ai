@@ -1,11 +1,12 @@
 stateDiagram-v2
   [*] --> RouteLoading
-  RouteLoading --> Login: no in-memory token
+  RouteLoading --> Login: no valid stored token
+  RouteLoading --> Workspace: restore unexpired stored JWT
   Login --> Authenticating: submit required credentials
   Authenticating --> LoginError: login rejects or network fails
   LoginError --> Authenticating: resubmit
   Authenticating --> Workspace: token received
-  Workspace --> Login: sign out or page reload
+  Workspace --> Login: sign out or token expiry
   Workspace --> Login: protected API 401 / session-expired event
   state Workspace {
     [*] --> Overview

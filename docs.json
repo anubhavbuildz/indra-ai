@@ -1,0 +1,127 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "INDRAA AI",
+  "description": "Read-only AWS security audits, multi-agent reviews, architecture, and quality assurance.",
+  "colors": {
+    "primary": "#76B900",
+    "light": "#8BCB26",
+    "dark": "#5D8F00"
+  },
+  "appearance": {
+    "default": "system"
+  },
+  "favicon": "/frontend/src/assets/indraa-mark.svg",
+  "search": {
+    "prompt": "Search INDRAA documentation..."
+  },
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Guides",
+        "groups": [
+          {
+            "group": "Getting started",
+            "pages": [
+              "README",
+              "design/diagrams/project-overview",
+              "AWS_SETUP"
+            ]
+          },
+          {
+            "group": "Frontend and security",
+            "pages": [
+              "frontend/README",
+              "design/HOW_TO",
+              "design/security",
+              "SECURITY"
+            ]
+          },
+          {
+            "group": "Contributing",
+            "pages": [
+              "CONTRIBUTING",
+              "CODE_OF_CONDUCT",
+              "SUPPORT",
+              "CHANGELOG"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API reference",
+        "groups": [
+          {
+            "group": "Backend API",
+            "pages": [
+              "design/api"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Architecture",
+        "groups": [
+          {
+            "group": "System design",
+            "pages": [
+              "design/diagrams/README",
+              "design/diagrams/architecture",
+              "design/diagrams/lld",
+              "design/diagrams/frontend-state-machine"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Quality assurance",
+        "groups": [
+          {
+            "group": "Testing",
+            "pages": [
+              "design/qa/README",
+              "design/qa/HOW_TO_TEST",
+              "design/qa/testing",
+              "design/qa/test_case"
+            ]
+          },
+          {
+            "group": "Test inventory",
+            "pages": [
+              "design/qa/unit-test-cases",
+              "design/qa/integration-test-cases",
+              "design/qa/e2e-test-cases",
+              "design/qa/security-test-cases",
+              "design/qa/performance-test-cases",
+              "design/qa/test-traceability-matrix"
+            ]
+          },
+          {
+            "group": "Results and repository",
+            "pages": [
+              "design/qa/FINAL_TEST_REPORT",
+              "design/qa/CODE_COVERAGE",
+              "design/qa/repository-inventory"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "GitHub",
+        "href": "https://github.com/anubhavbuildz/indra-ai"
+      }
+    ]
+  },
+  "footer": {
+    "socials": {
+      "github": "https://github.com/anubhavbuildz/indra-ai"
+    }
+  },
+  "seo": {
+    "indexing": "navigable"
+  }
+}

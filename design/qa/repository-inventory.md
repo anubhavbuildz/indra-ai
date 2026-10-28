@@ -4,7 +4,7 @@ Discovery completed before new test implementation. Baseline: qa-baseline.json. 
 
 | Boundary | Verified implementation |
 |---|---|
-| React | frontend/src/main.jsx; App.jsx lazy routes; AuthContext in-memory JWT; TanStack Query |
+| React | frontend/src/main.jsx; App.jsx lazy routes; AuthContext JWT persisted in localStorage with expiry handling; TanStack Query |
 | Pages | Login, Dashboard, CloudAudit, Agents, Findings, ReportDetail, Settings |
 | HTTP | services/api.js; configurable localStorage backend URL; bearer header; session-expiry event |
 | FastAPI | app/main.py; /health, /ready, /; /api/v1/auth/login, chat, assessments, aws/identity, rag/status, rag/query |

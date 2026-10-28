@@ -56,3 +56,7 @@ Designed before new test code. Counts are logical cases; parameterized execution
 | Evidence | design/qa/evidence/ generated logs and JUnit |
 | Automation | Manual: unsupported feature or review requirement |
 
+
+### E2E-001 refresh persistence regression
+
+After real login against the isolated QA backend, refresh the dashboard and open the persisted report with a full navigation. Expect the session to remain authenticated, protected requests to include the restored bearer token, and 401-triggered expiry to remove the stored JWT. Exercise desktop, tablet and mobile.

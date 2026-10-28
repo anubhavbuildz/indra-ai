@@ -542,3 +542,7 @@ Designed before new test code. Counts are logical cases; parameterized execution
 | Status | Passed |
 | Evidence | evidence/cors-fix.xml |
 | Automation | Automated: tests/test_config.py::test_env_file_is_loaded_from_project_root |
+
+### UNIT-026 persistent-session regression scenarios
+
+Persist the login JWT under `indraa.accessToken`; restore username and bearer header on remount; reject expired/malformed tokens; clear storage on sign-out, server 401 and JWT expiry. Passwords must never be stored. Use valid two-hour fixture JWTs and fake timers for expiration. Evidence: frontend-unit.xml and frontend-auth-persistence.log.
