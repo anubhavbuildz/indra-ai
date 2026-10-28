@@ -1,0 +1,17 @@
+flowchart TD
+  START[Validated authenticated chat request] --> OPEN[Create agents and validate inference configuration]
+  OPEN --> SELECT[CloudAgent asks model for allowlisted audit tool calls]
+  SELECT --> CHECK{Known unique tools and empty JSON arguments?}
+  CHECK -->|no| ERR[Safe AppError; no completed assessment]
+  CHECK -->|yes| EXEC[Execute selected read-only tools sequentially via asyncio.to_thread]
+  EXEC --> REPORT[Validate AuditReport and count severities]
+  REPORT --> RETRIEVE[Retrieve local FAISS guidance]
+  RETRIEVE --> COMP[ComplianceAgent reviews audit plus retrieved passages]
+  COMP --> SEN[SeniorAgent reviews structured audit plus compliance text]
+  SEN --> SAVE[Persist completed assessment]
+  SAVE --> OUT[Return separate outputs and live citations]
+  EXEC -.->|failure| ERR
+  RETRIEVE -.->|failure| ERR
+  COMP -.->|provider failure| ERR
+  SEN -.->|provider failure| ERR
+  NOTE[Senior semantic rejection is prompt-guided, not a deterministic certification gate] -.-> SEN

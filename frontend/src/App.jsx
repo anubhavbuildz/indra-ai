@@ -52,6 +52,7 @@ export default function App() {
               <Route path="agents" element={<Agents />} />
               <Route path="findings" element={<Findings />} />
               <Route path="reports/:assessmentId" element={<ReportDetail />} />
+              <Route path="findings/:assessmentId" element={<ReportDetail />} />
               <Route path="settings" element={<Settings />} />
             </Route>
           </Route>

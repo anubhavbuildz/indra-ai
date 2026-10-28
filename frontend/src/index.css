@@ -253,6 +253,12 @@ textarea { width: 100%; padding: 10px; resize: vertical; color: #e2eaf3; backgro
 .audit-progress-track { position: relative; height: 4px; overflow: hidden; border-radius: 999px; background: #202c3b; }
 .audit-progress-track > span { position: absolute; inset: 0 auto 0 0; width: 35%; border-radius: inherit; background: linear-gradient(90deg, #39a7c3, #85e2f5); box-shadow: 0 0 10px rgba(89, 205, 235, .35); animation: audit-progress 1.4s ease-in-out infinite; }
 @keyframes audit-progress { from { transform: translateX(-110%); } to { transform: translateX(320%); } }
+.audit-running-overlay { position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; padding: 20px; background: rgba(3, 7, 13, .78); backdrop-filter: blur(7px); }
+.audit-running-dialog { width: min(100%, 380px); display: grid; justify-items: center; gap: 12px; padding: 28px; color: #a9b8c9; border: 1px solid #304658; border-radius: 12px; background: #101923; box-shadow: 0 20px 70px rgba(0, 0, 0, .45); text-align: center; }
+.audit-running-dialog > svg { color: #78dff7; }
+.audit-running-dialog h2 { margin: 0; color: #e7eef6; font-size: 17px; }
+.audit-running-dialog p { margin: 0; font-size: 11px; line-height: 1.6; }
+.audit-running-dialog .audit-progress-track { width: 100%; margin-top: 5px; }
 @media (prefers-reduced-motion: reduce) {
   .audit-progress-track > span { animation-duration: 3s; }
 }
@@ -288,6 +294,8 @@ textarea { width: 100%; padding: 10px; resize: vertical; color: #e2eaf3; backgro
 .agent-output-content { overflow: hidden; border-top: 1px solid #222d3b; }
 .agent-output-content pre { max-height: 360px; overflow: auto; margin: 0; padding: 14px; color: #b6c7d7; background: #0c121b; font: 9px/1.7 var(--mono); white-space: pre-wrap; overflow-wrap: anywhere; }
 .agent-prose { padding: 15px; color: #c0cbd8; font-size: 10px; line-height: 1.8; }
+.agent-output-actions { display: flex; justify-content: flex-end; padding: 0 15px 14px; }
+.senior-review-print { display: none; }
 .audit-complete-banner { display: flex; align-items: center; gap: 8px; padding: 11px 13px; color: #a8d9c4; border: 1px solid #2c5247; border-radius: 7px; background: rgba(34, 109, 79, .1); font-size: 9px; }
 .audit-complete-banner > span { width: 19px; height: 19px; display: grid; place-items: center; color: #0b211a; border-radius: 50%; background: #75dcb1; }
 .audit-complete-banner code { color: #b9c9d8; font: 9px var(--mono); }
@@ -510,4 +518,47 @@ textarea { width: 100%; padding: 10px; resize: vertical; color: #e2eaf3; backgro
   .login-card { max-width: none; padding: 21px; }
   .login-card-icon { margin-bottom: 15px; }
   .login-footnote { gap: 10px; font-size: 6px; }
+}
+
+@media print {
+  @page { margin: 18mm; }
+
+  body.printing-senior-review {
+    color: #111;
+    background: #fff;
+    color-scheme: light;
+  }
+  body.printing-senior-review > #root { display: none !important; }
+  body.printing-senior-review > .senior-review-print {
+    display: block !important;
+    padding: 0;
+    color: #111;
+    background: #fff;
+    font: 11pt/1.5 Arial, sans-serif;
+  }
+  .senior-review-print h1 {
+    margin: 0 0 18pt;
+    color: #111;
+    font-size: 18pt;
+  }
+  .senior-review-print .markdown-view,
+  .senior-review-print .markdown-view h2,
+  .senior-review-print .markdown-view h3,
+  .senior-review-print .markdown-view h4,
+  .senior-review-print .markdown-view li,
+  .senior-review-print .markdown-view strong,
+  .senior-review-print .markdown-view code,
+  .senior-review-print .markdown-view th,
+  .senior-review-print .markdown-view td {
+    color: #111;
+    background: transparent;
+  }
+  .senior-review-print .markdown-view {
+    font-size: 11pt;
+    line-height: 1.5;
+  }
+  .senior-review-print .markdown-view th,
+  .senior-review-print .markdown-view td {
+    border-color: #888;
+  }
 }

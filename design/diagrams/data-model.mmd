@@ -1,0 +1,23 @@
+erDiagram
+  ASSESSMENTS ||--o{ OPERATIONS : "assessment_id FK CASCADE"
+  ASSESSMENTS {
+    string id PK
+    string name
+    text description "nullable"
+    string status
+    text question "nullable"
+    json audit_report "nullable"
+    text compliance_review "nullable"
+    text senior_review "nullable"
+    datetime created_at
+    datetime updated_at
+  }
+  OPERATIONS {
+    string id PK
+    string assessment_id FK
+    string operation_type
+    string status
+    datetime created_at
+    datetime finished_at "nullable"
+    text safe_summary "nullable"
+  }

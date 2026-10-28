@@ -1,0 +1,35 @@
+# Test-only image; production Dockerfile remains authoritative and unchanged.
+FROM python:3.13-slim AS backend
+WORKDIR /workspace
+COPY requirements-qa.lock pyproject.toml README.md ./
+RUN pip install --no-cache-dir -r requirements-qa.lock
+COPY app ./app
+COPY migrations ./migrations
+COPY alembic.ini pytest-qa.ini ./
+COPY tests ./tests
+COPY scripts ./scripts
+COPY design/qa/qa-cases.json ./design/qa/qa-cases.json
+RUN pip install --no-deps -e . && mkdir -p /tmp/qa \
+    && groupadd --gid 10001 qa && useradd --uid 10001 --gid qa --create-home qa \
+    && chown -R qa:qa /workspace
+USER qa
+ENV PYTHONDONTWRITEBYTECODE=1 AWS_EC2_METADATA_DISABLED=true
+CMD ["python", "-m", "uvicorn", "scripts.qa_server:app", "--host", "0.0.0.0", "--port", "8000"]
+
+FROM node:22-bookworm-slim AS frontend
+WORKDIR /workspace/frontend
+COPY frontend/package*.json ./
+RUN npm ci
+COPY --chown=node:node frontend ./
+RUN chown -R node:node /workspace
+USER node
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
+
+FROM mcr.microsoft.com/playwright:v1.56.1-noble AS browser
+WORKDIR /workspace/frontend
+COPY frontend/package*.json ./
+RUN npm ci
+COPY --chown=pwuser:pwuser frontend ./
+RUN chown -R pwuser:pwuser /workspace
+USER pwuser
+CMD ["npm", "run", "test:e2e"]

@@ -11,7 +11,30 @@ tables. The backend response contract remains unchanged.
 
 ## Quick start
 
-### Local Python
+### Install the full project
+
+Requirements: Python 3.12 or newer, Node.js 20.19+ (or 22.12+), and npm.
+From the project root, run:
+
+```bash
+./scripts/install.sh
+```
+
+The script creates a local `.venv`, installs the backend and development
+dependencies, creates `.env` files from the provided examples without
+overwriting existing ones, installs frontend dependencies, and applies
+database migrations. Configure `.env` before using authenticated or
+inference-backed features. Start each application in a separate terminal:
+
+```bash
+.venv/bin/uvicorn app.main:app --reload
+```
+
+```bash
+cd frontend && npm run dev
+```
+
+### Manual Python setup
 
 Requirements: Python 3.12 or newer.
 
@@ -78,6 +101,9 @@ Set `VITE_API_BASE_URL` to the backend origin when it is not
 `CORS_ORIGINS`. Backend credentials and provider secrets must never be placed
 in Vite environment variables.
 
+Assessment timestamps are stored in UTC and shown in India Standard Time
+(IST, Asia/Kolkata, UTC+05:30) in the frontend.
+
 ## API at a glance
 
 The versioned API prefix defaults to `/api/v1`. All versioned routes except
@@ -111,19 +137,19 @@ plain strings and are also stored as text in assessment history.
 ## Documentation
 
 Implementation, API, deployment, and testing references are collected in
-[design/](design/):
+[design/](design):
 
 - [Frontend integration how-to](design/HOW_TO.md)
 - [Detailed API reference](design/api.md)
-- [Architecture](design/architecture.md)
-- [Low-level design and module interactions](design/lld.md)
-- [Project overview](design/project-overview.md)
+- [Architecture](design/diagrams/architecture.md)
+- [Low-level design and module interactions](design/diagrams/lld.md)
+- [Project overview](design/diagrams/project-overview.md)
 - [Security boundaries](design/security.md)
-- [Testing strategy](design/testing.md)
-- [Function-level test cases and manual checklist](design/test_case.md)
+- [Testing strategy](design/qa/testing.md)
+- [Function-level test cases and manual checklist](design/qa/test_case.md)
 
 The old Terraform architecture draft is retained as a clearly marked
-[historical document](design/archive/architecture-legacy.md) and does not
+[historical document](design/diagrams/archive/architecture-legacy.md) and does not
 describe the current service.
 
 ## Development checks
@@ -152,7 +178,7 @@ testing additionally depends on AWS and inference availability.
 The most recent live workflow retry timed out at the remote inference provider,
 so real agent output has not been revalidated through the renderer. An earlier
 live S3 workflow succeeded before the Markdown integration. See the
-[testing notes](design/testing.md) for the distinction.
+[testing notes](design/qa/testing.md) for the distinction.
 
 ## Security and limitations
 

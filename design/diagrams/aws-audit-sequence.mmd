@@ -1,0 +1,40 @@
+sequenceDiagram
+  actor User
+  participant UI as React CloudAudit
+  participant API as FastAPI
+  participant JWT as Bearer validation
+  participant Flow as chat_workflow
+  participant Cloud as CloudAgent and AWSAuditor
+  participant Model as Configured model API
+  participant AWS as AWS read-only APIs
+  participant RAG as Local FAISS retrieval
+  participant Comp as ComplianceAgent
+  participant Senior as SeniorAgent
+  participant DB as Assessment storage
+  User->>UI: Select services, accept backend region, submit
+  UI->>API: POST chat with JWT and prompt
+  API->>JWT: Verify signature and required claims
+  JWT-->>API: Authenticated subject
+  API->>Flow: Run workflow
+  Flow->>Cloud: run_audit
+  Cloud->>Model: Request read-only tool selection
+  Model-->>Cloud: Tool calls (untrusted)
+  Cloud->>Cloud: Validate tool names and arguments
+  loop Selected tools in order
+    Cloud->>AWS: Read resource configuration
+    AWS-->>Cloud: Evidence or access errors
+  end
+  Cloud-->>Flow: Typed report and severity counts
+  Flow->>RAG: Query guidance
+  RAG-->>Flow: Attributed passages
+  Flow->>Comp: Report plus retrieved guidance
+  Comp->>Model: Generate assessment
+  Model-->>Comp: Compliance text
+  Flow->>Senior: Report plus compliance text
+  Note over Senior: Prompt-guided review without deterministic claim verifier
+  Senior->>Model: Generate independent review
+  Model-->>Senior: Review text
+  Flow-->>API: Separate outputs and citations
+  API->>DB: Persist report and reviews through ChatService
+  API-->>UI: Completed response and assessment id
+  UI-->>User: Workflow output and report link

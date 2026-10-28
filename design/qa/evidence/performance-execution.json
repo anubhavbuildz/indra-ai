@@ -1,0 +1,18 @@
+{
+  "stage": "performance",
+  "command": [
+    "/home/anubhav/indra-ai/.venv/bin/python",
+    "-m",
+    "pytest",
+    "-c",
+    "pytest-qa.ini",
+    "-p",
+    "tests.qa_plugin",
+    "-m",
+    "performance",
+    "--junitxml=design/qa/evidence/performance.xml"
+  ],
+  "started_utc": "2026-10-28T13:42:08.989906+00:00",
+  "finished_utc": "2026-10-28T13:42:11.849080+00:00",
+  "exit_code": 0
+}

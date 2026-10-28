@@ -23,7 +23,11 @@ export function formatDate(value) {
   const date = new Date(value);
   return Number.isNaN(date.getTime())
     ? "Unknown date"
-    : new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(date);
+    : new Intl.DateTimeFormat("en-IN", {
+      dateStyle: "medium",
+      timeStyle: "short",
+      timeZone: "Asia/Kolkata",
+    }).format(date);
 }
 
 export function relativeTime(value) {
@@ -39,7 +43,7 @@ export function relativeTime(value) {
     ["hour", 60 * 60],
     ["minute", 60],
   ];
-  const formatter = new Intl.RelativeTimeFormat(undefined, { numeric: "auto" });
+  const formatter = new Intl.RelativeTimeFormat("en-IN", { numeric: "auto" });
 
   for (const [unit, duration] of units) {
     if (Math.abs(seconds) >= duration) {

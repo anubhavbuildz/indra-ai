@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="18" failures="0" errors="0" time="3.761996048">
+    <testsuite name="src/api.test.js" timestamp="2026-10-28T13:41:14.845Z" hostname="srv682320" tests="5" failures="0" errors="0" skipped="0" time="0.021520479">
+        <testcase classname="src/api.test.js" name="UNIT-027 normalizes backend URL" time="0.005842666">
+        </testcase>
+        <testcase classname="src/api.test.js" name="UNIT-027 sends bearer and encoded request" time="0.007147606">
+        </testcase>
+        <testcase classname="src/api.test.js" name="UNIT-027 emits session expiry on protected 401" time="0.003628689">
+        </testcase>
+        <testcase classname="src/api.test.js" name="UNIT-027 maps network errors and preserves abort" time="0.001705283">
+        </testcase>
+        <testcase classname="src/api.test.js" name="UNIT-027 handles text error and encodes report ID" time="0.000957898">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/pages.test.jsx" timestamp="2026-10-28T13:41:14.848Z" hostname="srv682320" tests="8" failures="0" errors="0" skipped="0" time="3.3577007">
+        <testcase classname="src/pages.test.jsx" name="UNIT-029 dashboard renders saved evidence and navigation controls" time="0.844076098">
+        </testcase>
+        <testcase classname="src/pages.test.jsx" name="UNIT-029 findings filters and expands evidence" time="0.446399845">
+        </testcase>
+        <testcase classname="src/pages.test.jsx" name="UNIT-029 saved report displays both reviews" time="0.366155168">
+        </testcase>
+        <testcase classname="src/pages.test.jsx" name="UNIT-029 agent page explains workflow and expiry redirects" time="0.358230584">
+        </testcase>
+        <testcase classname="src/pages.test.jsx" name="UNIT-029 settings validates URL and saves safe origin" time="0.437633616">
+        </testcase>
+        <testcase classname="src/pages.test.jsx" name="UNIT-029 audit requires region confirmation then renders result" time="0.800067134">
+        </testcase>
+        <testcase classname="src/pages.test.jsx" name="UNIT-029 empty findings and API failure are visible" time="0.030162377">
+        </testcase>
+        <testcase classname="src/pages.test.jsx" name="UNIT-029 API error supports retry" time="0.072727999">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/qa.test.jsx" timestamp="2026-10-28T13:41:14.853Z" hostname="srv682320" tests="3" failures="0" errors="0" skipped="0" time="0.346243342">
+        <testcase classname="src/qa.test.jsx" name="UNIT-026 login and auth &gt; renders labeled required fields and toggles visibility" time="0.220410786">
+        </testcase>
+        <testcase classname="src/qa.test.jsx" name="UNIT-026 login and auth &gt; shows pending state and safe login failure" time="0.110899778">
+        </testcase>
+        <testcase classname="src/qa.test.jsx" name="UNIT-026 login and auth &gt; sets auth identity then clears token on sign out" time="0.009875568">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/utils.test.js" timestamp="2026-10-28T13:41:14.856Z" hostname="srv682320" tests="2" failures="0" errors="0" skipped="0" time="0.036531527">
+        <testcase classname="src/utils.test.js" name="UNIT-028 handles malformed findings and unknown severity" time="0.006081787">
+        </testcase>
+        <testcase classname="src/utils.test.js" name="UNIT-028 formats dates, times, errors, names and classes" time="0.027030083">
+        </testcase>
+    </testsuite>
+</testsuites>

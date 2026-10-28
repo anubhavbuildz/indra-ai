@@ -1,0 +1,93 @@
+{
+  "bandit": {
+    "exit_code": 0,
+    "command": [
+      "/home/anubhav/indra-ai/.venv/bin/python",
+      "-m",
+      "bandit",
+      "-r",
+      "app",
+      "-lll",
+      "-f",
+      "json",
+      "-o",
+      "design/qa-evidence/bandit-gate.json"
+    ]
+  },
+  "pip-audit": {
+    "exit_code": 0,
+    "command": [
+      "/home/anubhav/indra-ai/.venv/bin/python",
+      "-m",
+      "pip_audit",
+      "--format",
+      "json",
+      "--output",
+      "design/qa-evidence/pip-audit.json"
+    ]
+  },
+  "npm-audit": {
+    "exit_code": 0,
+    "command": [
+      "npm",
+      "--prefix",
+      "frontend",
+      "audit",
+      "--audit-level=high",
+      "--json"
+    ]
+  },
+  "gitleaks-history": {
+    "exit_code": 0,
+    "command": [
+      "/tmp/indra-qa-bin/gitleaks",
+      "git",
+      "--config",
+      ".gitleaks.toml",
+      "--redact",
+      "--report-format",
+      "json",
+      "--report-path",
+      "design/qa-evidence/gitleaks-history.json"
+    ]
+  },
+  "trivy": {
+    "exit_code": 0,
+    "command": [
+      "/tmp/indra-qa-bin/trivy",
+      "fs",
+      "--scanners",
+      "vuln,misconfig",
+      "--severity",
+      "HIGH,CRITICAL",
+      "--exit-code",
+      "1",
+      "--skip-dirs",
+      ".venv",
+      "--skip-dirs",
+      "frontend/node_modules",
+      "--skip-dirs",
+      "design/qa-evidence",
+      "--format",
+      "json",
+      "--output",
+      "design/qa-evidence/trivy.json",
+      "."
+    ]
+  },
+  "gitleaks-worktree": {
+    "exit_code": 0,
+    "command": [
+      "/tmp/indra-qa-bin/gitleaks",
+      "dir",
+      "/tmp/indra-scan-i4pwp33q",
+      "--config",
+      ".gitleaks.toml",
+      "--redact",
+      "--report-format",
+      "json",
+      "--report-path",
+      "design/qa-evidence/gitleaks-worktree.json"
+    ]
+  }
+}

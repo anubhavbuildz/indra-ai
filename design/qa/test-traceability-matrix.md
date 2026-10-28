@@ -1,0 +1,76 @@
+# Test traceability matrix
+
+Original inventory preceded new test implementation. Latest outcomes come from execution-results.json.
+
+| ID | Category | Implementation or limitation | Latest status |
+|---|---|---|---|
+| UNIT-001 | unit | `tests/test_auth.py::test_verify_access_token_rejects_expired_token` | Passed |
+| UNIT-002 | unit | `tests/test_auth.py::test_jwt_secret_must_be_at_least_32_bytes` | Passed |
+| UNIT-003 | unit | `tests/test_cloud_agent.py::test_cloud_agent_selects_and_executes_audit_tools` | Passed |
+| UNIT-004 | unit | `tests/test_cloud_agent.py::test_cloud_agent_rejects_invalid_tool_arguments_before_execution` | Passed |
+| UNIT-005 | unit | `tests/test_cloud_agent.py::test_cloud_agent_executes_cloudtrail_and_guardduty_with_report_schema` | Passed |
+| UNIT-006 | unit | `tests/test_cloud_agent.py::test_chat_workflow_invokes_cloud_agent_with_audit_context` | Passed |
+| UNIT-007 | unit | `tests/test_config.py::test_defaults_allow_startup_without_provider_credentials` | Passed |
+| UNIT-008 | unit | `tests/test_config.py::test_inference_timeout_is_bounded` | Passed |
+| UNIT-009 | unit | `tests/test_config.py::test_inference_timeout_rejects_values_above_maximum` | Passed |
+| UNIT-010 | unit | `tests/test_config.py::test_credentials_are_not_in_settings_repr` | Passed |
+| UNIT-011 | unit | `tests/test_llm_service.py::test_missing_provider_settings_fail_clearly` | Passed |
+| UNIT-012 | unit | `tests/test_llm_service.py::test_nebius_provider_defaults` | Passed |
+| UNIT-013 | unit | `tests/test_llm_service.py::test_client_is_created_from_settings_without_default_endpoint` | Passed |
+| UNIT-014 | unit | `tests/test_llm_service.py::test_client_uses_configured_inference_timeout` | Passed |
+| UNIT-015 | unit | `tests/test_llm_service.py::test_completion_uses_shared_client_model_and_conversation` | Passed |
+| UNIT-016 | unit | `tests/test_llm_service.py::test_provider_errors_are_mapped_without_details` | Passed |
+| UNIT-017 | unit | `tests/test_llm_service.py::test_malformed_provider_response_is_safe` | Passed |
+| UNIT-018 | unit | `tests/test_llm_service.py::test_compliance_agent_summarizes_audit_report_and_history` | Passed |
+| UNIT-019 | unit | `tests/test_llm_service.py::test_compliance_role_prompt_loads_from_markdown` | Passed |
+| UNIT-020 | unit | `tests/test_rag.py::test_retriever_returns_faiss_ranked_passages_and_sources` | Passed |
+| UNIT-021 | unit | `tests/test_rag.py::test_store_loader_rejects_document_count_mismatch` | Passed |
+| UNIT-022 | unit | `tests/test_rag.py::test_resolve_store_path_preserves_absolute_paths` | Passed |
+| UNIT-023 | unit | `tests/test_qa_unit.py::test_jwt_rejects_invalid_claims` | Passed |
+| UNIT-024 | unit | `tests/test_qa_unit.py::test_rag_rejects_invalid_metadata` | Passed |
+| UNIT-025 | unit | `tests/test_qa_unit.py::test_chat_schema_boundaries` | Passed |
+| UNIT-026 | unit | `frontend/src/qa.test.jsx` | Passed |
+| UNIT-027 | unit | `frontend/src/api.test.js` | Passed |
+| UNIT-028 | unit | `frontend/src/utils.test.js` | Passed |
+| INTEGRATION-001 | integration | `tests/test_assessments.py::test_list_and_read_assessments_with_senior_review` | Passed |
+| INTEGRATION-002 | integration | `tests/test_assessments.py::test_missing_assessment_has_stable_error` | Passed |
+| INTEGRATION-003 | integration | `tests/test_auth.py::test_login_issues_verifiable_access_token` | Passed |
+| INTEGRATION-004 | integration | `tests/test_auth.py::test_login_rejects_invalid_credentials` | Passed |
+| INTEGRATION-005 | integration | `tests/test_auth.py::test_versioned_routes_reject_missing_bearer_token` | Passed |
+| INTEGRATION-006 | integration | `tests/test_auth.py::test_protected_route_accepts_login_token` | Passed |
+| INTEGRATION-007 | integration | `tests/test_auth.py::test_protected_route_rejects_invalid_bearer_token` | Passed |
+| INTEGRATION-008 | integration | `tests/test_auth.py::test_openapi_documents_bearer_auth_on_protected_routes` | Passed |
+| INTEGRATION-009 | integration | `tests/test_auth.py::test_login_reports_missing_configuration` | Passed |
+| INTEGRATION-010 | integration | `tests/test_aws.py::test_missing_credentials_return_not_configured` | Passed |
+| INTEGRATION-011 | integration | `tests/test_aws.py::test_identity_returns_only_non_secret_metadata` | Passed |
+| INTEGRATION-012 | integration | `tests/test_aws_audit.py::test_get_enabled_regions_returns_enabled_region_names` | Passed |
+| INTEGRATION-013 | integration | `tests/test_aws_audit.py::test_s3_audit_reports_disabled_public_access_and_missing_encryption` | Passed |
+| INTEGRATION-014 | integration | `tests/test_aws_audit.py::test_iam_audit_reports_root_access_keys` | Passed |
+| INTEGRATION-015 | integration | `tests/test_aws_audit.py::test_regional_audits_report_open_management_ports_and_public_database` | Passed |
+| INTEGRATION-016 | integration | `tests/test_aws_audit.py::test_ec2_audit_reports_ipv6_all_protocol_ingress_and_public_snapshot` | Passed |
+| INTEGRATION-017 | integration | `tests/test_aws_audit.py::test_rds_audit_reports_disabled_backups_deletion_protection_and_public_snapshots` | Passed |
+| INTEGRATION-018 | integration | `tests/test_aws_audit.py::test_cloudtrail_audit_checks_multiregion_logging_and_log_bucket_protection` | Passed |
+| INTEGRATION-019 | integration | `tests/test_aws_audit.py::test_guardduty_audit_reports_missing_detector` | Passed |
+| INTEGRATION-020 | integration | `tests/test_aws_audit.py::test_vpc_audit_reports_default_vpc_without_flow_logs` | Passed |
+| INTEGRATION-021 | integration | `tests/test_chat_api.py::test_chat_sends_separate_agent_responses_to_frontend` | Passed |
+| INTEGRATION-022 | integration | `tests/test_chat_workflow.py::test_chat_returns_review_and_forwards_history` | Passed |
+| INTEGRATION-023 | integration | `tests/test_errors.py::test_unconfigured_chat_does_not_echo_prompt_or_credentials` | Passed |
+| INTEGRATION-024 | integration | `tests/test_health.py::test_health_reports_service_without_credentials` | Passed |
+| INTEGRATION-025 | integration | `tests/test_health.py::test_docs_are_available_in_development` | Passed |
+| INTEGRATION-026 | integration | `tests/test_health.py::test_request_id_is_returned_and_oversized_body_is_rejected` | Passed |
+| INTEGRATION-027 | integration | `tests/test_rag.py::test_rag_query_route_returns_passages_and_citations` | Passed |
+| INTEGRATION-028 | integration | `tests/test_rag.py::test_rag_status_route_reports_missing_files` | Passed |
+| INTEGRATION-029 | integration | `tests/test_rag.py::test_rag_query_returns_safe_error_when_store_is_missing` | Passed |
+| INTEGRATION-030 | integration | `tests/test_rag.py::test_rag_query_validates_question_length` | Passed |
+| INTEGRATION-031 | integration | `tests/test_qa_integration.py::test_chat_persists_and_reads` | Passed |
+| INTEGRATION-032 | integration | `tests/test_qa_integration.py::test_invalid_pagination` | Passed |
+| E2E-001 | e2e | `frontend/e2e/workspace.spec.js` | Passed |
+| E2E-002 | e2e | `manual` | Blocked |
+| E2E-003 | e2e | `manual` | Blocked |
+| SECURITY-001 | security | `tests/test_qa_security.py` | Passed |
+| SECURITY-002 | security | `scanners` | Passed |
+| SECURITY-003 | security | `manual` | Blocked |
+| PERFORMANCE-001 | performance | `tests/test_qa_performance.py` | Passed |
+| UNIT-029 | unit | `frontend/src/pages.test.jsx` | Passed |
+| UNIT-030 | unit | `tests/test_config.py::test_env_file_is_loaded_from_project_root` | Passed |
+| INTEGRATION-033 | integration | `tests/test_cors.py::test_cors_preflight_for_local_frontend` | Passed |

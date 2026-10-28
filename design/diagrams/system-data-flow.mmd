@@ -1,0 +1,26 @@
+flowchart TD
+  subgraph client[Browser boundary]
+    U[User] --> UI[React UI]
+  end
+  subgraph backend[Backend boundary]
+    ROUTE[Protected chat route] --> SERVICE[ChatService]
+    SERVICE --> FLOW[chat_workflow]
+    FLOW --> C[CloudAgent]
+    C --> A[AWSAuditor allowlist]
+    A -->|normalized findings and incomplete checks| C
+    C -->|AuditReport| R[RagService]
+    R -->|retrieved attributed guidance| CO[ComplianceAgent]
+    CO -->|untrusted generated assessment| S[SeniorAgent]
+    S -->|review text| SERVICE
+    SERVICE -->|completed assessment| DB[(Assessment storage)]
+    DB --> GET[Protected assessment read routes]
+    STORE[(Trusted FAISS and pickle metadata)] --> R
+  end
+  UI -->|JWT, prompt and bounded history| ROUTE
+  A -->|read-only signed requests| AWS[AWS API boundary]
+  AWS -->|resource evidence or errors| A
+  C <-->|tool selection| MODEL[External inference trust boundary]
+  CO <-->|audit evidence and guidance / text| MODEL
+  S <-->|report and compliance text / review| MODEL
+  SERVICE -->|live response with citations| UI
+  GET -->|saved report without RAG citations| UI

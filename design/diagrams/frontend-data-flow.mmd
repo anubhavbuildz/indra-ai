@@ -1,0 +1,20 @@
+flowchart LR
+  U[User] -->|credentials| LOGIN[Login form]
+  LOGIN --> AUTH[AuthContext]
+  AUTH -->|token in memory| API[services/api.js]
+  U -->|services, region confirmation, context| AUDIT[CloudAudit local state]
+  AUDIT -->|generated read-only audit prompt| MUT[useChatMutation]
+  MUT --> API
+  API -->|bearer HTTP requests| BE[FastAPI]
+  BE -->|structured audit, review text, citations, assessment id| API
+  API --> MUT
+  MUT -->|result| WORK[AgentWorkflow and MarkdownView]
+  MUT -->|invalidate| CACHE[TanStack Query cache]
+  CACHE --> DASH[Dashboard, Findings, ReportDetail]
+  BE -->|persisted assessments| CACHE
+  API -->|401 event| SESSION[SessionEvents]
+  SESSION -->|sign out and redirect| AUTH
+  API -->|ApiError| ERR[ErrorState, retry or form error]
+  U --> SETTINGS[Settings]
+  SETTINGS -->|backend origin only| LS[(localStorage)]
+  LS --> API

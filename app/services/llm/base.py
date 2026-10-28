@@ -110,7 +110,7 @@ class BaseLLM:
                 model=model or self.settings.nvidia_model,
                 messages=messages,
                 temperature=0.6,
-                max_completion_tokens=2048,
+                max_completion_tokens=8192,
             )
         except APITimeoutError as exc:
             raise AppError(504, "provider_timeout", "The inference provider timed out.") from exc

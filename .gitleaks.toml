@@ -1,0 +1,7 @@
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Exact public JWT test fixture and stable S3 check identifier; neither is a runtime secret"
+regexTarget = "secret"
+regexes = ['''^test-signing-secret-with-at-least-32-bytes$''', '''^s3\.default_encryption$''']

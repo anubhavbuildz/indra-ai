@@ -1,0 +1,27 @@
+stateDiagram-v2
+  [*] --> RouteLoading
+  RouteLoading --> Login: no in-memory token
+  Login --> Authenticating: submit required credentials
+  Authenticating --> LoginError: login rejects or network fails
+  LoginError --> Authenticating: resubmit
+  Authenticating --> Workspace: token received
+  Workspace --> Login: sign out or page reload
+  Workspace --> Login: protected API 401 / session-expired event
+  state Workspace {
+    [*] --> Overview
+    Overview --> AuditEditing: navigate to cloud audit
+    AuditEditing --> ValidationError: no services or region unconfirmed
+    ValidationError --> AuditEditing: edit selection or accept region
+    AuditEditing --> Processing: submit with selection and accepted region
+    Processing --> AuditError: request rejects
+    AuditError --> Processing: resubmit valid form
+    Processing --> ResponseReady: full response received
+    ResponseReady --> ReportLoading: navigate to persisted report
+    ReportLoading --> ReportReady: assessment loaded
+    ReportLoading --> ReportError: API rejects
+    ReportError --> ReportLoading: Try again
+  }
+  note right of Processing
+    Sequential backend agents; no streamed per-agent progress.
+    Overlay makes root inert until response.
+  end note

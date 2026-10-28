@@ -93,7 +93,7 @@ def test_completion_uses_shared_client_model_and_conversation():
     client.chat.completions.create.assert_awaited_once_with(
         model="developer-selected-model",
         temperature=0.6,
-        max_completion_tokens=2048,
+        max_completion_tokens=8192,
         messages=[
             {"role": "system", "content": "You are the base agent."},
             {"role": "assistant", "content": "Ready."},

@@ -1,0 +1,673 @@
+{
+  "timestamp": "2026-10-28T19:13:48.818856+05:30",
+  "commit": "e65b14c5b7051d0289870dfaa999d2d1d2ac4d94",
+  "summary": {
+    "Unit": {
+      "total": 55,
+      "passed": 55,
+      "failed": 0,
+      "skipped": 0,
+      "blocked": 0
+    },
+    "Integration": {
+      "total": 40,
+      "passed": 40,
+      "failed": 0,
+      "skipped": 0,
+      "blocked": 0
+    },
+    "E2E": {
+      "total": 11,
+      "passed": 9,
+      "failed": 0,
+      "skipped": 0,
+      "blocked": 2
+    },
+    "Security": {
+      "total": 14,
+      "passed": 13,
+      "failed": 0,
+      "skipped": 0,
+      "blocked": 1
+    },
+    "Performance": {
+      "total": 1,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "blocked": 0
+    }
+  },
+  "cases": [
+    {
+      "id": "UNIT-001",
+      "category": "unit",
+      "path": "tests/test_auth.py::test_verify_access_token_rejects_expired_token",
+      "objective": "verify access token rejects expired token",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "1 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "UNIT-002",
+      "category": "unit",
+      "path": "tests/test_auth.py::test_jwt_secret_must_be_at_least_32_bytes",
+      "objective": "jwt secret must be at least 32 bytes",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "1 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "UNIT-003",
+      "category": "unit",
+      "path": "tests/test_cloud_agent.py::test_cloud_agent_selects_and_executes_audit_tools",
+      "objective": "cloud agent selects and executes audit tools",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "1 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "UNIT-004",
+      "category": "unit",
+      "path": "tests/test_cloud_agent.py::test_cloud_agent_rejects_invalid_tool_arguments_before_execution",
+      "objective": "cloud agent rejects invalid tool arguments before execution",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "1 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "UNIT-005",
+      "category": "unit",
+      "path": "tests/test_cloud_agent.py::test_cloud_agent_executes_cloudtrail_and_guardduty_with_report_schema",
+      "objective": "cloud agent executes cloudtrail and guardduty with report schema",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "1 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "UNIT-006",
+      "category": "unit",
+      "path": "tests/test_cloud_agent.py::test_chat_workflow_invokes_cloud_agent_with_audit_context",
+      "objective": "chat workflow invokes cloud agent with audit context",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "1 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "UNIT-007",
+      "category": "unit",
+      "path": "tests/test_config.py::test_defaults_allow_startup_without_provider_credentials",
+      "objective": "defaults allow startup without provider credentials",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "1 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "UNIT-008",
+      "category": "unit",
+      "path": "tests/test_config.py::test_inference_timeout_is_bounded",
+      "objective": "inference timeout is bounded",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "1 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "UNIT-009",
+      "category": "unit",
+      "path": "tests/test_config.py::test_inference_timeout_rejects_values_above_maximum",
+      "objective": "inference timeout rejects values above maximum",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "1 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "UNIT-010",
+      "category": "unit",
+      "path": "tests/test_config.py::test_credentials_are_not_in_settings_repr",
+      "objective": "credentials are not in settings repr",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "1 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "UNIT-011",
+      "category": "unit",
+      "path": "tests/test_llm_service.py::test_missing_provider_settings_fail_clearly",
+      "objective": "missing provider settings fail clearly",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "1 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "UNIT-012",
+      "category": "unit",
+      "path": "tests/test_llm_service.py::test_nebius_provider_defaults",
+      "objective": "nebius provider defaults",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "1 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "UNIT-013",
+      "category": "unit",
+      "path": "tests/test_llm_service.py::test_client_is_created_from_settings_without_default_endpoint",
+      "objective": "client is created from settings without default endpoint",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "1 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "UNIT-014",
+      "category": "unit",
+      "path": "tests/test_llm_service.py::test_client_uses_configured_inference_timeout",
+      "objective": "client uses configured inference timeout",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "1 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "UNIT-015",
+      "category": "unit",
+      "path": "tests/test_llm_service.py::test_completion_uses_shared_client_model_and_conversation",
+      "objective": "completion uses shared client model and conversation",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "1 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "UNIT-016",
+      "category": "unit",
+      "path": "tests/test_llm_service.py::test_provider_errors_are_mapped_without_details",
+      "objective": "provider errors are mapped without details",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "4 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "UNIT-017",
+      "category": "unit",
+      "path": "tests/test_llm_service.py::test_malformed_provider_response_is_safe",
+      "objective": "malformed provider response is safe",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "1 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "UNIT-018",
+      "category": "unit",
+      "path": "tests/test_llm_service.py::test_compliance_agent_summarizes_audit_report_and_history",
+      "objective": "compliance agent summarizes audit report and history",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "1 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "UNIT-019",
+      "category": "unit",
+      "path": "tests/test_llm_service.py::test_compliance_role_prompt_loads_from_markdown",
+      "objective": "compliance role prompt loads from markdown",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "1 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "UNIT-020",
+      "category": "unit",
+      "path": "tests/test_rag.py::test_retriever_returns_faiss_ranked_passages_and_sources",
+      "objective": "retriever returns faiss ranked passages and sources",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "1 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "UNIT-021",
+      "category": "unit",
+      "path": "tests/test_rag.py::test_store_loader_rejects_document_count_mismatch",
+      "objective": "store loader rejects document count mismatch",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "1 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "UNIT-022",
+      "category": "unit",
+      "path": "tests/test_rag.py::test_resolve_store_path_preserves_absolute_paths",
+      "objective": "resolve store path preserves absolute paths",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "1 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "UNIT-023",
+      "category": "unit",
+      "path": "tests/test_qa_unit.py::test_jwt_rejects_invalid_claims",
+      "objective": "Reject missing claims and wrong signatures",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "4 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "UNIT-024",
+      "category": "unit",
+      "path": "tests/test_qa_unit.py::test_rag_rejects_invalid_metadata",
+      "objective": "Reject unusable guidance",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "3 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "UNIT-025",
+      "category": "unit",
+      "path": "tests/test_qa_unit.py::test_chat_schema_boundaries",
+      "objective": "Validate chat boundaries",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "4 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "UNIT-026",
+      "category": "unit",
+      "path": "frontend/src/qa.test.jsx",
+      "objective": "React login accessibility, loading, failure, token state and API failures",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "3 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "UNIT-027",
+      "category": "unit",
+      "path": "frontend/src/api.test.js",
+      "objective": "HTTP bearer, expiry, abort, malformed payload and network handling",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "5 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "UNIT-028",
+      "category": "unit",
+      "path": "frontend/src/utils.test.js",
+      "objective": "Severity, empty findings, dates and formatting boundaries",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "2 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "INTEGRATION-001",
+      "category": "integration",
+      "path": "tests/test_assessments.py::test_list_and_read_assessments_with_senior_review",
+      "objective": "list and read assessments with senior review",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "1 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "INTEGRATION-002",
+      "category": "integration",
+      "path": "tests/test_assessments.py::test_missing_assessment_has_stable_error",
+      "objective": "missing assessment has stable error",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "1 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "INTEGRATION-003",
+      "category": "integration",
+      "path": "tests/test_auth.py::test_login_issues_verifiable_access_token",
+      "objective": "login issues verifiable access token",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "1 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "INTEGRATION-004",
+      "category": "integration",
+      "path": "tests/test_auth.py::test_login_rejects_invalid_credentials",
+      "objective": "login rejects invalid credentials",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "1 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "INTEGRATION-005",
+      "category": "integration",
+      "path": "tests/test_auth.py::test_versioned_routes_reject_missing_bearer_token",
+      "objective": "versioned routes reject missing bearer token",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "4 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "INTEGRATION-006",
+      "category": "integration",
+      "path": "tests/test_auth.py::test_protected_route_accepts_login_token",
+      "objective": "protected route accepts login token",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "1 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "INTEGRATION-007",
+      "category": "integration",
+      "path": "tests/test_auth.py::test_protected_route_rejects_invalid_bearer_token",
+      "objective": "protected route rejects invalid bearer token",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "1 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "INTEGRATION-008",
+      "category": "integration",
+      "path": "tests/test_auth.py::test_openapi_documents_bearer_auth_on_protected_routes",
+      "objective": "openapi documents bearer auth on protected routes",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "1 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "INTEGRATION-009",
+      "category": "integration",
+      "path": "tests/test_auth.py::test_login_reports_missing_configuration",
+      "objective": "login reports missing configuration",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "1 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "INTEGRATION-010",
+      "category": "integration",
+      "path": "tests/test_aws.py::test_missing_credentials_return_not_configured",
+      "objective": "missing credentials return not configured",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "1 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "INTEGRATION-011",
+      "category": "integration",
+      "path": "tests/test_aws.py::test_identity_returns_only_non_secret_metadata",
+      "objective": "identity returns only non secret metadata",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "1 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "INTEGRATION-012",
+      "category": "integration",
+      "path": "tests/test_aws_audit.py::test_get_enabled_regions_returns_enabled_region_names",
+      "objective": "get enabled regions returns enabled region names",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "1 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "INTEGRATION-013",
+      "category": "integration",
+      "path": "tests/test_aws_audit.py::test_s3_audit_reports_disabled_public_access_and_missing_encryption",
+      "objective": "s3 audit reports disabled public access and missing encryption",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "1 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "INTEGRATION-014",
+      "category": "integration",
+      "path": "tests/test_aws_audit.py::test_iam_audit_reports_root_access_keys",
+      "objective": "iam audit reports root access keys",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "1 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "INTEGRATION-015",
+      "category": "integration",
+      "path": "tests/test_aws_audit.py::test_regional_audits_report_open_management_ports_and_public_database",
+      "objective": "regional audits report open management ports and public database",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "1 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "INTEGRATION-016",
+      "category": "integration",
+      "path": "tests/test_aws_audit.py::test_ec2_audit_reports_ipv6_all_protocol_ingress_and_public_snapshot",
+      "objective": "ec2 audit reports ipv6 all protocol ingress and public snapshot",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "1 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "INTEGRATION-017",
+      "category": "integration",
+      "path": "tests/test_aws_audit.py::test_rds_audit_reports_disabled_backups_deletion_protection_and_public_snapshots",
+      "objective": "rds audit reports disabled backups deletion protection and public snapshots",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "1 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "INTEGRATION-018",
+      "category": "integration",
+      "path": "tests/test_aws_audit.py::test_cloudtrail_audit_checks_multiregion_logging_and_log_bucket_protection",
+      "objective": "cloudtrail audit checks multiregion logging and log bucket protection",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "1 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "INTEGRATION-019",
+      "category": "integration",
+      "path": "tests/test_aws_audit.py::test_guardduty_audit_reports_missing_detector",
+      "objective": "guardduty audit reports missing detector",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "1 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "INTEGRATION-020",
+      "category": "integration",
+      "path": "tests/test_aws_audit.py::test_vpc_audit_reports_default_vpc_without_flow_logs",
+      "objective": "vpc audit reports default vpc without flow logs",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "1 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "INTEGRATION-021",
+      "category": "integration",
+      "path": "tests/test_chat_api.py::test_chat_sends_separate_agent_responses_to_frontend",
+      "objective": "chat sends separate agent responses to frontend",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "1 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "INTEGRATION-022",
+      "category": "integration",
+      "path": "tests/test_chat_workflow.py::test_chat_returns_review_and_forwards_history",
+      "objective": "chat returns review and forwards history",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "1 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "INTEGRATION-023",
+      "category": "integration",
+      "path": "tests/test_errors.py::test_unconfigured_chat_does_not_echo_prompt_or_credentials",
+      "objective": "unconfigured chat does not echo prompt or credentials",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "1 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "INTEGRATION-024",
+      "category": "integration",
+      "path": "tests/test_health.py::test_health_reports_service_without_credentials",
+      "objective": "health reports service without credentials",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "1 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "INTEGRATION-025",
+      "category": "integration",
+      "path": "tests/test_health.py::test_docs_are_available_in_development",
+      "objective": "docs are available in development",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "1 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "INTEGRATION-026",
+      "category": "integration",
+      "path": "tests/test_health.py::test_request_id_is_returned_and_oversized_body_is_rejected",
+      "objective": "request id is returned and oversized body is rejected",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "1 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "INTEGRATION-027",
+      "category": "integration",
+      "path": "tests/test_rag.py::test_rag_query_route_returns_passages_and_citations",
+      "objective": "rag query route returns passages and citations",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "1 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "INTEGRATION-028",
+      "category": "integration",
+      "path": "tests/test_rag.py::test_rag_status_route_reports_missing_files",
+      "objective": "rag status route reports missing files",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "1 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "INTEGRATION-029",
+      "category": "integration",
+      "path": "tests/test_rag.py::test_rag_query_returns_safe_error_when_store_is_missing",
+      "objective": "rag query returns safe error when store is missing",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "1 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "INTEGRATION-030",
+      "category": "integration",
+      "path": "tests/test_rag.py::test_rag_query_validates_question_length",
+      "objective": "rag query validates question length",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "1 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "INTEGRATION-031",
+      "category": "integration",
+      "path": "tests/test_qa_integration.py::test_chat_persists_and_reads",
+      "objective": "HTTP chat \u2192 workflow fixture \u2192 SQLite \u2192 report endpoint",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "1 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "INTEGRATION-032",
+      "category": "integration",
+      "path": "tests/test_qa_integration.py::test_invalid_pagination",
+      "objective": "Reject invalid assessment pagination",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "3 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "E2E-001",
+      "category": "e2e",
+      "path": "frontend/e2e/workspace.spec.js",
+      "objective": "Actual login, navigation, controlled audit, persisted report, session expiry, responsive viewports",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "9 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "E2E-002",
+      "category": "e2e",
+      "path": "manual",
+      "objective": "Terraform workflow absent; cannot test unsupported capability",
+      "status": "Blocked",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "Terraform workflow absent; cannot test unsupported capability; unsupported capability / requires independent review"
+    },
+    {
+      "id": "E2E-003",
+      "category": "e2e",
+      "path": "manual",
+      "objective": "Semantic compliance rejection requires independent evidence rubric; not enforced by deterministic code",
+      "status": "Blocked",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "Semantic compliance rejection requires independent evidence rubric; not enforced by deterministic code; unsupported capability / requires independent review"
+    },
+    {
+      "id": "SECURITY-001",
+      "category": "security",
+      "path": "tests/test_qa_security.py",
+      "objective": "JWT forgery and destructive tool allowlist rejection",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "7 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "SECURITY-002",
+      "category": "security",
+      "path": "scanners",
+      "objective": "Ruff, Bandit, pip-audit, npm audit, Gitleaks, Checkov, Trivy",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "6 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "SECURITY-003",
+      "category": "security",
+      "path": "manual",
+      "objective": "Tenant isolation unsupported by single-account model; deployment review required",
+      "status": "Blocked",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "Tenant isolation unsupported by single-account model; deployment review required; unsupported capability / requires independent review"
+    },
+    {
+      "id": "PERFORMANCE-001",
+      "category": "performance",
+      "path": "tests/test_qa_performance.py",
+      "objective": "100 health requests across 8 threads; p95 under 500ms, total under 10s; local fixture-only baseline",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "1 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "UNIT-029",
+      "category": "unit",
+      "path": "frontend/src/pages.test.jsx",
+      "objective": "Render implemented routes with stubbed API; verify findings filters, settings, audit guard, success and expiry",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "8 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "UNIT-030",
+      "category": "unit",
+      "path": "tests/test_config.py::test_env_file_is_loaded_from_project_root",
+      "objective": "Load repository .env independently of launch directory",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "1 mapped executions; Passed. See raw evidence."
+    },
+    {
+      "id": "INTEGRATION-033",
+      "category": "integration",
+      "path": "tests/test_cors.py::test_cors_preflight_for_local_frontend",
+      "objective": "Allow local frontend JSON/bearer preflight and reject unknown origins",
+      "status": "Passed",
+      "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
+      "actual": "3 mapped executions; Passed. See raw evidence."
+    }
+  ]
+}
