@@ -33,3 +33,15 @@ it("UNIT-027 handles text error and encodes report ID", async () => {
   await expect(api.assessment("a/b")).rejects.toMatchObject({status: 503});
   expect(fetcher.mock.calls[0][0]).toContain("a%2Fb");
 });
+
+it("UNIT-027 resolves container same-origin configuration to the browser origin", async () => {
+  vi.stubEnv("VITE_API_BASE_URL", "/");
+  try {
+    expect(getApiBaseUrl()).toBe(window.location.origin);
+    const fetcher = vi.fn().mockResolvedValue(response(200, {status: "ok"}));
+    vi.stubGlobal("fetch", fetcher);
+    await api.health();
+    expect(fetcher.mock.calls[0][0]).toBe(`${window.location.origin}/health`);
+    expect(saveApiBaseUrl("https://custom.example/")).toBe("https://custom.example");
+  } finally { vi.unstubAllEnvs(); }
+});
