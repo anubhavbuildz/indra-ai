@@ -9,7 +9,8 @@ export function setAccessToken(token) {
 export function getApiBaseUrl() {
   const saved = localStorage.getItem(BASE_URL_KEY);
   const configured = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
-  return (saved || configured).replace(/\/+$/, "");
+  const baseUrl = saved || (configured === "/" ? window.location.origin : configured);
+  return baseUrl.replace(/\/+$/, "");
 }
 
 export function saveApiBaseUrl(value) {

@@ -18,3 +18,13 @@ dist
 data
 faiss_store
 reference
+
+# Never send local credential stores, model caches, or frontend dependencies to builds.
+.aws
+**/.aws
+.cache
+frontend/node_modules
+frontend/dist
+frontend/.env
+frontend/.env.*
+design/qa/evidence

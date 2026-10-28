@@ -546,3 +546,7 @@ Designed before new test code. Counts are logical cases; parameterized execution
 ### UNIT-026 persistent-session regression scenarios
 
 Persist the login JWT under `indraa.accessToken`; restore username and bearer header on remount; reject expired/malformed tokens; clear storage on sign-out, server 401 and JWT expiry. Passwords must never be stored. Use valid two-hour fixture JWTs and fake timers for expiration. Evidence: frontend-unit.xml and frontend-auth-persistence.log.
+
+### UNIT-027 Compose same-origin API base
+
+With VITE_API_BASE_URL=/ and no saved override, resolve the API base to window.location.origin. Existing absolute URLs and saved preferences must continue to work. Automated in frontend/src/api.test.js; no external requests.

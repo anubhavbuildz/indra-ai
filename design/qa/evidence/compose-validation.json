@@ -1,0 +1,7 @@
+{
+  "official_schema_valid": true,
+  "backend_port_internal": true,
+  "aws_mount_read_only": true,
+  "frontend_has_no_credential_mount_or_environment": true,
+  "docker_runtime": "Blocked: Docker is not installed"
+}
