@@ -4,7 +4,7 @@
   or logs. AWS credentials remain in the standard credential chain; NVIDIA
   credentials remain in server configuration.
 - The login endpoint supports one environment-configured account and issues a
-  30-minute HS256 JWT. Configure `AUTH_USERNAME`, `AUTH_PASSWORD`, and a unique
+  2-hour HS256 JWT. Configure `AUTH_USERNAME`, `AUTH_PASSWORD`, and a unique
   `JWT_SECRET_KEY` of at least 32 bytes. Do not commit these secrets.
 - All versioned API routes require a valid bearer JWT except the public login
   route. `/`, `/health`, `/ready`, and development API documentation remain

@@ -40,7 +40,7 @@ def test_login_issues_verifiable_access_token(auth_client: TestClient) -> None:
     assert response.status_code == 200
     result = response.json()
     assert result["token_type"] == "bearer"
-    assert result["expires_in"] == 30 * 60
+    assert result["expires_in"] == 2 * 60 * 60
     settings = Settings(
         _env_file=None,
         AUTH_USERNAME="test-user",

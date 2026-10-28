@@ -79,13 +79,13 @@ not submitted values.
 }
 ```
 
-A successful request returns a 30-minute HS256 access token:
+A successful request returns a 2-hour HS256 access token:
 
 ```json
 {
   "access_token": "signed-jwt",
   "token_type": "bearer",
-  "expires_in": 1800
+  "expires_in": 7200
 }
 ```
 

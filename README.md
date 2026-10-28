@@ -86,7 +86,7 @@ login require `Authorization: Bearer <access_token>`. The root, `/health`,
 
 | Method | Path | Purpose |
 | --- | --- | --- |
-| `POST` | `/api/v1/auth/login` | Issue a 30-minute JWT for the configured environment account |
+| `POST` | `/api/v1/auth/login` | Issue a 2-hour JWT for the configured environment account |
 | `POST` | `/api/v1/chat` | Run AWS audit, RAG, Compliance, and Senior review |
 | `GET` | `/api/v1/assessments` | List persisted assessments |
 | `GET` | `/api/v1/assessments/{assessment_id}` | Retrieve a saved assessment |

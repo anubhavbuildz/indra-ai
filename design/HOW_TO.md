@@ -47,13 +47,13 @@ Content-Type: application/json
 {"username":"configured-user","password":"configured-password"}
 ```
 
-On success, the response contains an HS256 access token valid for 30 minutes:
+On success, the response contains an HS256 access token valid for 2 hours:
 
 ```json
 {
   "access_token": "signed-jwt",
   "token_type": "bearer",
-  "expires_in": 1800
+  "expires_in": 7200
 }
 ```
 

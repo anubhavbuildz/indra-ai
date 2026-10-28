@@ -40,6 +40,12 @@ class Settings(BaseSettings):
         default="openai-chat-completions",
         validation_alias="NVIDIA_API_FORMAT",
     )
+    inference_timeout_seconds: float = Field(
+        default=120.0,
+        ge=1.0,
+        le=600.0,
+        validation_alias="INFERENCE_TIMEOUT_SECONDS",
+    )
     embedding_model: str = Field(
         default="sentence-transformers/all-MiniLM-L6-v2",
         validation_alias="EMBEDDING_MODEL",

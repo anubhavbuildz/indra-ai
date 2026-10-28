@@ -221,7 +221,7 @@ source of defaults.
 For the single-account login endpoint, set `AUTH_USERNAME`,
 `AUTH_PASSWORD`, and a unique `JWT_SECRET_KEY` of at least 32 bytes.
 `POST /api/v1/auth/login` accepts a JSON username/password pair and returns a
-30-minute HS256 access token. Send it as
+2-hour HS256 access token. Send it as
 `Authorization: Bearer <access_token>` when calling any other versioned API
 route. The login route is public; `/`, `/health`, `/ready`, and development
 documentation are also public.
@@ -240,6 +240,7 @@ documentation are also public.
 | `NVIDIA_API_KEY` | empty | Server-side inference credential |
 | `NVIDIA_MODEL` | `nvidia/Nemotron-3_5-Lightning` | Inference model |
 | `NVIDIA_API_FORMAT` | `openai-chat-completions` | Provider adapter format |
+| `INFERENCE_TIMEOUT_SECONDS` | `120` | Per-request inference timeout; allowed range is 1–600 seconds |
 | `EMBEDDING_MODEL` | `sentence-transformers/all-MiniLM-L6-v2` | Local embedding model; must match the FAISS index |
 | `FAISS_INDEX_PATH` | `faiss_store/security.index` | Local FAISS index |
 | `FAISS_METADATA_PATH` | `faiss_store/security.pkl` | Trusted metadata paired with the index |

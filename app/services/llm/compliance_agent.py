@@ -17,7 +17,7 @@ class ComplianceAgent(BaseLLM):
     def __init__(
         self,
         settings: Settings,
-        timeout_seconds: float = 30.0,
+        timeout_seconds: float | None = None,
         client: AsyncOpenAI | None = None,
     ) -> None:
         super().__init__(settings, timeout_seconds, client)

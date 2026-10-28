@@ -34,11 +34,13 @@ class BaseLLM:
     def __init__(
         self,
         settings: Settings,
-        timeout_seconds: float = 30.0,
+        timeout_seconds: float | None = None,
         client: AsyncOpenAI | None = None,
     ) -> None:
         self.settings = settings
-        self.timeout_seconds = timeout_seconds
+        self.timeout_seconds = (
+            settings.inference_timeout_seconds if timeout_seconds is None else timeout_seconds
+        )
         self._client = client
 
     def _ensure_configured(self) -> None:
@@ -108,7 +110,7 @@ class BaseLLM:
                 model=model or self.settings.nvidia_model,
                 messages=messages,
                 temperature=0.6,
-                max_completion_tokens=8192,
+                max_completion_tokens=2048,
             )
         except APITimeoutError as exc:
             raise AppError(504, "provider_timeout", "The inference provider timed out.") from exc
