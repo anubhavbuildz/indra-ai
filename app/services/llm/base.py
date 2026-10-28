@@ -34,11 +34,13 @@ class BaseLLM:
     def __init__(
         self,
         settings: Settings,
-        timeout_seconds: float = 30.0,
+        timeout_seconds: float | None = None,
         client: AsyncOpenAI | None = None,
     ) -> None:
         self.settings = settings
-        self.timeout_seconds = timeout_seconds
+        self.timeout_seconds = (
+            settings.inference_timeout_seconds if timeout_seconds is None else timeout_seconds
+        )
         self._client = client
 
     def _ensure_configured(self) -> None:

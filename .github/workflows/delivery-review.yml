@@ -1,0 +1,23 @@
+name: Delivery review foundation
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    environment: production-review
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Produce source manifest for approved release review
+        run: |
+          git rev-parse HEAD > release-commit.txt
+          git ls-files -z | xargs -0 sha256sum > release-sha256.txt
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: release-review-manifest
+          path: release-*.txt
+      - name: Deployment is intentionally unconfigured
+        run: |
+          echo 'No hosting target configured. This workflow does not deploy.'
+          echo 'Configure required reviewers for production-review before any delivery use.'

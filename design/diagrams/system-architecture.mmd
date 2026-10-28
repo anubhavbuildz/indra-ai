@@ -1,0 +1,33 @@
+flowchart LR
+  subgraph browser["Trust boundary: browser"]
+    U[User] --> UI[React routes and components]
+    UI --> AUTH[AuthContext: in-memory JWT]
+    UI --> API[services/api.js]
+    LS[(localStorage: API origin only)] --> API
+  end
+  subgraph server["Trust boundary: FastAPI backend"]
+    HTTP[FastAPI routing and middleware] --> JWT[HS256 bearer validation]
+    HTTP --> LOGIN[Environment-configured login]
+    JWT --> CHAT[ChatService]
+    JWT --> READ[AssessmentService]
+    CHAT --> FLOW[Sequential chat_workflow]
+    FLOW --> CLOUD[CloudAgent: tool selection]
+    FLOW --> RAG[RagService]
+    FLOW --> COMP[ComplianceAgent]
+    FLOW --> SENIOR[SeniorAgent]
+    CHAT --> REPO[AssessmentRepository]
+    READ --> REPO
+    REPO --> DB[(SQLAlchemy: SQLite default)]
+    CLOUD --> TOOLS[Allowlisted read-only AWSAuditor]
+    TOOLS --> BOTO[Boto3 credential chain]
+    RAG --> EMB[CPU embedding model]
+    RAG --> FAISS[(FAISS index)]
+    RAG --> PKL[(Trusted-local framework metadata pickle)]
+  end
+  API -->|"HTTPS recommended; password at login, then JWT and prompts"| HTTP
+  CLOUD -->|"prompt and tool schema"| LLM[Configured OpenAI-compatible NVIDIA model endpoint]
+  COMP -->|"audit evidence and retrieved guidance"| LLM
+  SENIOR -->|"audit evidence and compliance text"| LLM
+  BOTO -->|"signed read-only API requests"| AWS[AWS APIs]
+  AWS -->|"resource evidence or service errors"| TOOLS
+  EMB -.->|"first-load model download if uncached"| HF[Model distribution]

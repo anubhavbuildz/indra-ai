@@ -71,6 +71,8 @@ def test_list_and_read_assessments_with_senior_review(assessment_client: TestCli
     assert listed.status_code == 200
     assert listed.json()["items"][0]["id"] == assessment_id
     assert listed.json()["items"][0]["senior_review"] == "Senior review output."
+    assert listed.json()["items"][0]["created_at"].endswith("Z")
+    assert listed.json()["items"][0]["updated_at"].endswith("Z")
 
     fetched = assessment_client.get(f"/api/v1/assessments/{assessment_id}")
     assert fetched.status_code == 200

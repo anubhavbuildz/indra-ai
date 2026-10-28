@@ -11,7 +11,7 @@ from app.core.errors import AppError
 from app.schemas.auth import LoginRequest
 
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+ACCESS_TOKEN_EXPIRE_MINUTES = 120
 
 
 class Login:

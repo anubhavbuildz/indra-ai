@@ -5,7 +5,7 @@ from types import SimpleNamespace
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from openai import APIConnectionError, AuthenticationError, RateLimitError
+from openai import APIConnectionError, APITimeoutError, AuthenticationError, RateLimitError
 
 from app.core.config import Settings
 from app.core.errors import AppError
@@ -47,6 +47,7 @@ def test_nebius_provider_defaults():
     assert settings.nvidia_base_url == "https://api.tokenfactory.nebius.com/v1"
     assert settings.nvidia_model == "nvidia/Nemotron-3_5-Lightning"
     assert settings.nvidia_api_format == "openai-chat-completions"
+    assert settings.inference_timeout_seconds == 120.0
 
 
 def test_client_is_created_from_settings_without_default_endpoint():
@@ -63,6 +64,17 @@ def test_client_is_created_from_settings_without_default_endpoint():
         "timeout": 12.0,
         "max_retries": 0,
     }
+
+
+def test_client_uses_configured_inference_timeout():
+    settings = configured_settings()
+    settings.inference_timeout_seconds = 180.0
+
+    with patch("app.services.llm.base.AsyncOpenAI") as openai_client:
+        client = BaseLLM(settings).client
+
+    assert client is openai_client.return_value
+    assert openai_client.call_args.kwargs["timeout"] == 180.0
 
 
 def test_completion_uses_shared_client_model_and_conversation():
@@ -93,6 +105,10 @@ def test_completion_uses_shared_client_model_and_conversation():
 @pytest.mark.parametrize(
     ("provider_error", "expected_code"),
     [
+        (
+            APITimeoutError(request=Mock()),
+            "provider_timeout",
+        ),
         (
             AuthenticationError(
                 "private provider detail",

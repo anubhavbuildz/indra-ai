@@ -1,0 +1,8 @@
+{
+  "requests": 100,
+  "workers": 8,
+  "p95_ms": 26.44922699982999,
+  "total_seconds": 0.2656538459996227,
+  "transport": "in-process ASGI TestClient",
+  "scope": "health endpoint only; excludes real network, cloud, inference and retrieval"
+}

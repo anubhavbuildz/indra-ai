@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
+import { createPortal } from "react-dom";
 import { ArrowRight, Check, Cloud, Globe2, Info, LoaderCircle, LockKeyhole, Play, ShieldCheck } from "lucide-react";
 import { AgentWorkflow } from "../components/agents/AgentWorkflow";
 import { Button, Card, ErrorState, PageHeading } from "../components/ui/Primitives";
@@ -24,9 +25,27 @@ export default function CloudAudit() {
   const [errorMessage, setErrorMessage] = useState("");
   const queryClient = useQueryClient();
   const mutation = useChatMutation();
+  const progressMessage = useRef(null);
   const identity = useAwsIdentity();
   const configuredRegion = identity.data?.region || "";
   const result = mutation.data;
+
+  useEffect(() => {
+    const appRoot = document.getElementById("root");
+    if (!appRoot || !mutation.isPending) return undefined;
+
+    const wasInert = appRoot.inert;
+    const previouslyFocused = document.activeElement;
+    appRoot.inert = true;
+    progressMessage.current?.focus();
+
+    return () => {
+      appRoot.inert = wasInert;
+      if (previouslyFocused instanceof HTMLElement && previouslyFocused.isConnected) {
+        previouslyFocused.focus();
+      }
+    };
+  }, [mutation.isPending]);
 
   function toggleService(id) {
     setSelected((current) =>
@@ -185,8 +204,26 @@ export default function CloudAudit() {
         <div className="audit-complete-banner">
           <span><Check size={14} /></span>
           Audit complete · Assessment <code>{result.assessment_id}</code>
-          <a href={`/findings/${result.assessment_id}`}><ArrowRight size={14} /> View assessment</a>
+          <a href={`/reports/${result.assessment_id}`}><ArrowRight size={14} /> View assessment</a>
         </div>
+      )}
+      {mutation.isPending && createPortal(
+        <div className="audit-running-overlay">
+          <div
+            ref={progressMessage}
+            className="audit-running-dialog"
+            role="status"
+            aria-live="polite"
+            aria-busy="true"
+            tabIndex={-1}
+          >
+            <LoaderCircle className="spin" size={24} />
+            <h2>Audit is running</h2>
+            <p>Running the selected checks and preparing the review. Please wait for the response.</p>
+            <div className="audit-progress-track" aria-hidden="true"><span /></div>
+          </div>
+        </div>,
+        document.body,
       )}
     </motion.div>
   );

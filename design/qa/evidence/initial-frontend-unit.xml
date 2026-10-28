@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="10" failures="3" errors="0" time="0.098267402">
+    <testsuite name="src/api.test.js" timestamp="2026-10-28T12:36:29.739Z" hostname="srv682320" tests="5" failures="0" errors="0" skipped="0" time="0.032871958">
+        <testcase classname="src/api.test.js" name="UNIT-027 normalizes backend URL" time="0.006197486">
+        </testcase>
+        <testcase classname="src/api.test.js" name="UNIT-027 sends bearer and encoded request" time="0.017997351">
+        </testcase>
+        <testcase classname="src/api.test.js" name="UNIT-027 emits session expiry on protected 401" time="0.003991889">
+        </testcase>
+        <testcase classname="src/api.test.js" name="UNIT-027 maps network errors and preserves abort" time="0.001993654">
+        </testcase>
+        <testcase classname="src/api.test.js" name="UNIT-027 handles text error and encodes report ID" time="0.000992508">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/qa.test.jsx" timestamp="2026-10-28T12:36:29.746Z" hostname="srv682320" tests="3" failures="3" errors="0" skipped="0" time="0.013594828">
+        <testcase classname="src/qa.test.jsx" name="UNIT-026 login and auth &gt; renders labeled required fields and toggles visibility" time="0.008774363">
+            <failure message="React is not defined" type="ReferenceError">
+ReferenceError: React is not defined
+ ❯ mount src/qa.test.jsx:8:34
+ ❯ src/qa.test.jsx:15:5
+            </failure>
+        </testcase>
+        <testcase classname="src/qa.test.jsx" name="UNIT-026 login and auth &gt; shows pending state and safe login failure" time="0.002170616">
+            <failure message="React is not defined" type="ReferenceError">
+ReferenceError: React is not defined
+ ❯ mount src/qa.test.jsx:8:34
+ ❯ src/qa.test.jsx:22:5
+            </failure>
+        </testcase>
+        <testcase classname="src/qa.test.jsx" name="UNIT-026 login and auth &gt; sets auth identity then clears token on sign out" time="0.000626185">
+            <failure message="React is not defined" type="ReferenceError">
+ReferenceError: React is not defined
+ ❯ src/qa.test.jsx:36:12
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/utils.test.js" timestamp="2026-10-28T12:36:29.751Z" hostname="srv682320" tests="2" failures="0" errors="0" skipped="0" time="0.051800616">
+        <testcase classname="src/utils.test.js" name="UNIT-028 handles malformed findings and unknown severity" time="0.004474703">
+        </testcase>
+        <testcase classname="src/utils.test.js" name="UNIT-028 formats dates, times, errors, names and classes" time="0.044233302">
+        </testcase>
+    </testsuite>
+</testsuites>

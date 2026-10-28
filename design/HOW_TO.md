@@ -6,8 +6,8 @@ agent outputs, CORS, and local Docker development.
 
 ## 1. Start the backend
 
-Use the native development setup or Docker. See [the project overview](./project-overview.md)
-for dependencies and environment variables and [the API reference](./api.md)
+Use the native development setup or Docker. See [the project overview](diagrams/project-overview.md)
+for dependencies and environment variables and [the API reference](api.md)
 for complete request and response contracts.
 
 For browser development, configure `CORS_ORIGINS` on the backend to include
@@ -47,13 +47,13 @@ Content-Type: application/json
 {"username":"configured-user","password":"configured-password"}
 ```
 
-On success, the response contains an HS256 access token valid for 30 minutes:
+On success, the response contains an HS256 access token valid for 2 hours:
 
 ```json
 {
   "access_token": "signed-jwt",
   "token_type": "bearer",
-  "expires_in": 1800
+  "expires_in": 7200
 }
 ```
 
@@ -165,7 +165,7 @@ Use the same bearer token for:
 - `GET /api/v1/aws/identity` for the backend's AWS caller identity.
 
 The RAG query and status endpoints do not invoke the LLM provider or AWS
-resource audits. See the [API reference](./api.md) for all parameters,
+resource audits. See the [API reference](api.md) for all parameters,
 schemas, and error codes.
 
 ## 7. Local Docker connection

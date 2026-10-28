@@ -1,0 +1,23 @@
+flowchart LR
+  subgraph local[Verified local development]
+    B[Browser] --> V[Vite dev server port 5173]
+    B -->|API requests| F[Uvicorn FastAPI port 8000]
+    F --> D[(SQLite file)]
+    F --> I[(FAISS and trusted metadata)]
+  end
+  subgraph image[Existing production Dockerfile boundary]
+    C[Python 3.12 non-root backend port 8000]
+    C --> CD[(data directory)]
+    C --> CI[(mounted guidance artifacts required)]
+  end
+  F --> AWS[AWS read-only APIs]
+  F --> LLM[Configured inference endpoint]
+  C --> AWS
+  C --> LLM
+  subgraph qa[Test-only compose.qa.yml - locally unverified because Docker absent]
+    QB[Fixture backend: no external sockets]
+    QF[Vite frontend] --> QB
+    PLAY[Playwright container] --> QF
+    PLAY --> QB
+  end
+  UNKNOWN[No verified production hosting or public network topology] -.-> C

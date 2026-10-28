@@ -101,7 +101,7 @@ export default function Login() {
               {!loading && <ArrowRight size={16} />}
             </Button>
           </form>
-          <div className="login-card-foot"><LockKeyhole size={13} /> JWT-secured session · 30-minute token</div>
+          <div className="login-card-foot"><LockKeyhole size={13} /> JWT-secured session · 2-hour token</div>
         </motion.section>
       </div>
       <div className="login-footnote">

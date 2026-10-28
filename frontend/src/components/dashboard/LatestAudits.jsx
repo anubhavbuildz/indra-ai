@@ -30,7 +30,7 @@ export function LatestAudits({ items = [] }) {
             const excerpt = summary?.title || summary?.issue || item.question || "Read-only AWS security assessment.";
 
             return (
-              <Link to={`/findings/${item.id}`} className="assessment-card" key={item.id}>
+              <Link to={`/reports/${item.id}`} className="assessment-card" key={item.id}>
                 <div className="assessment-card-top">
                   <span className="assessment-card-icon"><FileSearch size={17} /></span>
                   <Badge tone={tone}>{level} risk</Badge>

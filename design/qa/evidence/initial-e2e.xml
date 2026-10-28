@@ -1,0 +1,359 @@
+<testsuites id="" name="" tests="9" failures="9" skipped="0" errors="0" time="15.916648">
+<testsuite name="workspace.spec.js" timestamp="2026-10-28T12:42:03.335Z" hostname="desktop" tests="3" failures="3" skipped="0" time="0.026" errors="0">
+<testcase name="E2E-001 startup, real login, synthetic audit and saved report" classname="workspace.spec.js" time="0.01">
+<failure message="workspace.spec.js:18:1 E2E-001 startup, real login, synthetic audit and saved report" type="FAILURE">
+<![CDATA[  [desktop] › workspace.spec.js:18:1 › E2E-001 startup, real login, synthetic audit and saved report 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     npx playwright install-deps                      ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     apt-get install libnspr4\                        ║
+    ║         libnss3\                                     ║
+    ║         libatk1.0-0t64\                              ║
+    ║         libatk-bridge2.0-0t64\                       ║
+    ║         libatspi2.0-0t64\                            ║
+    ║         libxdamage1\                                 ║
+    ║         libxkbcommon0\                               ║
+    ║         libasound2t64                                ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+    attachment #1: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../../design/qa-evidence/playwright-results/workspace-E2E-001-startup--eceab-etic-audit-and-saved-report-desktop/trace.zip
+    Usage:
+
+        npx playwright show-trace ../../design/qa-evidence/playwright-results/workspace-E2E-001-startup--eceab-etic-audit-and-saved-report-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|playwright-results/workspace-E2E-001-startup--eceab-etic-audit-and-saved-report-desktop/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="E2E-001 invalid login and network failure remain visible" classname="workspace.spec.js" time="0.008">
+<failure message="workspace.spec.js:39:1 E2E-001 invalid login and network failure remain visible" type="FAILURE">
+<![CDATA[  [desktop] › workspace.spec.js:39:1 › E2E-001 invalid login and network failure remain visible ────
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     npx playwright install-deps                      ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     apt-get install libnspr4\                        ║
+    ║         libnss3\                                     ║
+    ║         libatk1.0-0t64\                              ║
+    ║         libatk-bridge2.0-0t64\                       ║
+    ║         libatspi2.0-0t64\                            ║
+    ║         libxdamage1\                                 ║
+    ║         libxkbcommon0\                               ║
+    ║         libasound2t64                                ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+    attachment #1: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../../design/qa-evidence/playwright-results/workspace-E2E-001-invalid--21f69-work-failure-remain-visible-desktop/trace.zip
+    Usage:
+
+        npx playwright show-trace ../../design/qa-evidence/playwright-results/workspace-E2E-001-invalid--21f69-work-failure-remain-visible-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|playwright-results/workspace-E2E-001-invalid--21f69-work-failure-remain-visible-desktop/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="E2E-001 protected route and session expiry" classname="workspace.spec.js" time="0.008">
+<failure message="workspace.spec.js:48:1 E2E-001 protected route and session expiry" type="FAILURE">
+<![CDATA[  [desktop] › workspace.spec.js:48:1 › E2E-001 protected route and session expiry ──────────────────
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     npx playwright install-deps                      ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     apt-get install libnspr4\                        ║
+    ║         libnss3\                                     ║
+    ║         libatk1.0-0t64\                              ║
+    ║         libatk-bridge2.0-0t64\                       ║
+    ║         libatspi2.0-0t64\                            ║
+    ║         libxdamage1\                                 ║
+    ║         libxkbcommon0\                               ║
+    ║         libasound2t64                                ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+    attachment #1: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../../design/qa-evidence/playwright-results/workspace-E2E-001-protected-route-and-session-expiry-desktop/trace.zip
+    Usage:
+
+        npx playwright show-trace ../../design/qa-evidence/playwright-results/workspace-E2E-001-protected-route-and-session-expiry-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|playwright-results/workspace-E2E-001-protected-route-and-session-expiry-desktop/trace.zip]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="workspace.spec.js" timestamp="2026-10-28T12:42:03.335Z" hostname="tablet" tests="3" failures="3" skipped="0" time="0.027" errors="0">
+<testcase name="E2E-001 startup, real login, synthetic audit and saved report" classname="workspace.spec.js" time="0.012">
+<failure message="workspace.spec.js:18:1 E2E-001 startup, real login, synthetic audit and saved report" type="FAILURE">
+<![CDATA[  [tablet] › workspace.spec.js:18:1 › E2E-001 startup, real login, synthetic audit and saved report 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     npx playwright install-deps                      ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     apt-get install libnspr4\                        ║
+    ║         libnss3\                                     ║
+    ║         libatk1.0-0t64\                              ║
+    ║         libatk-bridge2.0-0t64\                       ║
+    ║         libatspi2.0-0t64\                            ║
+    ║         libxdamage1\                                 ║
+    ║         libxkbcommon0\                               ║
+    ║         libasound2t64                                ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+    attachment #1: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../../design/qa-evidence/playwright-results/workspace-E2E-001-startup--eceab-etic-audit-and-saved-report-tablet/trace.zip
+    Usage:
+
+        npx playwright show-trace ../../design/qa-evidence/playwright-results/workspace-E2E-001-startup--eceab-etic-audit-and-saved-report-tablet/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|playwright-results/workspace-E2E-001-startup--eceab-etic-audit-and-saved-report-tablet/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="E2E-001 invalid login and network failure remain visible" classname="workspace.spec.js" time="0.008">
+<failure message="workspace.spec.js:39:1 E2E-001 invalid login and network failure remain visible" type="FAILURE">
+<![CDATA[  [tablet] › workspace.spec.js:39:1 › E2E-001 invalid login and network failure remain visible ─────
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     npx playwright install-deps                      ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     apt-get install libnspr4\                        ║
+    ║         libnss3\                                     ║
+    ║         libatk1.0-0t64\                              ║
+    ║         libatk-bridge2.0-0t64\                       ║
+    ║         libatspi2.0-0t64\                            ║
+    ║         libxdamage1\                                 ║
+    ║         libxkbcommon0\                               ║
+    ║         libasound2t64                                ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+    attachment #1: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../../design/qa-evidence/playwright-results/workspace-E2E-001-invalid--21f69-work-failure-remain-visible-tablet/trace.zip
+    Usage:
+
+        npx playwright show-trace ../../design/qa-evidence/playwright-results/workspace-E2E-001-invalid--21f69-work-failure-remain-visible-tablet/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|playwright-results/workspace-E2E-001-invalid--21f69-work-failure-remain-visible-tablet/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="E2E-001 protected route and session expiry" classname="workspace.spec.js" time="0.007">
+<failure message="workspace.spec.js:48:1 E2E-001 protected route and session expiry" type="FAILURE">
+<![CDATA[  [tablet] › workspace.spec.js:48:1 › E2E-001 protected route and session expiry ───────────────────
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     npx playwright install-deps                      ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     apt-get install libnspr4\                        ║
+    ║         libnss3\                                     ║
+    ║         libatk1.0-0t64\                              ║
+    ║         libatk-bridge2.0-0t64\                       ║
+    ║         libatspi2.0-0t64\                            ║
+    ║         libxdamage1\                                 ║
+    ║         libxkbcommon0\                               ║
+    ║         libasound2t64                                ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+    attachment #1: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../../design/qa-evidence/playwright-results/workspace-E2E-001-protected-route-and-session-expiry-tablet/trace.zip
+    Usage:
+
+        npx playwright show-trace ../../design/qa-evidence/playwright-results/workspace-E2E-001-protected-route-and-session-expiry-tablet/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|playwright-results/workspace-E2E-001-protected-route-and-session-expiry-tablet/trace.zip]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="workspace.spec.js" timestamp="2026-10-28T12:42:03.335Z" hostname="mobile" tests="3" failures="3" skipped="0" time="0.024" errors="0">
+<testcase name="E2E-001 startup, real login, synthetic audit and saved report" classname="workspace.spec.js" time="0.006">
+<failure message="workspace.spec.js:18:1 E2E-001 startup, real login, synthetic audit and saved report" type="FAILURE">
+<![CDATA[  [mobile] › workspace.spec.js:18:1 › E2E-001 startup, real login, synthetic audit and saved report 
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     npx playwright install-deps                      ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     apt-get install libnspr4\                        ║
+    ║         libnss3\                                     ║
+    ║         libatk1.0-0t64\                              ║
+    ║         libatk-bridge2.0-0t64\                       ║
+    ║         libatspi2.0-0t64\                            ║
+    ║         libxdamage1\                                 ║
+    ║         libxkbcommon0\                               ║
+    ║         libasound2t64                                ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+    attachment #1: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../../design/qa-evidence/playwright-results/workspace-E2E-001-startup--eceab-etic-audit-and-saved-report-mobile/trace.zip
+    Usage:
+
+        npx playwright show-trace ../../design/qa-evidence/playwright-results/workspace-E2E-001-startup--eceab-etic-audit-and-saved-report-mobile/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|playwright-results/workspace-E2E-001-startup--eceab-etic-audit-and-saved-report-mobile/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="E2E-001 invalid login and network failure remain visible" classname="workspace.spec.js" time="0.011">
+<failure message="workspace.spec.js:39:1 E2E-001 invalid login and network failure remain visible" type="FAILURE">
+<![CDATA[  [mobile] › workspace.spec.js:39:1 › E2E-001 invalid login and network failure remain visible ─────
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     npx playwright install-deps                      ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     apt-get install libnspr4\                        ║
+    ║         libnss3\                                     ║
+    ║         libatk1.0-0t64\                              ║
+    ║         libatk-bridge2.0-0t64\                       ║
+    ║         libatspi2.0-0t64\                            ║
+    ║         libxdamage1\                                 ║
+    ║         libxkbcommon0\                               ║
+    ║         libasound2t64                                ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+    attachment #1: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../../design/qa-evidence/playwright-results/workspace-E2E-001-invalid--21f69-work-failure-remain-visible-mobile/trace.zip
+    Usage:
+
+        npx playwright show-trace ../../design/qa-evidence/playwright-results/workspace-E2E-001-invalid--21f69-work-failure-remain-visible-mobile/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|playwright-results/workspace-E2E-001-invalid--21f69-work-failure-remain-visible-mobile/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="E2E-001 protected route and session expiry" classname="workspace.spec.js" time="0.007">
+<failure message="workspace.spec.js:48:1 E2E-001 protected route and session expiry" type="FAILURE">
+<![CDATA[  [mobile] › workspace.spec.js:48:1 › E2E-001 protected route and session expiry ───────────────────
+
+    Error: browserType.launch: 
+    ╔══════════════════════════════════════════════════════╗
+    ║ Host system is missing dependencies to run browsers. ║
+    ║ Please install them with the following command:      ║
+    ║                                                      ║
+    ║     npx playwright install-deps                      ║
+    ║                                                      ║
+    ║ Alternatively, use apt:                              ║
+    ║     apt-get install libnspr4\                        ║
+    ║         libnss3\                                     ║
+    ║         libatk1.0-0t64\                              ║
+    ║         libatk-bridge2.0-0t64\                       ║
+    ║         libatspi2.0-0t64\                            ║
+    ║         libxdamage1\                                 ║
+    ║         libxkbcommon0\                               ║
+    ║         libasound2t64                                ║
+    ║                                                      ║
+    ║ <3 Playwright Team                                   ║
+    ╚══════════════════════════════════════════════════════╝
+
+    attachment #1: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../../design/qa-evidence/playwright-results/workspace-E2E-001-protected-route-and-session-expiry-mobile/trace.zip
+    Usage:
+
+        npx playwright show-trace ../../design/qa-evidence/playwright-results/workspace-E2E-001-protected-route-and-session-expiry-mobile/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|playwright-results/workspace-E2E-001-protected-route-and-session-expiry-mobile/trace.zip]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+</testsuites>

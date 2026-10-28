@@ -1,0 +1,23 @@
+{
+  "stage": "unit",
+  "command": [
+    "/home/anubhav/indra-ai/.venv/bin/python",
+    "-m",
+    "pytest",
+    "-c",
+    "pytest-qa.ini",
+    "-p",
+    "tests.qa_plugin",
+    "-m",
+    "unit",
+    "--junitxml=design/qa/evidence/unit.xml",
+    "--cov=app",
+    "--cov-fail-under=0",
+    "--cov-report=json:design/qa/evidence/backend-coverage.json",
+    "--cov-report=xml:design/qa/evidence/backend-coverage.xml",
+    "--cov-report=html:design/qa/evidence/backend-html"
+  ],
+  "started_utc": "2026-10-28T13:41:03.581495+00:00",
+  "finished_utc": "2026-10-28T13:41:07.723494+00:00",
+  "exit_code": 0
+}

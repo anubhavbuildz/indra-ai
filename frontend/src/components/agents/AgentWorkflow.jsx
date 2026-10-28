@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { Fragment, useState } from "react";
+import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowDown,
@@ -6,11 +7,12 @@ import {
   ChevronDown,
   Cloud,
   Database,
+  Printer,
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
 import { MarkdownView } from "../reports/MarkdownView";
-import { Badge, Card } from "../ui/Primitives";
+import { Badge, Button, Card } from "../ui/Primitives";
 
 const agents = [
   {
@@ -44,8 +46,19 @@ function outputText(key, value) {
   return value || "No output was returned.";
 }
 
+function printSeniorReview() {
+  function cleanup() {
+    document.body.classList.remove("printing-senior-review");
+  }
+
+  document.body.classList.add("printing-senior-review");
+  window.addEventListener("afterprint", cleanup, { once: true });
+  window.print();
+}
+
 export function AgentWorkflow({ result, running = false, compact = false }) {
   const [expanded, setExpanded] = useState("cloud_agent_response");
+  const seniorReview = result?.senior_agent_response;
 
   return (
     <div className={`agent-flow ${compact ? "agent-flow-compact" : ""}`}>
@@ -70,7 +83,7 @@ export function AgentWorkflow({ result, running = false, compact = false }) {
           const Icon = agent.icon;
           const value = result?.[agent.key];
           return (
-            <div className="agent-node-wrap" key={agent.key}>
+            <Fragment key={agent.key}>
               <motion.div
                 className={`agent-node agent-node-${agent.color} ${value ? "agent-node-done" : ""}`}
                 animate={running ? { opacity: [0.72, 1, 0.72] } : { opacity: 1 }}
@@ -89,7 +102,7 @@ export function AgentWorkflow({ result, running = false, compact = false }) {
                   <ArrowDown size={14} />
                 </div>
               )}
-            </div>
+            </Fragment>
           );
         })}
       </div>
@@ -117,7 +130,16 @@ export function AgentWorkflow({ result, running = false, compact = false }) {
                       {agent.key === "cloud_agent_response" ? (
                         <pre>{outputText(agent.key, value)}</pre>
                       ) : (
-                        <MarkdownView className="agent-prose" text={outputText(agent.key, value)} />
+                        <>
+                          <MarkdownView className="agent-prose" text={outputText(agent.key, value)} />
+                          {agent.key === "senior_agent_response" && value && (
+                            <div className="agent-output-actions">
+                              <Button type="button" size="sm" variant="outline" onClick={printSeniorReview}>
+                                <Printer size={14} /> Print / Save as PDF
+                              </Button>
+                            </div>
+                          )}
+                        </>
                       )}
                     </motion.div>
                   )}
@@ -131,6 +153,13 @@ export function AgentWorkflow({ result, running = false, compact = false }) {
           <span><Sparkles size={15} /></span>
           Submit a cloud audit to see each agent’s actual response.
         </div>
+      )}
+      {seniorReview && createPortal(
+        <main className="senior-review-print">
+          <h1>Senior reviewer response</h1>
+          <MarkdownView text={outputText("senior_agent_response", seniorReview)} />
+        </main>,
+        document.body,
       )}
     </div>
   );

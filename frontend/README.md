@@ -65,4 +65,4 @@ matching local FAISS store, and a reachable inference provider.
 The renderer smoke check passed, but the latest live workflow attempt timed
 out at the inference provider before returning agent text. An earlier
 successful live S3 workflow predates Markdown rendering; see the
-[testing notes](../design/testing.md).
+[testing notes](../design/qa/testing.md).

@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     """Runtime configuration; integration credentials remain optional."""
 
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=PROJECT_ROOT / ".env",
         env_file_encoding="utf-8",
         case_sensitive=True,
         extra="ignore",
@@ -40,6 +40,12 @@ class Settings(BaseSettings):
         default="openai-chat-completions",
         validation_alias="NVIDIA_API_FORMAT",
     )
+    inference_timeout_seconds: float = Field(
+        default=120.0,
+        ge=1.0,
+        le=600.0,
+        validation_alias="INFERENCE_TIMEOUT_SECONDS",
+    )
     embedding_model: str = Field(
         default="sentence-transformers/all-MiniLM-L6-v2",
         validation_alias="EMBEDDING_MODEL",
@@ -53,7 +59,10 @@ class Settings(BaseSettings):
         validation_alias="FAISS_METADATA_PATH",
     )
     aws_region: str = Field(default="us-east-1", validation_alias="AWS_REGION")
-    cors_origins: str = Field(default="", validation_alias="CORS_ORIGINS")
+    cors_origins: str = Field(
+        default="http://localhost:5173,http://127.0.0.1:5173",
+        validation_alias="CORS_ORIGINS",
+    )
     max_request_bytes: int = Field(default=1_048_576, ge=1_024, le=10_485_760)
 
     @field_validator("jwt_secret_key")
