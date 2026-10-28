@@ -66,6 +66,18 @@ uvicorn app.main:app --reload
 The service listens at `http://localhost:8000`. Health is available at
 `/health`; development API docs are available at `/docs`.
 
+### Docker Compose: frontend and backend
+
+`compose.yml` builds both services and serves the frontend at
+`http://localhost:8080`. The frontend proxies API traffic to the backend.
+AWS credentials are mounted read-only from your host AWS directory into the
+backend; the frontend image contains no credentials.
+
+Follow [AWS profile and Compose setup](AWS_SETUP.md#5-aws-credentials-with-docker-compose)
+for host login, UID/GID permissions, persistent directories and startup commands.
+The regular app can perform real AWS reads and paid inference when you submit
+an audit; `compose.qa.yml` remains the separate synthetic test environment.
+
 ### Docker
 
 Build and run from the project root:

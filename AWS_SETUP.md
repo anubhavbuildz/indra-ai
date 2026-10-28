@@ -88,6 +88,102 @@ The application's `GET /api/v1/aws/identity` endpoint performs a read-only
 STS identity lookup. It confirms the identity available to the backend, but
 does not validate all permissions needed by the audit tools.
 
+## 5. AWS credentials with Docker Compose
+
+`compose.yml` runs the backend and a built React frontend. The frontend's
+Nginx proxy forwards API requests to the backend over Docker's internal network.
+Open `http://localhost:8080`; the backend port is not published to the host.
+
+The backend mounts your host AWS directory **read-only** at
+`/home/indra/.aws` and selects `AWS_PROFILE` (default `indra-readonly`). Boto3
+reads the mounted configuration, credentials, and any existing SSO cache.
+Credentials are not copied into an image or exposed to the frontend.
+AWS documents the [shared configuration file locations](https://docs.aws.amazon.com/sdkref/latest/guide/file-location.html)
+and [named profile format](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html).
+
+First configure and authenticate your read-only profile on the host, as above.
+For IAM Identity Center, run:
+
+```bash
+aws sso login --profile indra-readonly
+```
+
+From the repository root, configure application login/inference settings in the
+ignored `.env` file. Copy `.env.example` only if `.env` does not already exist.
+Never add AWS access keys to that file or to Vite variables. Then, on Linux or
+macOS:
+
+```bash
+export AWS_PROFILE=indra-readonly
+export LOCAL_UID="$(id -u)"
+export LOCAL_GID="$(id -g)"
+mkdir -p data/compose .cache/indra/huggingface
+
+docker compose -f compose.yml config --quiet
+docker compose -f compose.yml up --build -d --wait
+```
+
+The matching host UID/GID lets the backend read AWS files with restrictive
+permissions and write its data/cache directories. Do not make credential files
+world-readable to work around a permission error. On Windows, use WSL and these
+commands, or set `AWS_CONFIG_DIR` to the absolute Windows AWS-directory path
+available to Docker Desktop. The default source is `${HOME}/.aws`.
+
+If credentials are in a dedicated directory instead:
+
+```bash
+export AWS_CONFIG_DIR=/absolute/path/to/indraa-aws
+```
+
+The mount exposes all files in the chosen directory to the backend. Prefer a
+dedicated AWS directory when you need to isolate this app from other profiles.
+Profiles using `credential_process` also require that helper executable inside
+the image; mounting configuration alone does not install it. SSO refresh can
+require writes, so refresh/login on the host and restart the backend after
+renewing an expired session:
+
+```bash
+aws sso login --profile indra-readonly
+docker compose -f compose.yml restart backend
+```
+
+A read-only filesystem mount prevents changes to the host files. **AWS IAM
+permissions determine which AWS API operations the credentials allow.** Use
+an approved profile with only the required read permissions.
+
+Sign in through the frontend and use Settings → AWS identity to verify the
+backend identity. This performs a real STS read; submitting an audit makes real
+AWS read requests and configured inference calls. The real app Compose file
+is separate from the synthetic, credential-free `compose.qa.yml` test setup.
+
+Configuration and persistence:
+
+- `.env` supplies backend application settings, including login credentials,
+  the JWT signing key, and the inference key, at runtime. It is never built into
+  either image. Avoid printing `docker compose config` without `--quiet`, as it
+  can display resolved environment secrets.
+- `data/compose/` stores the container's SQLite database separately from the
+  development database; `.cache/indra/huggingface/` retains embedding downloads.
+- `faiss_store/` is mounted read-only and must contain the matching index and
+  trusted metadata. The first retrieval may download the configured CPU model.
+- The frontend build uses `VITE_API_BASE_URL=/` for the same-origin proxy. If
+  you previously saved a backend URL on this browser origin, clear it in Settings
+  or run `localStorage.removeItem("indraa.apiBaseUrl")` in the browser console.
+- `FRONTEND_PORT` changes host port 8080. `FRONTEND_BIND_ADDRESS` defaults to
+  `127.0.0.1`; use a configured HTTPS reverse proxy for remote access.
+
+Inspect and stop the local stack without deleting persistent files:
+
+```bash
+docker compose -f compose.yml ps
+docker compose -f compose.yml logs --tail=100 backend frontend
+docker compose -f compose.yml down
+```
+
+Docker runtime verification was unavailable on the implementation host. The
+configuration can be validated there structurally, but image builds, container
+health and credential permissions still need verification on a Docker host.
+
 ## Before installing Indra
 
 - [ ] `aws --version` reports AWS CLI v2.

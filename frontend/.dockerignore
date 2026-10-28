@@ -1,0 +1,13 @@
+node_modules
+dist
+.env
+.env.*
+!.env.example
+.git
+coverage
+e2e
+playwright-report
+test-results
+src/**/*.test.js
+src/**/*.test.jsx
+src/qa-setup.js

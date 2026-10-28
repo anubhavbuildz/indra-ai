@@ -1,0 +1,76 @@
+name: indraa
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    user: "${LOCAL_UID:-1000}:${LOCAL_GID:-1000}"
+    env_file:
+      - .env
+    environment:
+      APP_ENV: production
+      DEBUG: "false"
+      API_V1_PREFIX: /api/v1
+      DATABASE_URL: sqlite:////app/data/indra.db
+      FAISS_INDEX_PATH: /app/faiss_store/security.index
+      FAISS_METADATA_PATH: /app/faiss_store/security.pkl
+      HF_HOME: /home/indra/.cache/huggingface
+      HOME: /home/indra
+      AWS_PROFILE: ${AWS_PROFILE:-indra-readonly}
+      AWS_REGION: ${AWS_REGION:-us-east-1}
+      AWS_CONFIG_FILE: /home/indra/.aws/config
+      AWS_SHARED_CREDENTIALS_FILE: /home/indra/.aws/credentials
+      AWS_EC2_METADATA_DISABLED: "true"
+      # Browser API traffic is same-origin through the frontend proxy.
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8080,http://127.0.0.1:8080}
+    expose:
+      - "8000"
+    volumes:
+      - type: bind
+        source: ./data/compose
+        target: /app/data
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./faiss_store
+        target: /app/faiss_store
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./.cache/indra/huggingface
+        target: /home/indra/.cache/huggingface
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${AWS_CONFIG_DIR:-${HOME}/.aws}
+        target: /home/indra/.aws
+        read_only: true
+        bind:
+          create_host_path: false
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3).read()"]
+      interval: 10s
+      timeout: 5s
+      start_period: 60s
+      retries: 6
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: /
+    ports:
+      - "${FRONTEND_BIND_ADDRESS:-127.0.0.1}:${FRONTEND_PORT:-8080}:8080"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--spider", "http://127.0.0.1:8080/nginx-health"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+    restart: unless-stopped
