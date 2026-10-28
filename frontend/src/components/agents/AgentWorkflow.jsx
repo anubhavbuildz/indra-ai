@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowDown,
@@ -70,7 +70,7 @@ export function AgentWorkflow({ result, running = false, compact = false }) {
           const Icon = agent.icon;
           const value = result?.[agent.key];
           return (
-            <div className="agent-node-wrap" key={agent.key}>
+            <Fragment key={agent.key}>
               <motion.div
                 className={`agent-node agent-node-${agent.color} ${value ? "agent-node-done" : ""}`}
                 animate={running ? { opacity: [0.72, 1, 0.72] } : { opacity: 1 }}
@@ -89,7 +89,7 @@ export function AgentWorkflow({ result, running = false, compact = false }) {
                   <ArrowDown size={14} />
                 </div>
               )}
-            </div>
+            </Fragment>
           );
         })}
       </div>
