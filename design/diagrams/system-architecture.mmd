@@ -1,9 +1,10 @@
 flowchart LR
   subgraph browser["Trust boundary: browser"]
     U[User] --> UI[React routes and components]
-    UI --> AUTH[AuthContext: in-memory JWT]
+    UI --> AUTH[AuthContext: persisted JWT and expiry]
     UI --> API[services/api.js]
-    LS[(localStorage: API origin only)] --> API
+    LS[(localStorage: JWT and API origin)] --> API
+    AUTH <-->|persist and restore JWT| LS
   end
   subgraph server["Trust boundary: FastAPI backend"]
     HTTP[FastAPI routing and middleware] --> JWT[HS256 bearer validation]

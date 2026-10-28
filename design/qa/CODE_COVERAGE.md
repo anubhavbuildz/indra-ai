@@ -1,8 +1,8 @@
 # Code coverage
 
-Generated: 2026-10-28T19:13:48.818856+05:30
+Generated: 2026-10-28T19:31:57.928859+05:30
 
-Commit: `e65b14c5b7051d0289870dfaa999d2d1d2ac4d94` (working tree includes uncommitted QA changes).
+Commit: `41ede85b75df79a7423448468d0d6abec551b2f8` (working tree includes uncommitted QA changes).
 
 | Module | Line coverage | Branch coverage | Target | Result |
 |---|---:|---:|---|---|
@@ -10,7 +10,7 @@ Commit: `e65b14c5b7051d0289870dfaa999d2d1d2ac4d94` (working tree includes uncomm
 | Agent orchestration | 100.00% | N/A | 90% preferred | Met |
 | AWS auditing | 72.34% | 61.29% | 90% preferred | Below target |
 | Compliance processing | 79.15% | 52.63% | 90% preferred | Below target |
-| Frontend | 87.2% | 77.25% | 80% | Met |
+| Frontend | 87.91% | 78.2% | 80% | Met |
 
 Terraform processing is N/A: no implementation exists. Backend line coverage is executable lines, distinct from coverage.py's combined branch+line percentage.
 
@@ -100,7 +100,7 @@ Terraform processing is N/A: no implementation exists. Backend line coverage is 
 | `frontend/src/components/layout/Topbar.jsx` | 100% | 83.33% |
 | `frontend/src/components/reports/MarkdownView.jsx` | 50% | 100% |
 | `frontend/src/components/ui/Primitives.jsx` | 100% | 93.75% |
-| `frontend/src/context/AuthContext.jsx` | 100% | 50% |
+| `frontend/src/context/AuthContext.jsx` | 97.87% | 88.88% |
 | `frontend/src/hooks/useApi.js` | 90% | 100% |
 | `frontend/src/lib/utils.js` | 100% | 100% |
 | `frontend/src/pages/Agents.jsx` | 100% | 100% |

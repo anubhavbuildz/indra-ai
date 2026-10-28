@@ -87,6 +87,13 @@ endorsement or affiliation.
 
 - [About GitHub Copilot](https://docs.github.com/en/copilot/about-github-copilot/what-is-github-copilot)
 
+## OpenAI Codex
+
+OpenAI Codex was used to assist with quality assurance (QA), including test
+planning, implementation, execution, and reporting, and with designing,
+generating, and validating architecture and workflow diagrams. Codex was used
+as a development tool and is not a runtime dependency of the application.
+
 ## Documentation and retrieved source materials
 
 Project documentation under `design/` and the project README files describe

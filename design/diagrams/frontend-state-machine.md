@@ -1,17 +1,19 @@
 # Frontend state machine
 
 This diagram describes the React frontend's current session, route, and audit
-behavior. Authentication state is held in memory; a page reload starts a new
-unauthenticated session.
+behavior. The JWT is stored in localStorage and restored on reload until its expiry.
+Sign-out, expiry, or a protected API 401 removes the stored token.
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Unauthenticated
+    [*] --> RestoringSession
+    RestoringSession --> Authenticated: valid unexpired stored JWT
+    RestoringSession --> Unauthenticated: absent, malformed or expired JWT
 
     Unauthenticated --> Login: open /login
     Unauthenticated --> Login: request protected route / redirect and retain path
     Login --> Authenticating: submit username and password
-    Authenticating --> Authenticated: login succeeds / store JWT in memory
+    Authenticating --> Authenticated: login succeeds / persist JWT in localStorage
     Authenticating --> Login: login fails / show error
     Login --> Authenticated: already authenticated / redirect to /
 
@@ -44,11 +46,12 @@ stateDiagram-v2
     AuditSucceeded --> CloudAudit: remain on page
     AuditFailed --> CloudAudit: remain on page
 
-    Authenticated --> Unauthenticated: sign out / clear in-memory token and username
+    Authenticated --> Unauthenticated: sign out / clear stored JWT, API token and username
     Authenticated --> Unauthenticated: protected API returns 401 / session-expired event
     Unauthenticated --> Login: redirect to /login
     note right of Authenticated
-        Protected routes are available only while the in-memory JWT exists.
+        Protected routes require an unexpired JWT; the backend verifies its signature.
+        Reload restores the token and username. Expiry clears storage.
         A 401 clears the session and redirects to login.
     end note
 

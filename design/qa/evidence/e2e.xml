@@ -1,26 +1,26 @@
-<testsuites id="" name="" tests="9" failures="0" skipped="0" errors="0" time="41.316838000000004">
-<testsuite name="workspace.spec.js" timestamp="2026-10-28T13:41:26.662Z" hostname="desktop" tests="3" failures="0" skipped="0" time="9.709" errors="0">
-<testcase name="E2E-001 startup, real login, synthetic audit and saved report" classname="workspace.spec.js" time="4.346">
+<testsuites id="" name="" tests="9" failures="0" skipped="0" errors="0" time="58.31303">
+<testsuite name="workspace.spec.js" timestamp="2026-10-28T13:59:32.822Z" hostname="desktop" tests="3" failures="0" skipped="0" time="10.797" errors="0">
+<testcase name="E2E-001 startup, real login, synthetic audit and saved report" classname="workspace.spec.js" time="5.281">
 </testcase>
-<testcase name="E2E-001 invalid login and network failure remain visible" classname="workspace.spec.js" time="1.772">
+<testcase name="E2E-001 invalid login and network failure remain visible" classname="workspace.spec.js" time="1.826">
 </testcase>
-<testcase name="E2E-001 protected route and session expiry" classname="workspace.spec.js" time="3.591">
-</testcase>
-</testsuite>
-<testsuite name="workspace.spec.js" timestamp="2026-10-28T13:41:26.662Z" hostname="tablet" tests="3" failures="0" skipped="0" time="10.075" errors="0">
-<testcase name="E2E-001 startup, real login, synthetic audit and saved report" classname="workspace.spec.js" time="4.496">
-</testcase>
-<testcase name="E2E-001 invalid login and network failure remain visible" classname="workspace.spec.js" time="1.834">
-</testcase>
-<testcase name="E2E-001 protected route and session expiry" classname="workspace.spec.js" time="3.745">
+<testcase name="E2E-001 protected route and session expiry" classname="workspace.spec.js" time="3.69">
 </testcase>
 </testsuite>
-<testsuite name="workspace.spec.js" timestamp="2026-10-28T13:41:26.662Z" hostname="mobile" tests="3" failures="0" skipped="0" time="13.773" errors="0">
-<testcase name="E2E-001 startup, real login, synthetic audit and saved report" classname="workspace.spec.js" time="5.524">
+<testsuite name="workspace.spec.js" timestamp="2026-10-28T13:59:32.822Z" hostname="tablet" tests="3" failures="0" skipped="0" time="12.95" errors="0">
+<testcase name="E2E-001 startup, real login, synthetic audit and saved report" classname="workspace.spec.js" time="6.563">
 </testcase>
-<testcase name="E2E-001 invalid login and network failure remain visible" classname="workspace.spec.js" time="2.289">
+<testcase name="E2E-001 invalid login and network failure remain visible" classname="workspace.spec.js" time="2.526">
 </testcase>
-<testcase name="E2E-001 protected route and session expiry" classname="workspace.spec.js" time="5.96">
+<testcase name="E2E-001 protected route and session expiry" classname="workspace.spec.js" time="3.861">
+</testcase>
+</testsuite>
+<testsuite name="workspace.spec.js" timestamp="2026-10-28T13:59:32.822Z" hostname="mobile" tests="3" failures="0" skipped="0" time="25.67" errors="0">
+<testcase name="E2E-001 startup, real login, synthetic audit and saved report" classname="workspace.spec.js" time="16.833">
+</testcase>
+<testcase name="E2E-001 invalid login and network failure remain visible" classname="workspace.spec.js" time="3.205">
+</testcase>
+<testcase name="E2E-001 protected route and session expiry" classname="workspace.spec.js" time="5.632">
 </testcase>
 </testsuite>
 </testsuites>

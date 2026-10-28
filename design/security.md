@@ -36,3 +36,7 @@
   Compliance and Senior text is rendered through React Markdown with the GFM
   plugin; raw HTML support is not enabled. Do not replace this with direct
   HTML injection or expose AWS/provider credentials through `VITE_` variables.
+
+## Browser session persistence
+
+The frontend stores only the access JWT under `indraa.accessToken` in localStorage, alongside the existing API-origin preference. AuthProvider restores the username from the JWT subject and clears the token on sign-out, its signed expiry time, or a protected API 401. JWT decoding in the browser is used for expiry scheduling; the backend remains responsible for signature validation and authorization. Passwords are never persisted.

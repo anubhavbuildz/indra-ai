@@ -1,7 +1,8 @@
 flowchart LR
   U[User] -->|credentials| LOGIN[Login form]
   LOGIN --> AUTH[AuthContext]
-  AUTH -->|token in memory| API[services/api.js]
+  AUTH <-->|persist and restore JWT until expiry| TOKENS[(localStorage: access token)]
+  AUTH -->|bearer token| API[services/api.js]
   U -->|services, region confirmation, context| AUDIT[CloudAudit local state]
   AUDIT -->|generated read-only audit prompt| MUT[useChatMutation]
   MUT --> API

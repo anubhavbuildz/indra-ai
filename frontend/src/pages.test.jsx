@@ -13,7 +13,7 @@ const report = {audited_regions: ["us-east-1"], audited_services: ["s3"], total_
 const assessment = {id: "fixture-id", name: "Fixture assessment", created_at: "2026-01-01T00:00:00Z",
   audit_report: report, senior_review: "Fixture senior review", compliance_review: "Fixture compliance"};
 beforeEach(() => {
-  vi.spyOn(api, "login").mockResolvedValue({access_token: "fixture-token"});
+  vi.spyOn(api, "login").mockResolvedValue({access_token: `${btoa(JSON.stringify({alg: "HS256", typ: "JWT"}))}.${btoa(JSON.stringify({sub: "test-user", exp: Math.floor(Date.now() / 1000) + 7200}))}.fixture-signature`});
   vi.spyOn(api, "assessments").mockResolvedValue({items: [assessment]});
   vi.spyOn(api, "assessment").mockResolvedValue(assessment);
   vi.spyOn(api, "health").mockResolvedValue({status: "ok", service: "Fixture API", version: "0.1.0"});

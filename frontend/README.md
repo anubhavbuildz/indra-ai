@@ -30,7 +30,7 @@ npm run preview
 ## Backend behavior reflected by the UI
 
 - The login form calls `POST /api/v1/auth/login`; authenticated API calls use
-  the returned bearer token. The token stays in application memory.
+  the returned bearer token. The JWT is saved as `indraa.accessToken` in localStorage and restored on refresh until its two-hour expiry. Sign-out, expiry, or an authenticated API 401 clears it. Passwords are never stored.
 - The audit form calls `POST /api/v1/chat` and renders its separate Cloud,
   Compliance, and Senior response fields.
 - Agent-level progress is not streamed by the API. The UI shows a single

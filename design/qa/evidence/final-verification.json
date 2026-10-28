@@ -7,8 +7,8 @@
   "unit_before_integration": true,
   "summary": {
     "Unit": {
-      "total": 55,
-      "passed": 55,
+      "total": 62,
+      "passed": 62,
       "failed": 0,
       "skipped": 0,
       "blocked": 0

@@ -1,10 +1,10 @@
 {
-  "timestamp": "2026-10-28T19:13:48.818856+05:30",
-  "commit": "e65b14c5b7051d0289870dfaa999d2d1d2ac4d94",
+  "timestamp": "2026-10-28T19:31:57.928859+05:30",
+  "commit": "41ede85b75df79a7423448468d0d6abec551b2f8",
   "summary": {
     "Unit": {
-      "total": 55,
-      "passed": 55,
+      "total": 62,
+      "passed": 62,
       "failed": 0,
       "skipped": 0,
       "blocked": 0
@@ -271,7 +271,7 @@
       "objective": "React login accessibility, loading, failure, token state and API failures",
       "status": "Passed",
       "evidence": "evidence/ execution logs, JUnit and scanner-results.json",
-      "actual": "3 mapped executions; Passed. See raw evidence."
+      "actual": "10 mapped executions; Passed. See raw evidence."
     },
     {
       "id": "UNIT-027",
