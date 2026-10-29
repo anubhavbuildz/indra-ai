@@ -122,7 +122,7 @@ Designed before new test code. Counts are logical cases; parameterized execution
 | Preconditions | Isolated database, test credentials, external service fixtures; dependencies installed |
 | Test input | Fixture dependencies: monkeypatch; controlled inputs defined in `tests/test_config.py::test_defaults_allow_startup_without_provider_credentials` |
 | Steps | Run `.venv/bin/python -m pytest -c pytest-qa.ini -p tests.qa_plugin tests/test_config.py::test_defaults_allow_startup_without_provider_credentials -v`; compare assertions below to execution evidence |
-| Expected output | `settings.app_name == 'Indra API'`; `settings.database_url == 'sqlite:///./data/indra.db'`; `not settings.nvidia_api_key`; `settings.nvidia_base_url == 'https://api.tokenfactory.nebius.com/v1'`; `settings.nvidia_model == 'nvidia/Nemotron-3_5-Lightning'`; `settings.nvidia_api_format == 'openai-chat-completions'`; `settings.inference_timeout_seconds == 120.0`; `not settings.integrations_ready['nvidia']` |
+| Expected output | `settings.app_name == 'Indra-AI'`; `settings.database_url == 'sqlite:///./data/indra.db'`; `not settings.nvidia_api_key`; `settings.nvidia_base_url == 'https://api.tokenfactory.nebius.com/v1'`; `settings.nvidia_model == 'nvidia/Nemotron-3_5-Lightning'`; `settings.nvidia_api_format == 'openai-chat-completions'`; `settings.inference_timeout_seconds == 120.0`; `not settings.integrations_ready['nvidia']` |
 | Actual output | 1 mapped executions; Passed. See raw evidence. |
 | Status | Passed |
 | Evidence | design/qa/evidence/ generated logs and JUnit |

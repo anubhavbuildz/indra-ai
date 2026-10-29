@@ -30,8 +30,7 @@ export function Sidebar({ open, onClose, compact, onToggleCompact }) {
           </div>
           {!compact && (
             <div className="brand-wordmark">
-              <span>INDRAA</span>
-              <small>AI CLOUD SECURITY POSTURE</small>
+              <span>Indra-AI</span>
             </div>
           )}
           <button className="sidebar-collapse" onClick={onToggleCompact} aria-label="Toggle sidebar">
@@ -84,7 +83,7 @@ export function Sidebar({ open, onClose, compact, onToggleCompact }) {
           <Settings size={18} strokeWidth={1.8} />
           {!compact && <span>Settings</span>}
         </NavLink>
-        {!compact && <div className="sidebar-version">INDRAA CONSOLE <span>v1.0</span></div>}
+        {!compact && <div className="sidebar-version">Indra-AI CONSOLE <span>v1.0</span></div>}
       </aside>
     </>
   );

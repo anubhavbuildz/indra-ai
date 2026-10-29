@@ -2,7 +2,7 @@
 
 ## 1. Purpose and scope
 
-This document describes how the Indra AI backend's modules and functions
+This document describes how the Indra-AI backend's modules and functions
 collaborate at runtime. It focuses on the FastAPI request boundary, the AWS
 audit and review workflow, local FAISS retrieval, persistence, and supporting
 API services.

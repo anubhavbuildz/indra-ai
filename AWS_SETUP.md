@@ -1,7 +1,7 @@
 # AWS CLI and identity setup
 
-Complete this setup before installing or running Indra if you plan to use its
-AWS audit workflow. Indra's backend uses Boto3's standard AWS credential
+Complete this setup before installing or running Indra-AI if you plan to use its
+AWS audit workflow. Indra-AI's backend uses Boto3's standard AWS credential
 chain. The AWS CLI is useful for creating and validating a local named
 credential profile; it is not itself required by the running backend when
 credentials are provided through another supported mechanism, such as a
@@ -22,7 +22,7 @@ finish installing the CLI and open a new terminal before continuing.
 
 ## 2. Use a non-root AWS identity
 
-**Do not use the AWS account root user for Indra or day-to-day AWS work.** Do
+**Do not use the AWS account root user for Indra-AI or day-to-day AWS work.** Do
 not create root access keys. Keep root credentials protected for account-level
 administration and recovery only.
 
@@ -35,7 +35,7 @@ identity and assignment. For deployments, prefer a narrowly scoped workload
 role or the platform's workload identity rather than a developer's personal
 credentials.
 
-Indra's AWS audit tools perform read-only checks across selected services,
+Indra-AI's AWS audit tools perform read-only checks across selected services,
 including S3, IAM, EC2/EBS, VPC, RDS, CloudTrail, and GuardDuty. An identity
 with only `sts:GetCallerIdentity` can verify its caller identity but cannot
 run those audits. Grant only the specific read actions required for the
@@ -63,7 +63,7 @@ aws sts get-caller-identity --profile indra-readonly
 
 Confirm the returned account and ARN are the expected non-root identity. If
 the identity is not correct, stop and ask your administrator to fix the
-profile or permission assignment before using Indra.
+profile or permission assignment before using Indra-AI.
 
 ## 4. Make the profile available to the backend
 
@@ -184,7 +184,7 @@ Docker runtime verification was unavailable on the implementation host. The
 configuration can be validated there structurally, but image builds, container
 health and credential permissions still need verification on a Docker host.
 
-## Before installing Indra
+## Before installing Indra-AI
 
 - [ ] `aws --version` reports AWS CLI v2.
 - [ ] You have an approved non-root identity; do not use root credentials.

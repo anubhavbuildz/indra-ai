@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for helping improve Indra. This is an early-stage backend project;
+Thanks for helping improve Indra-AI. This is an early-stage backend project;
 discuss substantial API, provider, or schema changes in an
 issue before investing in a large implementation.
 

@@ -1,8 +1,8 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "INDRAA AI",
-  "description": "Read-only AWS security audits, multi-agent reviews, architecture, and quality assurance.",
+  "name": "Indra-AI",
+  "description": "Indra-AI cloud security posture assessment: read-only AWS audits, AI-assisted reviews, architecture, and quality assurance.",
   "colors": {
     "primary": "#76B900",
     "light": "#8BCB26",
@@ -13,7 +13,7 @@
   },
   "favicon": "/frontend/src/assets/indraa-mark.svg",
   "search": {
-    "prompt": "Search INDRAA documentation..."
+    "prompt": "Search Indra-AI documentation..."
   },
   "navigation": {
     "tabs": [

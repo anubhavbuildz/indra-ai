@@ -47,7 +47,7 @@ export default function Dashboard() {
         <div>
           <div className="eyebrow"><span className="status-dot" /> SECURITY OPERATIONS CENTER</div>
           <h1>Security overview</h1>
-          <p>Your cloud posture, translated into evidence you can act on.</p>
+          <p>Your cloud security posture assessment, translated into evidence you can act on.</p>
         </div>
         <Link to="/audit">
           <Button><Activity size={16} /> Start an audit <ArrowRight size={15} /></Button>
@@ -57,7 +57,7 @@ export default function Dashboard() {
       <div className="overview-banner">
         <div className="overview-banner-orb"><ShieldCheck size={26} /></div>
         <div className="overview-banner-copy">
-          <div className="banner-label">INDRAA AI CLOUD SECURITY POSTURE <span>LIVE</span></div>
+          <div className="banner-label">Indra-AI · CLOUD SECURITY POSTURE ASSESSMENT <span>LIVE</span></div>
           <strong>{latest ? "Your latest assessment is ready to review." : "Your cloud security workspace is ready."}</strong>
           <p>{latest ? `Last completed ${formatDate(latest.created_at)} · ${findings.length} findings returned.` : "Run a read-only AWS audit to surface real findings and evidence."}</p>
         </div>

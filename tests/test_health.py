@@ -5,7 +5,7 @@ def test_health_reports_service_without_credentials(client):
     response = client.get("/health")
 
     assert response.status_code == 200
-    assert response.json() == {"status": "ok", "service": "Indra API", "version": "0.1.0"}
+    assert response.json() == {"status": "ok", "service": "Indra-AI", "version": "0.1.0"}
 
 
 def test_docs_are_available_in_development(client):

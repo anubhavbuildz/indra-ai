@@ -221,7 +221,7 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
-# Indra local configuration and runtime data
+# Indra-AI local configuration and runtime data
 .env
 .env.*
 !.env.example

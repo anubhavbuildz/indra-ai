@@ -1,6 +1,6 @@
 # Third-Party Attributions
 
-Indra uses the third-party software and services listed below. Package names
+Indra-AI uses the third-party software and services listed below. Package names
 and links identify their respective projects; each remains subject to its own
 copyright, license, and terms. Consult the package's upstream license and
 notices before redistributing it. The project license does not replace or

@@ -1,6 +1,6 @@
-# Indraa frontend
+# Indra-AI frontend
 
-React 19 + Vite JavaScript SPA for the Indraa AWS security review backend.
+React 19 + Vite JavaScript SPA for Indra-AI, a cloud security posture assessment product.
 The UI calls the existing authenticated FastAPI routes; it does not simulate
 findings or agent progress.
 

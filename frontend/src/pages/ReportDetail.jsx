@@ -33,7 +33,7 @@ export default function ReportDetail() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `indraa-assessment-${item.id}.md`;
+    link.download = `Indra-AI-assessment-${item.id}.md`;
     link.click();
     URL.revokeObjectURL(url);
   }

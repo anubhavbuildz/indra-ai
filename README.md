@@ -1,7 +1,7 @@
-# Indra AI Backend
+# Indra-AI Backend
 
-Indra is a FastAPI backend for read-only AWS security audits and AI-assisted
-review. It returns a structured Cloud audit report, a separate Compliance
+Indra-AI is a cloud security posture assessment product with a FastAPI backend
+for read-only AWS security audits and AI-assisted review. It returns a structured Cloud audit report, a separate Compliance
 summary informed by local FAISS guidance, and an independent Senior review.
 Completed chat assessments are persisted in SQLAlchemy-backed storage.
 
