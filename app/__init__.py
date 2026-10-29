@@ -1,1 +1,1 @@
-"""Indra backend application."""
+"""Indra-AI backend application."""

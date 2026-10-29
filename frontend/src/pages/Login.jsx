@@ -39,8 +39,8 @@ export default function Login() {
       <div className="login-grid" />
       <div className="login-brand">
         <span className="brand-mark"><img src={indraaMark} alt="" /></span>
-        <span>INDRAA</span>
-        <small>AI CLOUD SECURITY POSTURE</small>
+        <span>Indra-AI</span>
+        <small>CLOUD SECURITY POSTURE ASSESSMENT</small>
       </div>
       <div className="login-layout">
         <motion.section
@@ -66,7 +66,7 @@ export default function Login() {
         >
           <div className="login-card-icon"><Fingerprint size={22} /></div>
           <div className="eyebrow">WELCOME BACK</div>
-          <h2>Sign in to Indraa</h2>
+          <h2>Sign in to Indra-AI</h2>
           <p className="login-card-description">Use the account configured for your backend.</p>
           <form onSubmit={submit} className="login-form">
             <label>
@@ -105,7 +105,7 @@ export default function Login() {
         </motion.section>
       </div>
       <div className="login-footnote">
-        <span>INDRAA · AI CLOUD SECURITY POSTURE</span>
+        <span>Indra-AI · CLOUD SECURITY POSTURE ASSESSMENT</span>
         <span>POWERED BY <b>NVIDIA</b></span>
       </div>
     </main>

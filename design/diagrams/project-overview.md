@@ -1,8 +1,9 @@
-# Indra Backend: Project Overview
+# Indra-AI Backend: Project Overview
 
 ## What the project solves
 
-Indra is a backend for AWS security assessment and AI-assisted review. It
+Indra-AI is a cloud security posture assessment product for AWS with an API
+for read-only security audits and AI-assisted review. It
 provides a single API for selecting a bounded set of read-only AWS checks,
 returning structured findings, and producing two sequential model reviews of
 those findings using relevant guidance from a local FAISS index. It also offers
@@ -11,11 +12,11 @@ optional AWS caller-identity check.
 
 The problem it addresses is the effort required to collect security-relevant
 AWS configuration signals and turn them into a clear, reviewable summary.
-Indra combines deterministic AWS API checks with model-generated explanation
+Indra-AI combines deterministic AWS API checks with model-generated explanation
 while keeping the observations and the model's interpretation in separate
 response fields.
 
-Indra is a decision-support scaffold, not a cloud control plane or a complete
+Indra-AI is a decision-support scaffold, not a cloud control plane or a complete
 security product. It does not remediate AWS resources, inspect every AWS
 service or control, certify compliance, or guarantee that an account is
 secure.
@@ -228,7 +229,7 @@ documentation are also public.
 
 | Variable | Default | Use |
 | --- | --- | --- |
-| `APP_NAME` | `Indra API` | Service name |
+| `APP_NAME` | `Indra-AI` | Service name |
 | `APP_ENV` | `development` | Development enables `/docs` and `/redoc` |
 | `DEBUG` | `false` | FastAPI debug mode |
 | `API_V1_PREFIX` | `/api/v1` | Versioned route prefix |

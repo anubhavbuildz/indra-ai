@@ -1,6 +1,6 @@
 # How to integrate a frontend
 
-This guide connects a browser-based frontend to the Indra FastAPI backend. It
+This guide connects a browser-based frontend to the Indra-AI FastAPI backend. It
 covers login, authenticated API requests, displaying the three independent
 agent outputs, CORS, and local Docker development.
 

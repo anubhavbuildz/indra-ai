@@ -19,7 +19,7 @@ Describe the problem without including credentials, tokens, account identifiers,
 ## Environment
 - Python version:
 - Operating system:
-- Indra version/commit:
+- Indra-AI version/commit:
 
 ## Logs
 Include only redacted logs. Never attach `.env` files or secrets.

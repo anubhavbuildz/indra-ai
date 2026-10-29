@@ -9,7 +9,7 @@ def test_defaults_allow_startup_without_provider_credentials(monkeypatch):
     monkeypatch.delenv("DATABASE_URL", raising=False)
     settings = Settings(_env_file=None)
 
-    assert settings.app_name == "Indra API"
+    assert settings.app_name == "Indra-AI"
     assert settings.database_url == "sqlite:///./data/indra.db"
     assert not settings.nvidia_api_key
     assert settings.nvidia_base_url == "https://api.tokenfactory.nebius.com/v1"

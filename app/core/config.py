@@ -7,7 +7,7 @@ from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-
+print(PROJECT_ROOT)
 
 class Settings(BaseSettings):
     """Runtime configuration; integration credentials remain optional."""
@@ -19,7 +19,7 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    app_name: str = Field(default="Indra API", validation_alias="APP_NAME")
+    app_name: str = Field(default="Indra-AI", validation_alias="APP_NAME")
     app_env: str = Field(default="development", validation_alias="APP_ENV")
     debug: bool = Field(default=False, validation_alias="DEBUG")
     api_v1_prefix: str = Field(default="/api/v1", validation_alias="API_V1_PREFIX")

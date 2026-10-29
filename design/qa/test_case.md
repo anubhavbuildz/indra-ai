@@ -1,4 +1,4 @@
-# Indraa Test Cases and Function Behavior
+# Indra-AI Test Cases and Function Behavior
 
 This is a hands-on test plan for the current backend and React frontend. It
 maps the principal production functions and user-facing operations to their

@@ -428,7 +428,7 @@ Designed before new test code. Counts are logical cases; parameterized execution
 | Preconditions | Isolated database, test credentials, external service fixtures; dependencies installed |
 | Test input | Fixture dependencies: client; controlled inputs defined in `tests/test_health.py::test_health_reports_service_without_credentials` |
 | Steps | Run `.venv/bin/python -m pytest -c pytest-qa.ini -p tests.qa_plugin tests/test_health.py::test_health_reports_service_without_credentials -v`; compare assertions below to execution evidence |
-| Expected output | `response.status_code == 200`; `response.json() == {'status': 'ok', 'service': 'Indra API', 'version': '0.1.0'}` |
+| Expected output | `response.status_code == 200`; `response.json() == {'status': 'ok', 'service': 'Indra-AI', 'version': '0.1.0'}` |
 | Actual output | 1 mapped executions; Passed. See raw evidence. |
 | Status | Passed |
 | Evidence | design/qa/evidence/ generated logs and JUnit |

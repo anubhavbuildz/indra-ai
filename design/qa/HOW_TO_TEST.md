@@ -1,4 +1,4 @@
-# INDRAA AI testing and installation manual
+# Indra-AI testing and installation manual
 
 This guide uses the existing repository layout. Test inventory: [traceability matrix](test-traceability-matrix.md). Architectural sources and previews: [diagrams](../diagrams/README.md). Evidence is written to `design/qa/evidence/`. Fixtures are synthetic and do not certify AWS security or compliance.
 

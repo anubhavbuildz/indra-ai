@@ -13,7 +13,7 @@ export function Topbar({ onMenu }) {
   const { pathname } = useLocation();
   const heading = pathname.startsWith("/reports/") || pathname.startsWith("/findings/")
     ? "Assessment details"
-    : pageNames[pathname] || "Indraa";
+    : pageNames[pathname] || "Indra-AI";
 
   return (
     <header className="topbar">
