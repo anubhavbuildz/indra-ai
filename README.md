@@ -44,6 +44,34 @@ account root user or create root access keys. AWS CLI setup is not required
 when the backend uses another supported credential source, such as a workload
 identity.
 
+Create and activate a Python virtual environment from the project root before
+installing dependencies. The full-project installer above creates `.venv`
+automatically; these steps are for manual installation.
+
+On macOS or Linux, use Python 3.12 or newer:
+
+```bash
+python3 --version
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+On Windows PowerShell:
+
+```powershell
+py -3.12 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
+
+If Python is not installed, install Python 3.12 or newer first. On Debian or
+Ubuntu, if creating the environment reports that `venv` or `ensurepip` is
+missing, install the matching system package (for example,
+`sudo apt install python3.12-venv` for Python 3.12), then retry creation.
+
+Keep the environment active while running the dependency installation and
+backend commands below. In each new terminal, activate it again. Run
+`deactivate` when you are finished.
+
 ```bash
 python -m pip install -e '.[dev]'
 cp .env.example .env
@@ -67,6 +95,10 @@ The service listens at `http://localhost:8000`. Health is available at
 `/health`; development API docs are available at `/docs`.
 
 ### Docker Compose: frontend and backend
+
+> **Docker Deployment — Under Development**
+>
+> The Docker-based deployment version of Indraa is currently under active development and testing. Docker deployment is not yet considered production-ready. The standard installation and deployment method remains available and operational. Docker support will be finalized after testing and validation.
 
 `compose.yml` builds both services and serves the frontend at
 `http://localhost:8080`. The frontend proxies API traffic to the backend.
@@ -201,3 +233,21 @@ live S3 workflow succeeded before the Markdown integration. See the
 - Never commit `.env`, provider credentials, AWS credentials, local database
   files, or trusted FAISS metadata.
 - Deploy behind HTTPS and use narrowly scoped AWS workload credentials.
+
+## Hackathon MVP and production roadmap
+
+**Hackathon MVP**
+
+- Working standard installation and deployment using the Quick start instructions.
+- IAM user authentication using authorized credentials; see [IAM user setup](AWS_SETUP.md#iam-user-authentication-for-the-hackathon-mvp).
+- AWS security posture assessment using read-only permissions.
+- AWS STS AssumeRole support through Boto3's standard credential chain and configured role profiles; there is no dedicated application-level AssumeRole onboarding flow. See [AssumeRole prerequisites](AWS_SETUP.md#sts-assumerole-prerequisites-and-credential-flow).
+- Docker deployment currently under development.
+
+**Production Roadmap** (planned, not completed)
+
+- Terraform-based AWS onboarding.
+- Least-privilege IAM audit roles and policies tailored to assessment checks.
+- Cross-account AssumeRole authentication with a managed onboarding flow.
+- Temporary credential management beyond the existing SDK credential chain.
+- Fully tested Docker deployment and containerized distribution.

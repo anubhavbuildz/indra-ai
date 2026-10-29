@@ -90,6 +90,10 @@ does not validate all permissions needed by the audit tools.
 
 ## 5. AWS credentials with Docker Compose
 
+> **Docker Deployment — Under Development**
+>
+> The Docker-based deployment version of Indraa is currently under active development and testing. Docker deployment is not yet considered production-ready. The standard installation and deployment method remains available and operational. Docker support will be finalized after testing and validation.
+
 `compose.yml` runs the backend and a built React frontend. The frontend's
 Nginx proxy forwards API requests to the backend over Docker's internal network.
 Open `http://localhost:8080`; the backend port is not published to the host.
@@ -199,3 +203,132 @@ The backend can start without AWS credentials, but AWS identity checks and
 AWS audit workflows require valid credentials. See the [project README](./README.md)
 for installation and startup steps, and the [security notes](./design/security.md)
 for the application's AWS boundaries.
+
+## IAM user authentication for the hackathon MVP
+
+Use this alternative when an administrator authorizes IAM user credentials for
+local MVP testing. The Identity Center and workload-role recommendations above
+remain the preferred production approach.
+
+1. Ask an AWS administrator to open **IAM → Users → Create user**, create a user
+   named `indra` (or an approved username), and attach the AWS-managed
+   `SecurityAudit` and `ViewOnlyAccess` policies. These are broad read-only audit
+   baselines, not a guarantee that every assessment API is authorized; review
+   their scope and any missing read permissions with the administrator.
+2. Read-only audit permissions do not automatically allow creating access keys:
+   creating credentials is a write operation. Request `iam:CreateAccessKey`
+   permission from the administrator. **`iam:CreateAccessKey` is an IAM permission,
+   not an AWS-managed policy name.** A user cannot grant this permission to themself
+   using read-only access.
+3. Have the administrator open the user's **Permissions → Add permissions →
+   Create inline policy**, select the JSON editor, and add the illustrative policy
+   below. Replace `<AWS_ACCOUNT_ID>` and `<IAM_USERNAME>` with the actual account
+   and username. If the user has an IAM path, use their complete user ARN,
+   including that path. This policy permits creation and listing only for that
+   user's own IAM identity; it does not grant key rotation or deletion actions.
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ManageOwnAccessKeys",
+      "Effect": "Allow",
+      "Action": [
+        "iam:CreateAccessKey",
+        "iam:ListAccessKeys"
+      ],
+      "Resource": "arn:aws:iam::<AWS_ACCOUNT_ID>:user/<IAM_USERNAME>"
+    }
+  ]
+}
+```
+
+An explicit deny, permissions boundary, or organization policy can still block
+creation. Ask the administrator to resolve those restrictions rather than
+broadening permissions yourself. Console navigation can require additional read
+permissions; the example is narrowly scoped to the access-key operations.
+
+4. Using an authorized console session, open **IAM → Users → indra → Security
+   credentials → Access keys → Create access key**. Select the appropriate use
+   case and follow the prompts. Save the access key ID and secret access key
+   securely; the secret is displayed only at creation. Never use root access keys.
+5. Configure the named CLI profile interactively on the backend host:
+
+```bash
+aws configure --profile indra-audit
+```
+
+Enter the authorized access key ID and secret at the prompts, choose the audit
+region (for example `us-east-1`), and choose `json` output. The CLI stores these
+long-term credentials in the host's shared credentials file; restrict file access
+and use an approved secrets store for secure retention. Never commit credentials
+to GitHub or expose them in frontend JavaScript. Follow the credential-handling
+rules in sections 3 and 4 above.
+
+6. Verify the expected account and IAM user, then test a read-only regional API:
+
+```bash
+aws sts get-caller-identity \
+  --profile indra-audit
+
+aws ec2 describe-instances \
+  --region us-east-1 \
+  --profile indra-audit
+```
+
+Identity verification does not establish audit authorization. A successful EC2
+response with no instances is valid, but only covers that account and region.
+IAM users are global within an AWS account; EC2 and many other AWS services are
+regional. Repeat relevant read-only checks in the intended audit regions.
+Select `indra-audit` as `AWS_PROFILE` in the backend terminal using the method in
+section 4; no credentials should be sent to the application API.
+
+AWS references: [access-key permissions](https://docs.aws.amazon.com/IAM/latest/UserGuide/access-keys_required-permissions.html),
+[managing access keys](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html),
+[CLI configure](https://docs.aws.amazon.com/cli/latest/reference/configure/),
+[caller identity](https://docs.aws.amazon.com/cli/latest/reference/sts/get-caller-identity.html),
+and [EC2 describe-instances](https://docs.aws.amazon.com/cli/latest/reference/ec2/describe-instances.html).
+
+## STS AssumeRole prerequisites and credential flow
+
+The backend uses `boto3.Session` and the standard credential chain, so it can
+consume an AWS role profile configured outside the application. There is no
+separate application-level AssumeRole onboarding flow documented or implemented
+in this repository.
+
+- **Initial authentication:** the SDK needs an authenticated source identity
+  before calling `sts:AssumeRole`, such as an approved source profile or workload
+  identity. A role ARN alone is not authentication. An IAM user's own-key policy
+  above does not grant permission to assume a role.
+- **Trust and authorization:** the target role's trust policy must trust the
+  intended source principal and satisfy any required conditions (such as an
+  external ID or MFA). For cross-account access, the source identity also needs
+  `sts:AssumeRole` authorization scoped to the target role ARN. In the same
+  account, a trust policy naming the principal directly can grant access without
+  a separate identity-policy allow, subject to applicable policy evaluation.
+- **Temporary credentials:** a configured SDK role profile specifies `role_arn`
+  and its `source_profile` or supported `credential_source`. Boto3 obtains an
+  access key ID, secret access key, session token, and expiration from STS and
+  refreshes assumed-role credentials through its supported provider. Manually
+  supplied temporary credentials require all three credential values and must
+  be renewed when they expire. Prefer temporary credentials for production.
+- **Assessment permissions:** Boto3 service clients use the resolved credentials
+  for the existing read-only assessment operations. The target role's permissions
+  policy must authorize the audit reads; trust and `sts:AssumeRole` permission
+  alone do not provide them. Use administrator-approved read-only policies for
+  MVP testing and scoped audit policies for production. Session policies and
+  other policy controls can further restrict effective access.
+
+See AWS's [AssumeRole API](https://docs.aws.amazon.com/STS/latest/APIReference/API_AssumeRole.html)
+and [Boto3 role credential configuration](https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html#assume-role-provider).
+
+## Incomplete assessment reporting
+
+Report unauthorized or incomplete audit checks as `NOT_ASSESSED`, with the
+missing permission, affected service, region, or other reason where known.
+Do not interpret denied access or an unfinished check as a passing security
+result. This is reporting guidance, not a claim that the current backend
+uniformly implements this status; review assessment coverage before relying on
+results. Existing credential safety requirements above apply to both IAM user
+and temporary role credentials.
